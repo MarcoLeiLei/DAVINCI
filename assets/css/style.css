@@ -1283,8 +1283,7 @@ html.intro .nav .brand { opacity: 0; }
 .intro__bg { position: absolute; inset: 0; background: var(--black); }
 .intro__logo { position: fixed; color: var(--white); transform-origin: 0 0; will-change: transform; }
 .intro__signet { overflow: visible; }
-.intro__bar { fill: currentColor; transform-box: fill-box; }
-html.intro .intro__bar { transform: scaleY(0); }
+.intro__bar { fill: currentColor; }
 html.intro .intro__word { opacity: 0; }
 @keyframes introSicherung { to { opacity: 0; visibility: hidden; } }
 

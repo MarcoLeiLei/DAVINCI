@@ -28,7 +28,7 @@
     try { sessionStorage.setItem('dv-intro', '1'); } catch (e) {}
     const logo = $('.intro__logo', overlay), bg = $('.intro__bg', overlay);
     const navBrand = $('.nav .brand');
-    const bars = $$('.intro__bar', overlay), word = $('.intro__word', overlay);
+    const word = $('.intro__word', overlay);
     // Ausgangslage: Logo exakt über dem Navigations-Logo, dann groß in die Bildmitte gerückt
     const ziel = navBrand.getBoundingClientRect();
     gsap.set(logo, { left: ziel.left, top: ziel.top });
@@ -42,10 +42,13 @@
       fertig();
     };
     const tl = gsap.timeline({ onComplete: ende });
-    tl.fromTo(bars[0], { scaleY: 0, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.45, ease: 'power3.out' })
-      .fromTo(bars[1], { scaleY: 0, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.45, ease: 'power3.out' }, '-=0.3')
-      .fromTo(bars[2], { scaleY: 0, transformOrigin: '50% 0%' }, { scaleY: 1, duration: 0.45, ease: 'power3.out' }, '-=0.3')
-      .fromTo(bars[3], { scaleY: 0, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.45, ease: 'power3.out' }, '-=0.3')
+    const masken = $$('.intro__mask', overlay);
+    masken.forEach((m, k) => {
+      const y = +m.dataset.y, h = +m.dataset.h, oben = m.dataset.von === 'oben';
+      const ziel = { attr: { y, height: h }, duration: k === 0 || k === 3 ? 0.5 : 0.4, ease: 'power3.out' };
+      tl.fromTo(m, { attr: { y: oben ? y : y + h, height: 0 } }, ziel, k ? '-=0.28' : 0);
+    });
+    tl
       .fromTo(word, { opacity: 0, letterSpacing: '0.9em' }, { opacity: 1, letterSpacing: '0.32em', duration: 0.65, ease: 'power3.out' }, '-=0.3')
       .to(logo, { x: 0, y: 0, scale: 1, duration: 0.95, ease: 'expo.inOut' }, '+=0.15')
       .fromTo(bg, { clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.95, ease: 'expo.inOut' }, '<0.05');
