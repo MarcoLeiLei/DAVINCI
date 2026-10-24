@@ -104,11 +104,11 @@ if ($id) {
   if (!$k) { meldung('Kontakt nicht gefunden.', 'fehler'); weiter('kontakte.php'); }
   $seineAnfragen = array_filter(anfragen(), fn($a) => $a['kontakt_id'] === $id);
   $seineLeads = array_filter(leads(), fn($l) => $l['kontakt_id'] === $id);
-  $seineAufgaben = array_filter(aufgaben(), fn($a) => ($a['bezug']['id'] ?? null) === $id && !$a['erledigt']);
+  $seineAufgaben = array_filter(aufgaben_sichtbar($ich), fn($a) => ($a['bezug']['id'] ?? null) === $id && !$a['erledigt']);
   $nl = $k['newsletter'];
   kopf(kontakt_name($k), 'kontakte');
   seitenkopf($k['firma'] ?: 'Kontakt', e(kontakt_name($k)),
-    '<a class="btn btn--hell" href="kontakte.php?id=' . e($id) . '&aktion=bearbeiten">Bearbeiten</a><a class="btn btn--hell" href="aufgaben.php?aktion=neu&bezug=kontakt:' . e($id) . '">' . icon('plus') . ' Aufgabe</a><a class="btn" href="leads.php?aktion=neu&kontakt=' . e($id) . '">' . icon('plus') . ' Projekt</a>');
+    ($k['email'] ? '<a class="btn btn--hell" href="email.php?kontakt=' . e($id) . '">' . icon('send') . ' E-Mail</a>' : '') . '<a class="btn btn--hell" href="kontakte.php?id=' . e($id) . '&aktion=bearbeiten">Bearbeiten</a><a class="btn btn--hell" href="aufgaben.php?aktion=neu&bezug=kontakt:' . e($id) . '">' . icon('plus') . ' Aufgabe</a><a class="btn" href="leads.php?aktion=neu&kontakt=' . e($id) . '">' . icon('plus') . ' Projekt</a>');
   ?>
   <div class="grid grid--side">
     <div class="stack">

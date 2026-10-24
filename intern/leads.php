@@ -103,9 +103,9 @@ if ($id) {
   $l = leads()[$id] ?? null;
   if (!$l) { meldung('Projekt nicht gefunden.', 'fehler'); weiter('leads.php'); }
   $k = $l['kontakt_id'] ? ($kontakte[$l['kontakt_id']] ?? null) : null;
-  $auf = array_filter(aufgaben(), fn($a) => ($a['bezug']['id'] ?? null) === $id);
+  $auf = array_filter(aufgaben_sichtbar($ich), fn($a) => ($a['bezug']['id'] ?? null) === $id);
   kopf($l['titel'], 'leads');
-  seitenkopf('Projekt', e($l['titel']), '<a class="btn btn--hell" href="leads.php">Alle Projekte</a><a class="btn btn--hell" href="aufgaben.php?aktion=neu&bezug=lead:' . e($id) . '">' . icon('plus') . ' Aufgabe</a><a class="btn" href="leads.php?id=' . e($id) . '&aktion=bearbeiten">Bearbeiten</a>');
+  seitenkopf('Projekt', e($l['titel']), ($k && $k['email'] ? '<a class="btn btn--hell" href="email.php?lead=' . e($id) . '">' . icon('send') . ' E-Mail</a>' : '') . '<a class="btn btn--hell" href="leads.php">Alle Projekte</a><a class="btn btn--hell" href="aufgaben.php?aktion=neu&bezug=lead:' . e($id) . '">' . icon('plus') . ' Aufgabe</a><a class="btn" href="leads.php?id=' . e($id) . '&aktion=bearbeiten">Bearbeiten</a>');
   ?>
   <div class="grid grid--side">
     <div class="stack">

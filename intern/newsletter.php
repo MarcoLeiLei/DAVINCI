@@ -3,6 +3,7 @@
 require __DIR__ . '/lib/start.php';
 $ich = seite_schuetzen();
 website_abgleich();
+geplante_pruefen();
 $kampagnen = lesen('kampagnen');
 uasort($kampagnen, fn($a, $b) => strcmp($b['geaendert'], $a['geaendert']));
 $kontakte = kontakte();
@@ -29,7 +30,7 @@ seitenkopf('E-Mail an Kunden', 'Newsletter', '<a class="btn" href="kampagne.php?
       <tbody><?php foreach ($kampagnen as $k): $s = kampagne_zahlen($k); ?>
         <tr data-href="kampagne.php?id=<?= e($k['id']) ?>"><td><a href="kampagne.php?id=<?= e($k['id']) ?>"><?= e($k['betreff'] ?: 'Ohne Betreff') ?></a></td><td><?= status_pill($k['status'], KAMPAGNE_STATUS) ?></td>
           <td class="rechts"><?= $s['gesamt'] ?: '–' ?></td><td class="rechts"><?= $k['status'] === 'entwurf' ? '–' : $s['ok'] ?></td><td class="rechts"><?= $s['abgemeldet'] ?: '–' ?></td>
-          <td class="nowrap muted klein"><?= $k['fertig'] ? datum($k['fertig']) : ($k['gestartet'] ? 'seit ' . datum($k['gestartet']) : relativ($k['geaendert'])) ?></td></tr>
+          <td class="nowrap muted klein"><?= $k['status'] === 'geplant' ? 'am ' . datum($k['geplant_fuer'], true) : ($k['fertig'] ? datum($k['fertig']) : ($k['gestartet'] ? 'seit ' . datum($k['gestartet']) : relativ($k['geaendert']))) ?></td></tr>
       <?php endforeach; ?></tbody></table></div><?php endif; ?>
   </section>
   <div class="stack">

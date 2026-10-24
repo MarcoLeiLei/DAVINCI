@@ -271,3 +271,13 @@ body.oeffentlich { min-height: 100vh; display: grid; place-items: center; paddin
   .vorschau.ist-mobil iframe { width: 100%; }
   .brand em { display: none; }
 }
+
+/* Aufgaben: Prioritäten */
+.prio-kopf { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin: 18px 0 2px; display: flex; align-items: center; gap: 8px; color: var(--grey-3); }
+.prio-kopf::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.prio-kopf--1 { color: var(--err); } .prio-kopf--2 { color: var(--warn); } .prio-kopf--3 { color: var(--accent); }
+.aufgabe--p1 .aufgabe__haken { border-color: var(--err); } .aufgabe--p2 .aufgabe__haken { border-color: var(--warn); }
+details.card > summary { list-style: none; } details.card > summary::-webkit-details-marker { display: none; }
+[hidden] { display: none !important; }
+.editor > * { min-width: 0; }
+input[type=file] { max-width: 100%; font: inherit; font-size: 14px; }

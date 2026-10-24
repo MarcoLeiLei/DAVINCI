@@ -138,8 +138,19 @@
   // Versand nur mit Haken
   $('[data-starten]').addEventListener('click', e => {
     if (!$('[name="bestaetigt"]', form).checked) { e.preventDefault(); $('[name="bestaetigt"]', form).closest('.check').style.color = 'var(--err)'; $('[name="bestaetigt"]', form).focus(); return; }
-    if (!confirm('Newsletter jetzt an ' + $('[data-anzahl]').textContent + ' Empfänger senden? Das lässt sich nicht rückgängig machen.')) e.preventDefault();
+    const spaeter = $('[name="wann"]:checked', form).value === 'spaeter';
+    const zp = $('[name="zeitpunkt"]', form).value;
+    const frage = spaeter ? 'Newsletter für ' + new Date(zp).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }) + ' Uhr planen?'
+      : 'Newsletter jetzt an ' + $('[data-anzahl]').textContent + ' Empfänger senden? Das lässt sich nicht rückgängig machen.';
+    if (!confirm(frage)) e.preventDefault();
   });
+  // Jetzt oder später
+  const wann = () => {
+    const spaeter = $('[name="wann"]:checked', form).value === 'spaeter';
+    $$('[data-zeitpunkt]').forEach(el => { el.hidden = !spaeter; });
+    $('[data-starten-text]').textContent = spaeter ? 'Versand planen' : 'Jetzt versenden';
+  };
+  $$('[data-wann]').forEach(r => r.addEventListener('change', wann));
   // Vorschaubreite
   $$('[data-breite]').forEach(a => a.addEventListener('click', e => {
     e.preventDefault();

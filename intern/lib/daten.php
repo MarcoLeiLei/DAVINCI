@@ -105,7 +105,26 @@ function leerer_lead(): array {
 }
 function leere_aufgabe(): array {
   return ['id' => neue_id(), 'titel' => '', 'text' => '', 'faellig' => '', 'wichtig' => false, 'erledigt' => null, 'zugewiesen' => null,
-          'bezug' => null, 'erstellt' => date('c'), 'von' => ich()['id'] ?? null];
+          'bezug' => null, 'erstellt' => date('c'), 'von' => ich()['id'] ?? null, 'art' => 'team', 'prio' => 2];
+}
+const PRIOS = [1 => 'Hoch', 2 => 'Mittel', 3 => 'Normal'];
+/** Ältere Aufgaben ohne Art gelten als Team-Aufgabe; „wichtig“ = hohe Priorität. */
+function aufgabe_norm(array $a): array {
+  $a['art'] = $a['art'] ?? 'team';
+  $a['prio'] = (int) ($a['prio'] ?? (!empty($a['wichtig']) ? 1 : 2));
+  return $a;
+}
+/** Persönliche Aufgaben sieht nur, wer sie angelegt hat oder wem sie zugewiesen sind. */
+function aufgabe_sichtbar(array $a, array $ich): bool {
+  return ($a['art'] ?? 'team') === 'team' || ($a['von'] ?? null) === $ich['id'] || ($a['zugewiesen'] ?? null) === $ich['id'];
+}
+function aufgaben_sichtbar(array $ich): array {
+  $o = [];
+  foreach (aufgaben() as $id => $a) { $a = aufgabe_norm($a); if (aufgabe_sichtbar($a, $ich)) $o[$id] = $a; }
+  return $o;
+}
+function aufgaben_sortieren(array &$l): void {
+  usort($l, fn($a, $b) => [$a['art'] === 'team' ? $a['prio'] : 2, $a['faellig'] ?: '9999', $a['erstellt']] <=> [$b['art'] === 'team' ? $b['prio'] : 2, $b['faellig'] ?: '9999', $b['erstellt']]);
 }
 /** Sperrliste: abgemeldete Adressen (als Prüfsumme), damit sie nach Löschen oder Import nicht erneut angeschrieben werden. */
 function gesperrt(string $email): bool { return isset(lesen('sperrliste')[hash('sha256', strtolower(trim($email)))]); }

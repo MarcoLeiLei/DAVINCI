@@ -4,7 +4,7 @@ require __DIR__ . '/lib/start.php';
 $ich = seite_schuetzen();
 website_abgleich();
 
-$anfragen = anfragen(); $kontakte = kontakte(); $leads = leads(); $aufgaben = aufgaben(); $kampagnen = lesen('kampagnen');
+$anfragen = anfragen(); $kontakte = kontakte(); $leads = leads(); $aufgaben = aufgaben_sichtbar($ich); $kampagnen = lesen('kampagnen');
 $jetzt = time();
 $in = fn($a, $von, $bis) => ($t = strtotime($a['zeit'])) >= $von && $t < $bis;
 $woche = count(array_filter($anfragen, fn($a) => $in($a, $jetzt - 7 * 86400, $jetzt + 1)));
@@ -27,9 +27,11 @@ foreach ($anfragen as $a) {
 }
 $max = max(4, (int) ceil(max(array_map('array_sum', $wochen)) / 4) * 4);
 
-// Aufgaben: offen, meine oder nicht zugewiesen, wichtige und fällige zuerst
-$meine = array_filter($aufgaben, fn($a) => !$a['erledigt'] && (!$a['zugewiesen'] || $a['zugewiesen'] === $ich['id']));
-usort($meine, fn($a, $b) => [(int) !$a['wichtig'], $a['faellig'] ?: '9999'] <=> [(int) !$b['wichtig'], $b['faellig'] ?: '9999']);
+// Aufgaben: Team-Prios (alle) und persönliche (nur meine)
+$teamPrios = array_values(array_filter($aufgaben, fn($a) => $a['art'] === 'team' && !$a['erledigt']));
+$meine = array_values(array_filter($aufgaben, fn($a) => !$a['erledigt'] && (($a['art'] === 'persoenlich') || $a['zugewiesen'] === $ich['id'])));
+aufgaben_sortieren($teamPrios); aufgaben_sortieren($meine);
+geplante_pruefen();
 $naechste = array_filter($aktiv, fn($l) => !empty($l['naechster_termin']));
 usort($naechste, fn($a, $b) => strcmp($a['naechster_termin'], $b['naechster_termin']));
 uasort($anfragen, fn($a, $b) => strcmp($b['zeit'], $a['zeit']));
@@ -92,25 +94,27 @@ seitenkopf($tage[(int) date('w')] . ', ' . date('j') . '. ' . $mon[(int) date('n
   </div>
 
   <div class="stack">
+    <?php foreach ([['Team-Prios', $teamPrios, 'team', 'Neue Team-Aufgabe …', 'Keine offenen Team-Aufgaben.'], ['Meine Aufgaben', $meine, 'persoenlich', 'Für mich notieren …', 'Alles erledigt.']] as [$titel, $liste, $art, $ph, $leerText]): ?>
     <section class="card">
-      <div class="card__head"><h2>Meine Aufgaben</h2><a href="aufgaben.php">Alle →</a></div>
-      <form method="post" action="aufgaben.php?aktion=schnell" class="knopfreihe" style="margin-bottom:12px"><?= csrf_feld() ?>
-        <input name="titel" placeholder="Neue Aufgabe …" required style="flex:1"><button class="btn btn--klein" type="submit"><?= icon('plus') ?></button></form>
-      <?php if (!$meine): ?><?= leer('Alles erledigt.') ?><?php else: foreach (array_slice($meine, 0, 7) as $a): ?>
-        <div class="aufgabe">
+      <div class="card__head"><h2><?= $titel ?></h2><a href="aufgaben.php">Alle →</a></div>
+      <form method="post" action="aufgaben.php?aktion=schnell&zurueck=index.php" class="knopfreihe" style="margin-bottom:12px"><?= csrf_feld() ?><input type="hidden" name="art" value="<?= $art ?>">
+        <input name="titel" placeholder="<?= $ph ?>" required style="flex:1"><button class="btn btn--klein" type="submit"><?= icon('plus') ?></button></form>
+      <?php if (!$liste): ?><?= leer($leerText) ?><?php else: foreach (array_slice($liste, 0, 6) as $a): ?>
+        <div class="aufgabe<?= $a['art'] === 'team' ? ' aufgabe--p' . $a['prio'] : '' ?>">
           <form method="post" action="aufgaben.php?aktion=haken&id=<?= e($a['id']) ?>&zurueck=index.php"><?= csrf_feld() ?><button class="aufgabe__haken" title="Erledigt"></button></form>
           <div class="aufgabe__haupt"><a class="aufgabe__titel" href="aufgaben.php?id=<?= e($a['id']) ?>" style="text-decoration:none"><?= e($a['titel']) ?></a>
-            <div class="aufgabe__meta"><?php if ($a['wichtig']): ?><span class="wichtig">Wichtig</span><?php endif; ?><?php if ($a['faellig']): ?><span class="<?= $a['faellig'] < date('Y-m-d') ? 'faellig' : '' ?>">bis <?= datum($a['faellig']) ?></span><?php endif; ?></div></div>
+            <div class="aufgabe__meta"><?php if ($a['art'] === 'team'): ?><span class="<?= $a['prio'] === 1 ? 'wichtig' : '' ?>"><?= PRIOS[$a['prio']] ?></span><span><?= $a['zugewiesen'] ? e(benutzer_name($a['zugewiesen'])) : 'Team' ?></span><?php else: ?><span>persönlich</span><?php endif; ?><?php if ($a['faellig']): ?><span class="<?= $a['faellig'] < date('Y-m-d') ? 'faellig' : '' ?>">bis <?= datum($a['faellig']) ?></span><?php endif; ?></div></div>
         </div>
       <?php endforeach; endif; ?>
     </section>
+    <?php endforeach; ?>
 
     <section class="card">
       <div class="card__head"><h2>Newsletter</h2><a href="newsletter.php">Alle →</a></div>
       <?php if ($letzte): ?>
         <p class="typ" style="margin-bottom:6px"><?= e(KAMPAGNE_STATUS[$letzte['status']] ?? $letzte['status']) ?></p>
         <h3 style="margin-bottom:6px"><a href="kampagne.php?id=<?= e($letzte['id']) ?>" style="text-decoration:none"><?= e($letzte['betreff'] ?: 'Ohne Betreff') ?></a></h3>
-        <p class="muted klein"><?php $st = kampagne_zahlen($letzte); ?><?= $letzte['status'] === 'entwurf' ? 'Zuletzt bearbeitet ' . e(relativ($letzte['geaendert'])) : $st['ok'] . ' von ' . $st['gesamt'] . ' versendet' . ($st['abgemeldet'] ? ' · ' . $st['abgemeldet'] . ' Abmeldungen' : '') ?></p>
+        <p class="muted klein"><?php $st = kampagne_zahlen($letzte); ?><?= $letzte['status'] === 'geplant' ? 'Geplant für ' . datum($letzte['geplant_fuer'], true) . ' Uhr' : ($letzte['status'] === 'entwurf' ? 'Zuletzt bearbeitet ' . e(relativ($letzte['geaendert'])) : $st['ok'] . ' von ' . $st['gesamt'] . ' versendet' . ($st['abgemeldet'] ? ' · ' . $st['abgemeldet'] . ' Abmeldungen' : '')) ?></p>
       <?php else: ?><?= leer('Noch kein Newsletter.') ?><?php endif; ?>
       <p style="margin-top:16px"><a class="btn btn--hell btn--klein" href="kampagne.php?aktion=neu"><?= icon('plus') ?> Neuer Newsletter</a></p>
     </section>

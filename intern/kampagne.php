@@ -91,13 +91,22 @@ if (ist_post()) {
       $empf = empfaenger_waehlen(kontakte(), $k['gruppen']);
       $fehler = $k['betreff'] === '' ? 'Bitte einen Betreff eintragen.' : (!$k['bloecke'] ? 'Der Newsletter hat noch keinen Inhalt.' : (!$empf ? 'Für diese Auswahl gibt es keine Empfänger mit Einwilligung.' : (!p('bestaetigt') ? 'Bitte den Versand bestätigen.' : '')));
       if ($fehler) { aendern('kampagnen', function (&$a) use ($id, $k) { $a[$id] = $k; }); meldung($fehler, 'fehler'); weiter('kampagne.php?id=' . $id); }
-      aendern('kampagnen', function (&$a) use ($id, $k, $empf) {
-        $k['empfaenger'] = [];
-        foreach ($empf as $cid => $c) $k['empfaenger'][$cid] = ['email' => $c['email'], 'status' => 'offen', 'zeit' => null];
-        $k['status'] = 'laeuft'; $k['gestartet'] = date('c'); $k['von_versand'] = ich()['id'];
-        $a[$id] = $k;
-      });
-      protokoll('Newsletter-Versand gestartet: ' . $k['betreff'] . ' (' . count($empf) . ' Empfänger)');
+      // Später versenden: Zeitpunkt prüfen und Newsletter einplanen
+      if (p('wann') === 'spaeter') {
+        $ts = strtotime(p('zeitpunkt'));
+        if (!$ts || $ts < time() + 120) { aendern('kampagnen', function (&$a) use ($id, $k) { $a[$id] = $k; }); meldung('Bitte einen Zeitpunkt mindestens zwei Minuten in der Zukunft wählen.', 'fehler'); weiter('kampagne.php?id=' . $id); }
+        aendern('kampagnen', function (&$a) use ($id, $k, $ts) { $k['status'] = 'geplant'; $k['geplant_fuer'] = date('c', $ts); $k['von_versand'] = ich()['id']; $a[$id] = $k; });
+        protokoll('Newsletter geplant für ' . datum($ts, true) . ' Uhr: ' . $k['betreff']);
+        meldung('Newsletter geplant für ' . datum($ts, true) . ' Uhr.');
+        weiter('kampagne.php?id=' . $id);
+      }
+      aendern('kampagnen', function (&$a) use ($id, $k) { $k['von_versand'] = ich()['id']; $a[$id] = $k; });
+      $n = kampagne_starten($id);
+      protokoll('Newsletter-Versand gestartet: ' . $k['betreff'] . " ($n Empfänger)");
+      weiter('kampagne.php?id=' . $id);
+    case 'entplanen':
+      aendern('kampagnen', function (&$a) use ($id) { if ($a[$id]['status'] === 'geplant') { $a[$id]['status'] = 'entwurf'; $a[$id]['geplant_fuer'] = null; } });
+      meldung('Planung aufgehoben. Der Newsletter ist wieder ein Entwurf.');
       weiter('kampagne.php?id=' . $id);
     case 'pausieren':
     case 'fortsetzen':
@@ -126,6 +135,41 @@ $kontakte = kontakte();
 $einst = einstellungen();
 
 /* ---------- Versandstatus (nach dem Start) ---------- */
+if ($kamp['status'] === 'geplant') {
+  geplante_pruefen();
+  $kamp = lesen('kampagnen')[$id];
+}
+if ($kamp['status'] === 'geplant') {
+  kopf($kamp['betreff'], 'newsletter');
+  seitenkopf('Newsletter · Geplant', e($kamp['betreff']), '<form method="post" action="kampagne.php?id=' . e($id) . '&aktion=entplanen">' . csrf_feld() . '<button class="btn btn--hell">Planung aufheben und bearbeiten</button></form>');
+  $ts = strtotime($kamp['geplant_fuer']);
+  ?>
+  <div class="grid grid--side">
+    <section class="card" data-geplant="<?= $ts ?>">
+      <div class="card__head"><h2>Geplanter Versand</h2><?= status_pill('geplant', KAMPAGNE_STATUS) ?></div>
+      <p style="font-size:28px;font-weight:250;letter-spacing:-.02em"><?= datum($ts, true) ?> Uhr</p>
+      <p class="muted" style="margin-top:6px" data-countdown></p>
+      <dl class="dl" style="margin-top:18px">
+        <dt>Gruppen</dt><dd><?= $kamp['gruppen'] ? e(implode(', ', $kamp['gruppen'])) : 'Alle Empfänger mit Einwilligung' ?></dd>
+        <dt>Empfänger heute</dt><dd><?= count(empfaenger_waehlen($kontakte, $kamp['gruppen'])) ?> (wird zum Versandzeitpunkt neu bestimmt)</dd>
+        <dt>Geplant von</dt><dd><?= e(benutzer_name($kamp['von_versand'] ?? null)) ?></dd>
+      </dl>
+    </section>
+    <section class="vorschau"><div class="vorschau__kopf"><span>Vorschau</span></div>
+      <iframe title="Vorschau" srcdoc="<?= e(nl_html($kamp, ['vorname' => 'Max', 'nachname' => 'Mustermann', 'newsletter' => ['token' => 'x']], '#')) ?>" sandbox></iframe></section>
+  </div>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const box = document.querySelector('[data-geplant]'), out = box.querySelector('[data-countdown]'), ziel = +box.dataset.geplant * 1000;
+    const tick = () => { const s = Math.round((ziel - Date.now()) / 1000);
+      if (s <= 0) { out.textContent = 'Der Versand startet jetzt …'; setTimeout(() => location.reload(), 4000); return; }
+      const t = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+      out.textContent = 'Noch ' + (t ? t + ' Tag' + (t > 1 ? 'e ' : ' ') : '') + (h ? h + ' Std. ' : '') + m + ' Min.'; setTimeout(tick, 20000); };
+    tick();
+  });
+  </script>
+  <?php fuss(); exit;
+}
 if ($kamp['status'] !== 'entwurf') {
   $z = kampagne_zahlen($kamp);
   $prozent = $z['gesamt'] ? round(($z['gesamt'] - $z['offen']) / $z['gesamt'] * 100) : 0;
@@ -210,8 +254,14 @@ seitenkopf('Newsletter · Entwurf', e($kamp['betreff'] ?: 'Neuer Newsletter'),
     </section>
     <section class="card form">
       <h2>Versenden</h2>
-      <label class="check"><input type="checkbox" name="bestaetigt" value="1"><span>Ich habe den Test geprüft und möchte den Newsletter jetzt an <b data-anzahl><?= count(empfaenger_waehlen($kontakte, $kamp['gruppen'])) ?></b> Empfänger senden.</span></label>
-      <div class="knopfreihe"><button class="btn" type="submit">Entwurf speichern</button><button class="btn btn--akzent" type="submit" formaction="kampagne.php?id=<?= e($id) ?>&aktion=starten" data-starten><?= icon('mail') ?> Jetzt versenden</button></div>
+      <div class="checks">
+        <label class="chip"><input type="radio" name="wann" value="jetzt" checked data-wann><span>Jetzt senden</span></label>
+        <label class="chip"><input type="radio" name="wann" value="spaeter" data-wann><span><?= icon('clock') ?> Später senden</span></label>
+      </div>
+      <label class="feld" data-zeitpunkt hidden>Versenden am<input type="datetime-local" name="zeitpunkt" value="<?= e(date('Y-m-d\TH:i', strtotime('tomorrow 09:00'))) ?>" min="<?= e(date('Y-m-d\TH:i')) ?>"></label>
+      <label class="check"><input type="checkbox" name="bestaetigt" value="1"><span>Ich habe den Test geprüft. Der Newsletter geht an <b data-anzahl><?= count(empfaenger_waehlen($kontakte, $kamp['gruppen'])) ?></b> Empfänger.</span></label>
+      <p class="muted klein" data-zeitpunkt hidden>Die Empfänger werden zum Versandzeitpunkt aus den gewählten Gruppen zusammengestellt. Wer sich bis dahin abmeldet, bekommt nichts. Für den pünktlichen Start muss der Cron-Job eingerichtet sein.</p>
+      <div class="knopfreihe"><button class="btn" type="submit">Entwurf speichern</button><button class="btn btn--akzent" type="submit" formaction="kampagne.php?id=<?= e($id) ?>&aktion=starten" data-starten><?= icon('mail') ?> <span data-starten-text>Jetzt versenden</span></button></div>
     </section>
   </div>
   <section class="vorschau" data-vorschau>

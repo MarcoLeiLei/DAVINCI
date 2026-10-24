@@ -24,6 +24,9 @@ function icon(string $n): string {
     'trash'   => 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
     'upload'  => 'M12 16V4M7 9l5-5 5 5M4 20h16',
     'menu'    => 'M4 7h16M4 12h16M4 17h16',
+    'send'    => 'M22 2L11 13M22 2l-7 20-4-9-9-4z',
+    'clip'    => 'M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 8',
+    'clock'   => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
   ][$n] ?? '';
   return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="' . $p . '"/></svg>';
 }
@@ -38,6 +41,7 @@ function kopf(string $titel, string $aktiv = '', array $opt = []): void {
     'kontakte'   => ['Kontakte', 'users', 'kontakte.php'],
     'leads'      => ['Projekte', 'board', 'leads.php'],
     'aufgaben'   => ['Aufgaben', 'check', 'aufgaben.php'],
+    'email'      => ['E-Mail', 'send', 'email.php'],
     'newsletter' => ['Newsletter', 'mail', 'newsletter.php'],
   ];
   ?><!DOCTYPE html>

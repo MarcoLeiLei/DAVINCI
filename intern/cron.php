@@ -10,6 +10,7 @@ if (php_sapi_name() !== 'cli') {
   if ($s === '' || !hash_equals($s, (string) ($_GET['schluessel'] ?? ''))) { http_response_code(403); exit('Nur per Cron-Job.'); }
 }
 $neu = website_abgleich(true);
+geplante_pruefen();
 $n = 0;
 foreach (lesen('kampagnen') as $k) {
   if ($k['status'] !== 'laeuft') continue;

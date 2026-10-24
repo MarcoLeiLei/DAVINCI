@@ -5,7 +5,7 @@
    ========================================================= */
 declare(strict_types=1);
 
-const KAMPAGNE_STATUS = ['entwurf' => 'Entwurf', 'laeuft' => 'Versand läuft', 'pausiert' => 'Pausiert', 'fertig' => 'Versendet'];
+const KAMPAGNE_STATUS = ['entwurf' => 'Entwurf', 'geplant' => 'Geplant', 'laeuft' => 'Versand läuft', 'pausiert' => 'Pausiert', 'fertig' => 'Versendet'];
 const NL_F = "font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;";
 const FIRMA = 'Fivemeters UG (haftungsbeschränkt)';
 const ADRESSE = 'Kaiser-Friedrich-Ring 43 · 40545 Düsseldorf';
@@ -150,21 +150,71 @@ function abmelde_url(array $k, string $kampagne = ''): string {
 /* ---------- Versand ---------- */
 function nl_mail(string $an, string $betreff, string $html, string $abmelden = ''): bool {
   $e = einstellungen();
-  $grenze = 'dv' . bin2hex(random_bytes(8));
+  return mail_roh($an, $betreff, $html, ['von' => $e['absender'], 'von_name' => $e['absender_name'], 'antwort' => $e['antwort'], 'abmelden' => $abmelden]);
+}
+
+/** HTML in lesbaren Klartext umwandeln (zweiter Teil jeder E-Mail). */
+function klartext(string $html): string {
   $h2 = preg_replace('#<div style="display:none[^>]*>.*?</div>#s', '', $html);
   $h2 = preg_replace('#<a href="(?!mailto)([^"]+)"[^>]*>(.*?)</a>#s', '$2 ($1)', $h2);
-  $plain = trim(html_entity_decode(strip_tags(preg_replace(['#<br\s*/?>#i', '#</(p|tr|h1|div)>#i', '#</td>#i', '#<title>.*?</title>#s'], ["\n", "\n", '  ', ''], $h2)), ENT_QUOTES, 'UTF-8'));
-  $plain = preg_replace(["/[ \t]+\n/", "/\n[ \t]+/", "/\n{3,}/"], ["\n", "\n", "\n\n"], $plain);
-  $kopf = 'From: =?UTF-8?B?' . base64_encode($e['absender_name']) . '?= <' . $e['absender'] . ">\r\n"
-        . 'Reply-To: ' . $e['antwort'] . "\r\n";
-  if ($abmelden) $kopf .= 'List-Unsubscribe: <' . $abmelden . '>, <mailto:' . $e['antwort'] . "?subject=Newsletter%20abbestellen>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n";
-  $kopf .= "MIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary=\"$grenze\"\r\n";
-  $body = "--$grenze\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($plain) . "\r\n"
-        . "--$grenze\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($html) . "\r\n--$grenze--";
-  $betreffKodiert = '=?UTF-8?B?' . base64_encode($betreff) . '?=';
+  $plain = trim(html_entity_decode(strip_tags(preg_replace(['#<br\s*/?>#i', '#</(p|tr|h1|div)>#i', '#</td>#i', '#<title>.*?</title>#s', '#<style.*?</style>#s'], ["\n", "\n", '  ', '', ''], $h2)), ENT_QUOTES, 'UTF-8'));
+  return preg_replace(["/[ \t]+\n/", "/\n[ \t]+/", "/\n{3,}/"], ["\n", "\n", "\n\n"], $plain);
+}
+function kopf_name(string $name, string $mail): string { return '=?UTF-8?B?' . base64_encode($name) . '?= <' . $mail . '>'; }
+
+/**
+ * E-Mail mit HTML- und Textteil senden, optional mit Anhängen.
+ * $o: von, von_name, antwort, cc[], bcc[], anhaenge[[name, pfad, typ]], abmelden
+ */
+function mail_roh(string $an, string $betreff, string $html, array $o = []): bool {
+  $von = $o['von'] ?? cfg('absender', 'bauen@davinci-homes.de');
+  $kopf = 'From: ' . kopf_name($o['von_name'] ?? 'DAVINCI', $von) . "\r\n";
+  if (!empty($o['antwort'])) $kopf .= 'Reply-To: ' . $o['antwort'] . "\r\n";
+  if (!empty($o['cc'])) $kopf .= 'Cc: ' . implode(', ', $o['cc']) . "\r\n";
+  if (!empty($o['bcc'])) $kopf .= 'Bcc: ' . implode(', ', $o['bcc']) . "\r\n";
+  if (!empty($o['abmelden'])) $kopf .= 'List-Unsubscribe: <' . $o['abmelden'] . '>, <mailto:' . ($o['antwort'] ?? $von) . "?subject=Newsletter%20abbestellen>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n";
+  $alt = 'alt' . bin2hex(random_bytes(8));
+  $teil = "--$alt\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode(klartext($html)) . "\r\n"
+        . "--$alt\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($html) . "\r\n--$alt--";
+  $kopf .= "MIME-Version: 1.0\r\n";
+  if (!empty($o['anhaenge'])) {
+    $mix = 'mix' . bin2hex(random_bytes(8));
+    $kopf .= "Content-Type: multipart/mixed; boundary=\"$mix\"\r\n";
+    $body = "--$mix\r\nContent-Type: multipart/alternative; boundary=\"$alt\"\r\n\r\n$teil\r\n";
+    foreach ($o['anhaenge'] as [$name, $pfad, $typ]) {
+      $n = '=?UTF-8?B?' . base64_encode($name) . '?=';
+      $body .= "--$mix\r\nContent-Type: " . ($typ ?: 'application/octet-stream') . "; name=\"$n\"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"$n\"\r\n\r\n"
+             . chunk_split(base64_encode((string) file_get_contents($pfad))) . "\r\n";
+    }
+    $body .= "--$mix--";
+  } else {
+    $kopf .= "Content-Type: multipart/alternative; boundary=\"$alt\"\r\n";
+    $body = $teil;
+  }
   // Testbetrieb: E-Mails in eine Datei schreiben statt zu senden
   if ($datei = getenv('DV_MAIL_DATEI')) { file_put_contents($datei, json_encode(['an' => $an, 'betreff' => $betreff, 'kopf' => $kopf, 'laenge' => strlen($body)]) . "\n", FILE_APPEND); return !str_contains($an, 'fehler@'); }
-  return @mail($an, $betreffKodiert, $body, $kopf, '-f' . $e['absender']);
+  return @mail($an, '=?UTF-8?B?' . base64_encode($betreff) . '?=', $body, $kopf, '-f' . $von);
+}
+
+/** Empfänger festhalten und Versand starten (sofort oder zum geplanten Zeitpunkt). */
+function kampagne_starten(string $id): int {
+  $empf = empfaenger_waehlen(kontakte(), lesen('kampagnen')[$id]['gruppen'] ?? []);
+  aendern('kampagnen', function (&$a) use ($id, $empf) {
+    $a[$id]['empfaenger'] = [];
+    foreach ($empf as $cid => $c) $a[$id]['empfaenger'][$cid] = ['email' => $c['email'], 'status' => 'offen', 'zeit' => null];
+    $a[$id]['status'] = $empf ? 'laeuft' : 'fertig';
+    $a[$id]['gestartet'] = date('c');
+    if (!$empf) $a[$id]['fertig'] = date('c');
+  });
+  return count($empf);
+}
+/** Fällige geplante Newsletter starten (bei jedem Seitenaufruf und im Cron-Job). */
+function geplante_pruefen(): void {
+  foreach (lesen('kampagnen') as $id => $k) {
+    if (($k['status'] ?? '') !== 'geplant' || strtotime((string) ($k['geplant_fuer'] ?? '')) > time()) continue;
+    $n = kampagne_starten($id);
+    protokoll('Geplanter Newsletter gestartet: ' . $k['betreff'] . " ($n Empfänger)");
+  }
 }
 
 /** Wie viele E-Mails dürfen in dieser Stunde noch raus? */
