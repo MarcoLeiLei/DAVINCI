@@ -1,0 +1,6 @@
+# Geheimnisse und Serverdaten – gehören nicht ins Repository
+lib/config.php
+zugang.php
+data/
+diag.php
+.DS_Store

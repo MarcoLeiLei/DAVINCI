@@ -1,0 +1,67 @@
+# Deployment der Website davinci-homes.de zu SiteGround per SSH.
+# Läuft bei jedem Push auf "main" und manuell über Actions → "Deploy" → "Run workflow".
+# Benötigte Repository-Secrets (Settings → Secrets and variables → Actions):
+#   SG_HOST  SSH-Hostname aus SiteGround (Site Tools → Devs → SSH Keys Manager → „SSH-Zugangsdaten“)
+#   SG_USER  SSH-Benutzername (z. B. u1234-abcdef)
+#   SG_PORT  SSH-Port (bei SiteGround meist 18765)
+#   SG_PATH  Zielordner, z. B. www/davinci-homes.de/public_html
+#   SG_KEY   privater SSH-Schlüssel OHNE Passphrase (der öffentliche Teil ist in SiteGround importiert)
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secrets prüfen
+        id: check
+        env:
+          SG_HOST: ${{ secrets.SG_HOST }}
+          SG_KEY: ${{ secrets.SG_KEY }}
+        run: |
+          if [ -z "$SG_HOST" ] || [ -z "$SG_KEY" ]; then
+            echo "Die Secrets für SiteGround fehlen noch. Deployment wird übersprungen."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SSH einrichten
+        if: steps.check.outputs.ok == 'true'
+        env:
+          SG_HOST: ${{ secrets.SG_HOST }}
+          SG_PORT: ${{ secrets.SG_PORT }}
+          SG_KEY: ${{ secrets.SG_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SG_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "${SG_PORT:-18765}" "$SG_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Dateien übertragen
+        if: steps.check.outputs.ok == 'true'
+        env:
+          SG_HOST: ${{ secrets.SG_HOST }}
+          SG_USER: ${{ secrets.SG_USER }}
+          SG_PORT: ${{ secrets.SG_PORT }}
+          SG_PATH: ${{ secrets.SG_PATH }}
+        run: |
+          # Kein --delete: Dateien, die nur auf dem Server liegen (Zugangsdaten, Anfragen, hochgeladene Grundrisse), bleiben unangetastet.
+          rsync -rlptz --itemize-changes \
+            --exclude '.git/' --exclude '.github/' --exclude '.gitignore' --exclude 'README.md' \
+            --exclude '*.example.php' --exclude 'lib/config.php' --exclude 'zugang.php' --exclude 'data/' --exclude 'diag.php' \
+            -e "ssh -i ~/.ssh/id_deploy -p ${SG_PORT:-18765} -o StrictHostKeyChecking=yes" \
+            ./ "$SG_USER@$SG_HOST:$SG_PATH/"
+
+      - name: Aufräumen
+        if: always()
+        run: rm -f ~/.ssh/id_deploy

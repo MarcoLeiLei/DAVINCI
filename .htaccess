@@ -1,0 +1,49 @@
+DirectoryIndex index.php
+
+# Falls eine saubere Adresse trotzdem nicht aufgelöst wird: Ersatz-Router
+ErrorDocument 404 /route.php
+
+# Saubere Adressen: /haeuser statt /haeuser.php, /en/haeuser für Englisch
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  # alte Adressen dauerhaft umleiten
+  RewriteRule ^(impressum|datenschutz)\.html$ /$1/ [R=301,L]
+  RewriteRule ^index\.html$ / [R=301,L]
+  RewriteRule ^en\.php$ /en/ [R=301,L]
+  # .php in der Adresse auf die saubere Adresse umleiten (nur Seiten, keine Skripte)
+  RewriteCond %{THE_REQUEST} \s/+((en/)?(haeuser|system|manufaktur|geschichte|service|kontakt|design-book|impressum|datenschutz))\.php[\s?] [NC]
+  RewriteRule ^ /%1/ [R=301,L]
+  RewriteCond %{THE_REQUEST} \s/+(en/)?index\.php[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+  # saubere Adresse intern auf die .php-Datei
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.php -f
+  RewriteRule ^(.+)$ $1.php [L]
+</IfModule>
+
+# Konfigurationsdateien nicht direkt abrufbar
+<FilesMatch "^(zugang|gate)\.php$">
+  Require all denied
+</FilesMatch>
+
+# SiteGround: PHP-Seiten nie im Dynamic Cache ablegen (sonst sieht jeder die Seite ohne Passwort)
+<FilesMatch "\.php$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "private, no-cache"
+  </IfModule>
+</FilesMatch>
+
+# Performance
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml
+</IfModule>

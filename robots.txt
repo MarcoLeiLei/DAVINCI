@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /data/
+Disallow: /lib/
+Disallow: /send.php
+Disallow: /bestaetigen.php
+Disallow: /abmelden.php
+Disallow: /hubspot-einrichten.php
+
+Sitemap: https://davinci-homes.de/sitemap.xml
