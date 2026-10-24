@@ -21,7 +21,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Secrets prüfen
         id: check
@@ -36,16 +36,35 @@ jobs:
             echo "ok=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: SSH einrichten
+      - name: Eingaben bereinigen
         if: steps.check.outputs.ok == 'true'
         env:
           SG_HOST: ${{ secrets.SG_HOST }}
+          SG_USER: ${{ secrets.SG_USER }}
           SG_PORT: ${{ secrets.SG_PORT }}
+          SG_PATH: ${{ secrets.SG_PATH }}
+        run: |
+          # Leerzeichen/Zeilenumbrüche entfernen, "ssh ", "-p 18765" und "user@" aus dem Hostnamen herauslösen
+          H=$(printf '%s' "$SG_HOST" | sed -E 's/^[[:space:]]*ssh[[:space:]]+//; s#^[a-z]+://##' | tr -d '[:space:]'); U=$(printf '%s' "$SG_USER" | tr -d '[:space:]'); P=$(printf '%s' "$SG_PORT" | tr -dc '0-9')
+          case "$H" in *-p[0-9]*) [ -z "$P" ] && P=$(printf '%s' "$H" | sed -E 's/.*-p([0-9]+).*/\1/'); H=$(printf '%s' "$H" | sed -E 's/-p[0-9]+//') ;; esac
+          case "$H" in *@*) [ -z "$U" ] && U=${H%@*}; H=${H#*@} ;; esac
+          case "$U" in *@*) U=${U%@*} ;; esac
+          H=${H%%:*}
+          D=$(printf '%s' "$SG_PATH" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s#^~/##; s#/$##')
+          echo "::add-mask::$H"; echo "::add-mask::$U"
+          { echo "H=$H"; echo "U=$U"; echo "P=${P:-18765}"; echo "D=$D"; } >> "$GITHUB_ENV"
+          if ! printf '%s' "$H" | grep -Eq '^[A-Za-z0-9.-]+$'; then echo "::error::SG_HOST enthält ungültige Zeichen. Bitte nur den Hostnamen eintragen, z. B. ssh.davinci-homes.de oder eine IP-Adresse."; exit 1; fi
+          if ! printf '%s' "$U" | grep -Eq '^[A-Za-z0-9._-]+$'; then echo "::error::SG_USER enthält ungültige Zeichen. Bitte nur den Benutzernamen eintragen, z. B. u1234-abcdef."; exit 1; fi
+          echo "Eingaben in Ordnung (Host ${#H} Zeichen, Benutzer ${#U} Zeichen, Port ${P:-18765}, Pfad ${D})"
+
+      - name: SSH einrichten
+        if: steps.check.outputs.ok == 'true'
+        env:
           SG_KEY: ${{ secrets.SG_KEY }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$SG_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -p "${SG_PORT:-18765}" "$SG_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -p "$P" "$H" >> ~/.ssh/known_hosts 2>/dev/null || true
           if [ ! -s ~/.ssh/known_hosts ]; then
             echo "::error::Server nicht erreichbar: SG_HOST oder SG_PORT stimmt nicht (Hostname aus SiteGround → SSH-Zugangsdaten, Port meist 18765)."
             exit 1
@@ -57,13 +76,8 @@ jobs:
 
       - name: Verbindung testen
         if: steps.check.outputs.ok == 'true'
-        env:
-          SG_HOST: ${{ secrets.SG_HOST }}
-          SG_USER: ${{ secrets.SG_USER }}
-          SG_PORT: ${{ secrets.SG_PORT }}
-          SG_PATH: ${{ secrets.SG_PATH }}
         run: |
-          if ! out=$(ssh -i ~/.ssh/id_deploy -p "${SG_PORT:-18765}" -o BatchMode=yes -o ConnectTimeout=20 "$SG_USER@$SG_HOST" "echo verbunden; test -d \"$SG_PATH\" && echo pfad-ok || echo pfad-fehlt; command -v rsync >/dev/null && echo rsync-ok || echo rsync-fehlt" 2>&1); then
+          if ! out=$(ssh -i ~/.ssh/id_deploy -p "$P" -o BatchMode=yes -o ConnectTimeout=20 "$U@$H" "echo verbunden; test -d \"$D\" && echo pfad-ok || echo pfad-fehlt; command -v rsync >/dev/null && echo rsync-ok || echo rsync-fehlt" 2>&1); then
             if echo "$out" | grep -qi "permission denied"; then
               echo "::error::Anmeldung abgelehnt: SG_USER stimmt nicht oder der öffentliche Schlüssel ist in SiteGround nicht importiert."
             else
@@ -73,7 +87,7 @@ jobs:
           fi
           echo "$out"
           if echo "$out" | grep -q pfad-fehlt; then
-            echo "::error::Zielordner nicht gefunden. SG_PATH prüfen, z. B. www/davinci-homes.de/public_html. Vorhanden in www/: $(ssh -i ~/.ssh/id_deploy -p "${SG_PORT:-18765}" -o BatchMode=yes "$SG_USER@$SG_HOST" 'ls www 2>/dev/null | tr "\n" " "')"
+            echo "::error::Zielordner nicht gefunden. SG_PATH prüfen, z. B. www/davinci-homes.de/public_html. Vorhanden in www/: $(ssh -i ~/.ssh/id_deploy -p "$P" -o BatchMode=yes "$U@$H" 'ls www 2>/dev/null | tr "\n" " "')"
             exit 1
           fi
           if echo "$out" | grep -q rsync-fehlt; then
@@ -83,18 +97,13 @@ jobs:
 
       - name: Dateien übertragen
         if: steps.check.outputs.ok == 'true'
-        env:
-          SG_HOST: ${{ secrets.SG_HOST }}
-          SG_USER: ${{ secrets.SG_USER }}
-          SG_PORT: ${{ secrets.SG_PORT }}
-          SG_PATH: ${{ secrets.SG_PATH }}
         run: |
           # Kein --delete: Dateien, die nur auf dem Server liegen (Zugangsdaten, Anfragen, hochgeladene Grundrisse), bleiben unangetastet.
           rsync -rlptz --itemize-changes \
             --exclude '.git/' --exclude '.github/' --exclude '.gitignore' --exclude 'README.md' \
             --exclude '*.example.php' --exclude 'lib/config.php' --exclude 'zugang.php' --exclude 'data/' --exclude 'diag.php' \
-            -e "ssh -i ~/.ssh/id_deploy -p ${SG_PORT:-18765} -o StrictHostKeyChecking=yes" \
-            ./ "$SG_USER@$SG_HOST:$SG_PATH/"
+            -e "ssh -i ~/.ssh/id_deploy -p $P -o StrictHostKeyChecking=yes" \
+            ./ "$U@$H:$D/"
 
       - name: Aufräumen
         if: always()
