@@ -1293,3 +1293,5 @@ html.intro .intro__word { opacity: 0; }
 .hero__strip img { position: absolute; top: 0; height: 106%; max-width: none; object-fit: cover; will-change: transform; }
 .hero__strip::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 1px; background: rgba(255,255,255,.18); }
 html.intro .load-in { animation-play-state: paused; }
+/* Maske der Titelzeilen: Platz für Unterlängen (g, y), damit nichts abgeschnitten wird */
+.hero__title .line-mask { padding-bottom: .2em; margin-bottom: -.2em; padding-top: .06em; margin-top: -.06em; }
