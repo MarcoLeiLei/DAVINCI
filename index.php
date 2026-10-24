@@ -15,7 +15,6 @@ seite_start([
     <div class="hero__slide"><img src="/assets/img/dv-12-hang-pool-nacht.jpg" style="object-position:45% 45%" alt="<?= t('DAVINCI Haus am Hang mit Pultdach, Terrasse und Pool bei Nacht', 'DAVINCI house on a slope with mono-pitch roof, terrace and pool at night') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-03-giebel-winter-tag.jpg" style="object-position:50% 35%" alt="<?= t('DAVINCI Haus mit Glasgiebel im Schnee vor Bergkulisse', 'DAVINCI house with glazed gable in the snow against a mountain backdrop') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-04-pultdach-bungalow-abend.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Bungalow mit versetzten Pultdächern im Sonnenuntergang', 'DAVINCI bungalow with offset mono-pitch roofs at sunset') ?>" loading="lazy"></div>
-    <div class="hero__slide"><img src="/assets/img/echt-luft-landschaft.jpg" style="object-position:50% 55%" alt="<?= t('Echtes DAVINCI Haus aus der Luft: Bungalow mit Pultdach-Aufsatz vor weiter Landschaft', 'A real DAVINCI house from above: bungalow with raised mono-pitch roof in an open landscape') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-06-flachdach-schwarz-tag.jpg" style="object-position:50% 45%" alt="<?= t('DAVINCI Haus mit schwarzem Holzskelett, Flachdach und Glasfassade', 'DAVINCI house with black timber frame, flat roof and glass facade') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-18-schwarz-giebel-hang-garage.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Haus mit dunklem Tragwerk, Satteldach und Garage bei Nacht', 'DAVINCI house with dark timber structure, pitched roof and garage at night') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-09-bungalow-flach-garten.jpg" style="object-position:50% 50%" alt="<?= t('Weißer DAVINCI Bungalow mit Flachdach und Garten', 'White DAVINCI bungalow with flat roof and garden') ?>" loading="lazy"></div>
@@ -108,6 +107,11 @@ seite_start([
     <p class="reveal" style="margin-top:40px"><a href="<?= u('system') ?>#material" class="link-arrow" style="color:var(--wood-light)"><?= t('Mehr über Material und Raum', 'More about material and space') ?> <svg><use href="#arrow"/></svg></a></p>
   </div>
 </section>
+
+<!-- ============ ECHTES HAUS ============ -->
+<?php require_once __DIR__ . '/inc/echt.php';
+echt_haus('traufe', ['garten', 'carport'], t('Gebaut und bewohnt', 'Built and lived in'), t('So sieht es<br>in echt aus.', 'This is what<br>it looks like.'),
+  t('Klare Linien, dunkles Holz, weiße Flächen und viel Glas. Ein bestehendes DAVINCI Haus, fotografiert im Herbst.', 'Clear lines, dark timber, white surfaces and plenty of glass. An existing DAVINCI house, photographed in autumn.')); ?>
 
 <!-- ============ GESCHICHTE ============ -->
 <section class="section">

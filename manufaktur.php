@@ -34,6 +34,10 @@ seitenkopf(t('Manufaktur', 'Manufacture'), t('Präzision im Werk.', 'Precision i
 
 <?php require __DIR__ . '/inc/prozess.php'; ?>
 
+<?php require_once __DIR__ . '/inc/echt.php';
+echt_haus('dachecke_h', ['pultdach', 'carport'], t('Das Ergebnis', 'The result'), t('Präzision,<br>die bleibt.', 'Precision<br>that lasts.'),
+  t('Was im Werk vorgefertigt wird, steht Jahrzehnte später noch genauso klar da. Saubere Anschlüsse, gerade Kanten, ruhige Flächen.', 'What is prefabricated in the works still stands just as clean decades later. Neat junctions, straight edges, calm surfaces.')); ?>
+
 <section class="section--tight">
   <div class="wrap after">
     <div class="reveal">

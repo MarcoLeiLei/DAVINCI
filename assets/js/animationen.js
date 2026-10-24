@@ -70,7 +70,7 @@
     });
   }
 
-  /* Hero-Bildwechsel: Das nächste Bild schiebt sich in sechs Streifen herein, wie Felder im Raster */
+  /* Hero-Bildwechsel: ruhige, weiche Überblendung mit leichter Bewegung */
   let wechselTl = null;
   // Nach dem Intro alle Hero-Bilder im Hintergrund vorladen, damit jeder Wechsel sofort steht
   introFertig.then(() => setTimeout(() => $$('.hero__slide img').forEach(im => { im.loading = 'eager'; if (im.decode) im.decode().catch(() => {}); }), 800));
@@ -81,36 +81,27 @@
     const q = $('img', neu);
     if (!(q.complete && q.naturalWidth)) { geladen(q).then(() => window.dvHeroWechsel(alt, neu, alle)); return; }
     const media = alt.parentElement;
-    const quelle = $('img', neu);
-    const W = media.clientWidth, N = innerWidth < 700 ? 4 : 6;
-    const box = document.createElement('div'); box.className = 'hero__strips';
+    const quelle = $('img', neu), altImg = $('img', alt);
+    // Ruhige Überblendung: das neue Bild legt sich weich über das alte und kommt dabei langsam zur Ruhe
+    const box = document.createElement('div'); box.className = 'hero__blend';
     gsap.set(box, { scale: gsap.getProperty(neu, 'scale') || 1 });
-    const pos = getComputedStyle(quelle).objectPosition;
-    const streifen = [];
-    for (let k = 0; k < N; k++) {
-      const st = document.createElement('div'); st.className = 'hero__strip';
-      const x = Math.floor(k * W / N), w = Math.ceil(W / N) + 1;
-      st.style.left = x + 'px'; st.style.width = w + 'px';
-      const im = document.createElement('img'); im.src = quelle.currentSrc || quelle.src; im.alt = '';
-      im.style.left = -x + 'px'; im.style.width = W + 'px'; im.style.objectPosition = pos;
-      st.appendChild(im); box.appendChild(st); streifen.push(st);
-    }
-    media.appendChild(box);
-    const altImg = $('img', alt);
+    const im = document.createElement('img'); im.src = quelle.currentSrc || quelle.src; im.alt = '';
+    im.style.objectPosition = getComputedStyle(quelle).objectPosition;
+    box.appendChild(im); media.appendChild(box);
     wechselTl = gsap.timeline({
+      defaults: { ease: 'sine.inOut' },
       onComplete: () => {
         alle.forEach(sl => { sl.style.transition = 'none'; sl.classList.toggle('is-active', sl === neu); });
         void media.offsetWidth; box.remove();
         requestAnimationFrame(() => alle.forEach(sl => { sl.style.transition = ''; }));
-        gsap.set(altImg, { clearProps: 'filter' });
+        gsap.set(altImg, { clearProps: 'transform' });
         wechselTl = null;
       }
     });
     wechselTl
-      .fromTo(streifen, { clipPath: i => i % 2 ? 'inset(0% 0% 100% 0%)' : 'inset(100% 0% 0% 0%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.25, ease: 'expo.inOut', stagger: { each: 0.07, from: 'start' } })
-      .fromTo($$('img', box), { scale: 1.14, yPercent: i => (i % 2 ? -4 : 4) }, { scale: 1.03, yPercent: 0, duration: 1.7, ease: 'expo.out', stagger: 0.07 }, 0)
-      .fromTo(altImg, { filter: 'brightness(1)' }, { filter: 'brightness(0.6)', duration: 1.1, ease: 'power2.in' }, 0);
+      .fromTo(box, { opacity: 0 }, { opacity: 1, duration: 1.8 })
+      .fromTo(im, { scale: 1.06 }, { scale: 1, duration: 2.6, ease: 'power2.out' }, 0)
+      .fromTo(altImg, { scale: 1 }, { scale: 1.03, duration: 1.8 }, 0);
   };
 
   const hero = $('.hero');

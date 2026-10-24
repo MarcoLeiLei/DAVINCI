@@ -76,6 +76,11 @@ seitenkopf(t('Häuser', 'Homes'), t('Zwei Wege zu<br>Ihrem DAVINCI.', 'Two paths
   </div>
 </section>
 
+<!-- ============ ECHTES HAUS ============ -->
+<?php require_once __DIR__ . '/inc/echt.php';
+echt_haus('garten_h', ['luft', 'herbst'], t('Ein echtes DAVINCI Haus', 'A real DAVINCI house'), t('Der Bungalow,<br>wie er dasteht.', 'The bungalow,<br>as it stands.'),
+  t('Flachdach, Pultdach-Aufsatz für Licht von oben, Carport im selben Raster. So sieht ein DAVINCI Bungalow nach Jahren im Alltag aus.', 'Flat roof, a raised mono-pitch roof for light from above, a carport on the same grid. This is how a DAVINCI bungalow looks after years of everyday life.')); ?>
+
 <!-- ============ VERGLEICH ============ -->
 <section class="section--tight">
   <div class="wrap">
