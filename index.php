@@ -11,10 +11,11 @@ seite_start([
 <section class="hero" id="hero">
   <div class="hero__media" data-hero-img>
     <div class="hero__slide is-active"><img src="/assets/img/dv-01-flachdach-weiss-abend.jpg" style="object-position:50% 55%" alt="<?= t('Weißes DAVINCI Haus mit Flachdach und raumhoher Verglasung in der Abenddämmerung', 'White DAVINCI house with flat roof and floor-to-ceiling glazing at dusk') ?>" fetchpriority="high"></div>
-    <div class="hero__slide"><img src="/assets/img/echt-ansicht-strasse.jpg" style="object-position:55% 60%" alt="<?= t('Echtes DAVINCI Haus: Bungalow mit Flachdach, Pultdach-Aufsatz und Carport im Herbst', 'A real DAVINCI house: bungalow with flat roof, raised mono-pitch roof and carport in autumn') ?>" loading="lazy"></div>
+    <div class="hero__slide hero__slide--video"><video muted playsinline preload="none" poster="/assets/img/dv-drohne-poster.jpg" aria-label="<?= t('Drohnenflug über einen DAVINCI Bungalow mit Flachdach, Pultdach-Aufsatz und Carport im Herbst', 'Drone flight over a DAVINCI bungalow with flat roof, raised mono-pitch roof and carport in autumn') ?>" data-src="/assets/video/dv-drohne-1920.mp4" data-src-klein="/assets/video/dv-drohne-1280.mp4"></video></div>
     <div class="hero__slide"><img src="/assets/img/dv-12-hang-pool-nacht.jpg" style="object-position:45% 45%" alt="<?= t('DAVINCI Haus am Hang mit Pultdach, Terrasse und Pool bei Nacht', 'DAVINCI house on a slope with mono-pitch roof, terrace and pool at night') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-03-giebel-winter-tag.jpg" style="object-position:50% 35%" alt="<?= t('DAVINCI Haus mit Glasgiebel im Schnee vor Bergkulisse', 'DAVINCI house with glazed gable in the snow against a mountain backdrop') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-04-pultdach-bungalow-abend.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Bungalow mit versetzten Pultdächern im Sonnenuntergang', 'DAVINCI bungalow with offset mono-pitch roofs at sunset') ?>" loading="lazy"></div>
+    <div class="hero__slide"><img src="/assets/img/echt-ansicht-strasse.jpg" style="object-position:55% 60%" alt="<?= t('Echtes DAVINCI Haus: Bungalow mit Flachdach, Pultdach-Aufsatz und Carport im Herbst', 'A real DAVINCI house: bungalow with flat roof, raised mono-pitch roof and carport in autumn') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-06-flachdach-schwarz-tag.jpg" style="object-position:50% 45%" alt="<?= t('DAVINCI Haus mit schwarzem Holzskelett, Flachdach und Glasfassade', 'DAVINCI house with black timber frame, flat roof and glass facade') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-18-schwarz-giebel-hang-garage.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Haus mit dunklem Tragwerk, Satteldach und Garage bei Nacht', 'DAVINCI house with dark timber structure, pitched roof and garage at night') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-09-bungalow-flach-garten.jpg" style="object-position:50% 50%" alt="<?= t('Weißer DAVINCI Bungalow mit Flachdach und Garten', 'White DAVINCI bungalow with flat roof and garden') ?>" loading="lazy"></div>
@@ -34,12 +35,14 @@ seite_start([
   </div>
   <div class="hero__dots" role="tablist" aria-label="<?= t('Bilder', 'Images') ?>">
     <button role="tab" aria-selected="true" aria-label="<?= t('Flachdach', 'Flat roof') ?>" data-slide="0"><i></i><span><?= t('Flachdach', 'Flat roof') ?></span></button>
-    <button role="tab" aria-selected="false" aria-label="<?= t('Am Hang', 'Hillside') ?>" data-slide="1"><i></i><span><?= t('Am Hang', 'Hillside') ?></span></button>
-    <button role="tab" aria-selected="false" aria-label="<?= t('Winter', 'Winter') ?>" data-slide="2"><i></i><span><?= t('Winter', 'Winter') ?></span></button>
-    <button role="tab" aria-selected="false" aria-label="<?= t('Pultdach', 'Mono-pitch') ?>" data-slide="3"><i></i><span><?= t('Pultdach', 'Mono-pitch') ?></span></button>
-    <button role="tab" aria-selected="false" aria-label="<?= t('Holzskelett', 'Timber frame') ?>" data-slide="4"><i></i><span><?= t('Holzskelett', 'Timber frame') ?></span></button>
-    <button role="tab" aria-selected="false" aria-label="<?= t('Bei Nacht', 'At night') ?>" data-slide="5"><i></i><span><?= t('Bei Nacht', 'At night') ?></span></button>
-    <button role="tab" aria-selected="false" aria-label="<?= t('Bungalow', 'Bungalow') ?>" data-slide="6"><i></i><span><?= t('Bungalow', 'Bungalow') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Aus der Luft', 'From above') ?>" data-slide="1"><i></i><span><?= t('Aus der Luft', 'From above') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Am Hang', 'Hillside') ?>" data-slide="2"><i></i><span><?= t('Am Hang', 'Hillside') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Winter', 'Winter') ?>" data-slide="3"><i></i><span><?= t('Winter', 'Winter') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Pultdach', 'Mono-pitch') ?>" data-slide="4"><i></i><span><?= t('Pultdach', 'Mono-pitch') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Echtes Haus', 'Real house') ?>" data-slide="5"><i></i><span><?= t('Echtes Haus', 'Real house') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Holzskelett', 'Timber frame') ?>" data-slide="6"><i></i><span><?= t('Holzskelett', 'Timber frame') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Bei Nacht', 'At night') ?>" data-slide="7"><i></i><span><?= t('Bei Nacht', 'At night') ?></span></button>
+    <button role="tab" aria-selected="false" aria-label="<?= t('Bungalow', 'Bungalow') ?>" data-slide="8"><i></i><span><?= t('Bungalow', 'Bungalow') ?></span></button>
   </div>
 </section>
 

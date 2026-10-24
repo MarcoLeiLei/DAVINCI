@@ -73,35 +73,31 @@
   /* Hero-Bildwechsel: ruhige, weiche Überblendung mit leichter Bewegung */
   let wechselTl = null;
   // Nach dem Intro alle Hero-Bilder im Hintergrund vorladen, damit jeder Wechsel sofort steht
-  introFertig.then(() => setTimeout(() => $$('.hero__slide img').forEach(im => { im.loading = 'eager'; if (im.decode) im.decode().catch(() => {}); }), 800));
+  introFertig.then(() => setTimeout(() => { $$('.hero__slide img').forEach(im => { im.loading = 'eager'; if (im.decode) im.decode().catch(() => {}); }); $$('.hero__slide video').forEach(v => window.dvVideoLaden && window.dvVideoLaden(v)); }, 800));
   const geladen = img => (img.complete && img.naturalWidth) ? Promise.resolve() :
     new Promise(ok => { img.loading = 'eager'; img.addEventListener('load', ok, { once: true }); img.addEventListener('error', ok, { once: true }); setTimeout(ok, 2500); });
   window.dvHeroWechsel = (alt, neu, alle) => {
     if (wechselTl) wechselTl.progress(1);
-    const q = $('img', neu);
-    if (!(q.complete && q.naturalWidth)) { geladen(q).then(() => window.dvHeroWechsel(alt, neu, alle)); return; }
-    const media = alt.parentElement;
-    const quelle = $('img', neu), altImg = $('img', alt);
-    // Ruhige Überblendung: das neue Bild legt sich weich über das alte und kommt dabei langsam zur Ruhe
-    const box = document.createElement('div'); box.className = 'hero__blend';
-    gsap.set(box, { scale: gsap.getProperty(neu, 'scale') || 1 });
-    const im = document.createElement('img'); im.src = quelle.currentSrc || quelle.src; im.alt = '';
-    im.style.objectPosition = getComputedStyle(quelle).objectPosition;
-    box.appendChild(im); media.appendChild(box);
+    const m = $('img, video', neu), altM = $('img, video', alt);
+    if (m.tagName === 'IMG' && !(m.complete && m.naturalWidth)) { geladen(m).then(() => window.dvHeroWechsel(alt, neu, alle)); return; }
+    // Ruhige Überblendung: das neue Bild (oder Video) legt sich weich über das alte und kommt langsam zur Ruhe
+    [neu, alt, m, altM].forEach(el => { el.style.transition = 'none'; });
+    neu.classList.add('is-active');
+    gsap.set(neu, { opacity: 0, zIndex: 2 });
     wechselTl = gsap.timeline({
       defaults: { ease: 'sine.inOut' },
       onComplete: () => {
-        alle.forEach(sl => { sl.style.transition = 'none'; sl.classList.toggle('is-active', sl === neu); });
-        void media.offsetWidth; box.remove();
-        requestAnimationFrame(() => alle.forEach(sl => { sl.style.transition = ''; }));
-        gsap.set(altImg, { clearProps: 'transform' });
+        alle.forEach(sl => { if (sl !== neu) sl.classList.remove('is-active'); });
+        gsap.set(neu, { clearProps: 'opacity,zIndex' });
+        gsap.set([m, altM], { clearProps: 'transform' });
+        requestAnimationFrame(() => [neu, alt, m, altM].forEach(el => { el.style.transition = ''; }));
         wechselTl = null;
       }
     });
     wechselTl
-      .fromTo(box, { opacity: 0 }, { opacity: 1, duration: 1.8 })
-      .fromTo(im, { scale: 1.06 }, { scale: 1, duration: 2.6, ease: 'power2.out' }, 0)
-      .fromTo(altImg, { scale: 1 }, { scale: 1.03, duration: 1.8 }, 0);
+      .to(neu, { opacity: 1, duration: 1.8 })
+      .fromTo(m, { scale: 1.06 }, { scale: 1, duration: 2.6, ease: 'power2.out' }, 0)
+      .fromTo(altM, { scale: 1 }, { scale: 1.03, duration: 1.8 }, 0);
   };
 
   const hero = $('.hero');

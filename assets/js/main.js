@@ -287,7 +287,7 @@ const GOOGLE_ADS_LABELS = {
   });
 
   /* ---------- Kennzeichnung der KI-Visualisierungen ---------- */
-  $$('img[src*="/dv-"]').forEach(img => {
+  $$('img[src*="/dv-"], video[poster*="/dv-"]').forEach(img => {
     const box = img.closest('.hero__slide, figure, .product__img, .way__img, .mood__i, .split__img, .house__img, .dbook-teaser__cover') || img.parentElement;
     if (!box || box.querySelector(':scope > .ki-badge')) return;
     if (getComputedStyle(box).position === 'static') box.style.position = 'relative';
@@ -375,6 +375,9 @@ const GOOGLE_ADS_LABELS = {
   const heroEl = $('.hero');
   const slides = $$('.hero__slide');
   const dots = $$('.hero__dots [data-slide]');
+  // Videoquelle passend zur Bildschirmbreite erst bei Bedarf setzen (spart Daten auf dem Handy)
+  const videoLaden = v => { if (v.getAttribute('src')) return; v.preload = 'auto'; v.src = (innerWidth <= 1100 && v.dataset.srcKlein) || v.dataset.src; };
+  window.dvVideoLaden = videoLaden;
   if (slides.length > 1) {
     let cur = 0, timer = null;
     heroEl.style.setProperty('--slide-ms', HERO_INTERVALL + 'ms');
@@ -386,6 +389,10 @@ const GOOGLE_ADS_LABELS = {
       if (cur === prev) return;
       if (window.dvHeroWechsel && !reduce) window.dvHeroWechsel(slides[prev], slides[cur], slides);
       else slides.forEach((sl, k) => sl.classList.toggle('is-active', k === cur));
+      // Video im Hero: beim Einblenden von vorn abspielen, das vorige nach der Überblendung anhalten
+      const v = $('video', slides[cur]), vAlt = $('video', slides[prev]);
+      if (v && !reduce) { videoLaden(v); try { v.currentTime = 0; } catch (e) {} v.play().catch(() => {}); }
+      if (vAlt) setTimeout(() => { if (!slides[prev].classList.contains('is-active')) vAlt.pause(); }, 3200);
       dots.forEach((d, k) => {
         d.setAttribute('aria-selected', k === cur);
         const bar = d.querySelector('i'); if (bar) { bar.style.animation = 'none'; bar.offsetWidth; bar.style.animation = ''; }
