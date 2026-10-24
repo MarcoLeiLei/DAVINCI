@@ -19,17 +19,100 @@
   const MOBIL = '(max-width: 860px) and (prefers-reduced-motion: no-preference)';
   const EASE = 'power3.out';
 
+  /* ---------- 0 · Intro: Das Zeichen baut sich auf, das Logo gleitet in die Navigation ---------- */
+  const html = document.documentElement;
+  const overlay = $('.intro-overlay');
+  const introFertig = new Promise(fertig => {
+    if (!html.classList.contains('intro') || !overlay) { overlay?.remove(); return fertig(); }
+    window.dvIntroLaeuft = true;
+    try { sessionStorage.setItem('dv-intro', '1'); } catch (e) {}
+    const logo = $('.intro__logo', overlay), bg = $('.intro__bg', overlay);
+    const navBrand = $('.nav .brand');
+    const word = $('.intro__word', overlay);
+    // Ausgangslage: Logo exakt über dem Navigations-Logo, dann groß in die Bildmitte gerückt
+    const ziel = navBrand.getBoundingClientRect();
+    gsap.set(logo, { left: ziel.left, top: ziel.top });
+    const gross = Math.min(4.2, (innerWidth * 0.62) / ziel.width);
+    const mitteX = innerWidth / 2 - (ziel.left + ziel.width * gross / 2);
+    const mitteY = innerHeight / 2 - (ziel.top + ziel.height * gross / 2);
+    gsap.set(logo, { x: mitteX, y: mitteY, scale: gross });
+    const ende = () => {
+      html.classList.remove('intro'); overlay.remove(); window.dvIntroLaeuft = false;
+      ['click', 'wheel', 'touchstart', 'keydown'].forEach(ev => removeEventListener(ev, ueberspringen));
+      fertig();
+    };
+    const tl = gsap.timeline({ onComplete: ende });
+    const masken = $$('.intro__mask', overlay);
+    masken.forEach((m, k) => {
+      const y = +m.dataset.y, h = +m.dataset.h, oben = m.dataset.von === 'oben';
+      const ziel = { attr: { y, height: h }, duration: k === 0 || k === 3 ? 0.5 : 0.4, ease: 'power3.out' };
+      tl.fromTo(m, { attr: { y: oben ? y : y + h, height: 0 } }, ziel, k ? '-=0.28' : 0);
+    });
+    tl
+      .fromTo(word, { opacity: 0, letterSpacing: '0.9em' }, { opacity: 1, letterSpacing: '0.32em', duration: 0.65, ease: 'power3.out' }, '-=0.3')
+      .to(logo, { x: 0, y: 0, scale: 1, duration: 0.95, ease: 'expo.inOut' }, '+=0.15')
+      .fromTo(bg, { clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.95, ease: 'expo.inOut' }, '<0.05');
+    const ueberspringen = () => tl.progress(1);
+    ['click', 'wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, ueberspringen, { passive: true, once: true }));
+  });
+
   /* ---------- 1 · Startseite: Titel Buchstabe für Buchstabe, Bild zoomt beim Scrollen heraus ---------- */
   const titel = $('.hero__title');
   if (titel && window.SplitText) {
     mm.add(BEWEGT, () => {
-      document.fonts.ready.then(() => {
-        titel.classList.remove('load-in'); titel.classList.add('is-split');
+      titel.classList.remove('load-in'); titel.classList.add('is-split');
+      gsap.set(titel, { opacity: 0 });
+      Promise.all([document.fonts.ready, introFertig]).then(() => {
         const split = new SplitText(titel, { type: 'lines,chars', mask: 'lines', linesClass: 'line' });
-        gsap.from(split.chars, { yPercent: 115, duration: 1.15, ease: 'power4.out', stagger: 0.035, delay: 0.25 });
+        gsap.set(titel, { opacity: 1 });
+        gsap.from(split.chars, { yPercent: 115, duration: 1.15, ease: 'power4.out', stagger: 0.035, delay: 0.1 });
       });
     });
   }
+
+  /* Hero-Bildwechsel: Das nächste Bild schiebt sich in sechs Streifen herein, wie Felder im Raster */
+  let wechselTl = null;
+  // Nach dem Intro alle Hero-Bilder im Hintergrund vorladen, damit jeder Wechsel sofort steht
+  introFertig.then(() => setTimeout(() => $$('.hero__slide img').forEach(im => { im.loading = 'eager'; if (im.decode) im.decode().catch(() => {}); }), 800));
+  const geladen = img => (img.complete && img.naturalWidth) ? Promise.resolve() :
+    new Promise(ok => { img.loading = 'eager'; img.addEventListener('load', ok, { once: true }); img.addEventListener('error', ok, { once: true }); setTimeout(ok, 2500); });
+  window.dvHeroWechsel = (alt, neu, alle) => {
+    if (wechselTl) wechselTl.progress(1);
+    const q = $('img', neu);
+    if (!(q.complete && q.naturalWidth)) { geladen(q).then(() => window.dvHeroWechsel(alt, neu, alle)); return; }
+    const media = alt.parentElement;
+    const quelle = $('img', neu);
+    const W = media.clientWidth, N = innerWidth < 700 ? 4 : 6;
+    const box = document.createElement('div'); box.className = 'hero__strips';
+    gsap.set(box, { scale: gsap.getProperty(neu, 'scale') || 1 });
+    const pos = getComputedStyle(quelle).objectPosition;
+    const streifen = [];
+    for (let k = 0; k < N; k++) {
+      const st = document.createElement('div'); st.className = 'hero__strip';
+      const x = Math.floor(k * W / N), w = Math.ceil(W / N) + 1;
+      st.style.left = x + 'px'; st.style.width = w + 'px';
+      const im = document.createElement('img'); im.src = quelle.currentSrc || quelle.src; im.alt = '';
+      im.style.left = -x + 'px'; im.style.width = W + 'px'; im.style.objectPosition = pos;
+      st.appendChild(im); box.appendChild(st); streifen.push(st);
+    }
+    media.appendChild(box);
+    const altImg = $('img', alt);
+    wechselTl = gsap.timeline({
+      onComplete: () => {
+        alle.forEach(sl => { sl.style.transition = 'none'; sl.classList.toggle('is-active', sl === neu); });
+        void media.offsetWidth; box.remove();
+        requestAnimationFrame(() => alle.forEach(sl => { sl.style.transition = ''; }));
+        gsap.set(altImg, { clearProps: 'filter' });
+        wechselTl = null;
+      }
+    });
+    wechselTl
+      .fromTo(streifen, { clipPath: i => i % 2 ? 'inset(0% 0% 100% 0%)' : 'inset(100% 0% 0% 0%)' },
+        { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.25, ease: 'expo.inOut', stagger: { each: 0.07, from: 'start' } })
+      .fromTo($$('img', box), { scale: 1.14, yPercent: i => (i % 2 ? -4 : 4) }, { scale: 1.03, yPercent: 0, duration: 1.7, ease: 'expo.out', stagger: 0.07 }, 0)
+      .fromTo(altImg, { filter: 'brightness(1)' }, { filter: 'brightness(0.6)', duration: 1.1, ease: 'power2.in' }, 0);
+  };
+
   const hero = $('.hero');
   if (hero && ST) {
     mm.add(BEWEGT, () => {

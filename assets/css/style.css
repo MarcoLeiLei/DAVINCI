@@ -1274,5 +1274,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .raster-svg .r-room.r-a:not(.r-b) { opacity: 0; }
   .raster__steps li { opacity: 1; }
 }
+
+/* Intro: Logo beim ersten Aufruf der Startseite */
+.intro-overlay { display: none; }
+html.intro { overflow: hidden; }
+html.intro .intro-overlay { display: block; position: fixed; inset: 0; z-index: 9999; pointer-events: auto; animation: introSicherung .6s ease 4s forwards; }
+html.intro .nav .brand { opacity: 0; }
+.intro__bg { position: absolute; inset: 0; background: var(--black); }
+.intro__logo { position: fixed; color: var(--white); transform-origin: 0 0; will-change: transform; }
+.intro__signet { overflow: visible; }
+.intro__bar { fill: currentColor; }
+html.intro .intro__word { opacity: 0; }
+@keyframes introSicherung { to { opacity: 0; visibility: hidden; } }
+
+/* Hero: Bildwechsel in Streifen (Raster) */
+.hero__strips { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.hero__strip { position: absolute; top: 0; bottom: 0; overflow: hidden; will-change: clip-path; }
+.hero__strip img { position: absolute; top: 0; height: 106%; max-width: none; object-fit: cover; will-change: transform; }
+.hero__strip::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 1px; background: rgba(255,255,255,.18); }
+html.intro .load-in { animation-play-state: paused; }
 /* Maske der Titelzeilen: Platz für Unterlängen (g, y), damit nichts abgeschnitten wird */
 .hero__title .line-mask { padding-bottom: .2em; margin-bottom: -.2em; padding-top: .06em; margin-top: -.06em; }

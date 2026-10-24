@@ -366,6 +366,9 @@ const GOOGLE_ADS_LABELS = {
     $$('.timeline li[data-bild]').forEach(li => io.observe(li));
   }
 
+  /* ---------- Intro: Sicherung, falls die Animation nicht startet ---------- */
+  if (document.documentElement.classList.contains('intro')) setTimeout(() => { if (!window.dvIntroLaeuft) { document.documentElement.classList.remove('intro'); $('.intro-overlay')?.remove(); } }, 1200);
+
   /* ---------- Hero-Slider ---------- */
   const heroEl = $('.hero');
   const slides = $$('.hero__slide');
@@ -376,8 +379,11 @@ const GOOGLE_ADS_LABELS = {
     $('.hero__media')?.classList.add('is-first');
     const go = i => {
       $('.hero__media')?.classList.remove('is-first');
+      const prev = cur;
       cur = (i + slides.length) % slides.length;
-      slides.forEach((sl, k) => sl.classList.toggle('is-active', k === cur));
+      if (cur === prev) return;
+      if (window.dvHeroWechsel && !reduce) window.dvHeroWechsel(slides[prev], slides[cur], slides);
+      else slides.forEach((sl, k) => sl.classList.toggle('is-active', k === cur));
       dots.forEach((d, k) => {
         d.setAttribute('aria-selected', k === cur);
         const bar = d.querySelector('i'); if (bar) { bar.style.animation = 'none'; bar.offsetWidth; bar.style.animation = ''; }
