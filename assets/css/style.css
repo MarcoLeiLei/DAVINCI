@@ -1274,3 +1274,5 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .raster-svg .r-room.r-a:not(.r-b) { opacity: 0; }
   .raster__steps li { opacity: 1; }
 }
+/* Maske der Titelzeilen: Platz für Unterlängen (g, y), damit nichts abgeschnitten wird */
+.hero__title .line-mask { padding-bottom: .2em; margin-bottom: -.2em; padding-top: .06em; margin-top: -.06em; }
