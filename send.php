@@ -42,6 +42,14 @@ $quelle = array_filter(['Quelle' => feld('utm_source'), 'Medium' => feld('utm_me
 $sprache = feld('sprache') === 'en' ? 'Englisch' : '';
 if ($sprache) $quelle = ['Sprache' => $sprache] + $quelle;
 $hsBasis = ['email' => $email, 'vorname' => feld('vorname'), 'nachname' => feld('nachname')];
+// Optional: Newsletter (Double-Opt-in, eigene Bestätigungs-E-Mail)
+$nlGewuenscht = !empty($_POST['newsletter']);
+$nlLink = null;
+if ($nlGewuenscht) {
+  $nlLink = newsletter_anmelden($name, $email, $typ, $sprache ? 'en' : 'de');
+  if ($nlLink) { [$bN, $hN] = v_newsletter_bestaetigen(['name' => $name], $nlLink); m_senden($email, $bN, $hN, DV_NAME, DV_EMPFAENGER); }
+}
+$nlZeile = $nlGewuenscht ? ['Newsletter' => $nlLink ? 'angemeldet (wartet auf Bestätigung)' : 'bereits angemeldet'] : [];
 
 /* ---------- Termin (von der HubSpot-Buchung) ---------- */
 if ($typ === 'Termin') {
@@ -57,6 +65,7 @@ if ($typ === 'Termin') {
       $q[] = ['id' => st_token(), 'faellig' => $start - 86400, 'vorlage' => 'erinnerung', 'daten' => $d];
     });
   }
+  anfrage_ablegen('Termin', ['name' => $name, 'email' => $email, 'termin' => $start ? date('c', $start) : ''], $quelle);
   hs_kontakt_uebertragen($hsBasis, hs_notiz('Termin gebucht über die Website', ['Termin' => $start ? datum_de($start) : 'siehe Kalender', 'Gebucht am' => $jetzt] + $quelle),
     ['phase' => 'Termin gebucht', 'name' => $name . ' · Termin', 'props' => ['davinci_quelle' => 'Terminbuchung']]);
   echo json_encode(['ok' => $okI, 'kunde' => $okK]); exit;
@@ -72,7 +81,9 @@ if ($typ === 'Grundriss') {
   $okK = m_senden($email, $bK, $hK, DV_NAME, DV_EMPFAENGER);
   $zeilen = ['Typ' => 'Grundriss angefordert', 'Haus' => $d['haustyp'], 'Name' => $name, 'E-Mail' => $email,
              'Grundriss-PDF' => $pdf ? 'automatisch verschickt' : 'fehlt noch: downloads/grundrisse/' . ($key ?: '?') . '.pdf',
-             'Einwilligung' => 'Datenschutz akzeptiert am ' . $jetzt] + $quelle;
+             'Einwilligung' => 'Datenschutz akzeptiert am ' . $jetzt] + $nlZeile + $quelle;
+  anfrage_ablegen('Grundriss', ['name' => $name, 'vorname' => feld('vorname'), 'nachname' => feld('nachname'), 'email' => $email, 'haus' => $d['haustyp'],
+    'pdf' => $pdf ? 'verschickt' : 'fehlt', 'newsletter' => $nlGewuenscht ? 'angemeldet' : ''], $quelle);
   [$bI, $hI] = v_intern('Grundriss', $d, $zeilen, $pdf ? '' : 'PDF liegt noch nicht auf dem Server. Bitte Grundriss persönlich nachsenden.');
   $okI = m_senden(DV_EMPFAENGER, $bI, $hI, 'DAVINCI Website', $email);
   try { $l = st_lesen('leads'); $l[] = ['zeit' => date('c'), 'name' => $d['name'], 'email' => $d['email'], 'haus' => $d['haustyp'], 'pdf' => (bool) $pdf, 'sprache' => $sprache]; st_schreiben('leads', $l); }
@@ -113,7 +124,11 @@ $okK = m_senden($email, $bK, $hK, DV_NAME, DV_EMPFAENGER);
 $zeilen = ['Typ' => $typ . ($istBook ? " · $format" : ''), 'Name' => $name, 'E-Mail' => $email, 'Telefon' => $d['telefon']] + $termin + [
            'Adresse' => $adresse, 'Haustyp' => $d['haustyp'], 'Grundstück' => $d['grund'], 'Nachricht' => $d['nachricht'],
            'Inspiration' => $istBook ? ($inspiration ? 'angefragt (wartet auf Bestätigung)' : 'nein') : '',
-           'Einwilligung' => 'Datenschutz akzeptiert am ' . $jetzt] + $quelle;
+           'Einwilligung' => 'Datenschutz akzeptiert am ' . $jetzt] + $nlZeile + $quelle;
+anfrage_ablegen($istBook ? 'Design-Book' : ($istTermin ? 'Terminanfrage' : 'Beratungsanfrage'),
+  ['name' => $name, 'vorname' => feld('vorname'), 'nachname' => feld('nachname'), 'email' => $email, 'telefon' => $d['telefon'], 'adresse' => $adresse,
+   'haustyp' => $d['haustyp'], 'grundstueck' => $d['grund'], 'nachricht' => $d['nachricht'], 'format' => $istBook ? $format : '',
+   'termin' => $termin ? implode(' · ', $termin) : '', 'inspiration' => $inspiration ? 'angefragt' : '', 'newsletter' => $nlGewuenscht ? 'angemeldet' : ''], $quelle);
 [$bI, $hI] = v_intern($istBook ? 'Design-Book' : ($istTermin ? 'Terminanfrage' : 'Beratungsanfrage'), $d, $zeilen, $istPrint ? 'Bitte gedrucktes Design-Book versenden.' : '');
 $okI = m_senden(DV_EMPFAENGER, $bI, $hI, 'DAVINCI Website', $email);
 

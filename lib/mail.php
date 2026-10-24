@@ -260,3 +260,13 @@ function v_entwurf_bereit($d) {
     . m_p('Wir freuen uns sehr auf diesen Moment.') . m_gruss();
   return ['Ihr Entwurf ist fertig', m_layout('Wir möchten Ihnen Ihren Entwurf vorstellen.', m_bild('dv-07-hang-pultdach-garage.jpg', 'DAVINCI Haus aus Holz und Glas') . m_block($t, '40px 40px 24px'))];
 }
+
+/* Newsletter – Bitte um Bestätigung (Double-Opt-in) */
+function v_newsletter_bestaetigen($d, $link) {
+  $t = m_titel('DAVINCI Newsletter', 'Bitte bestätigen Sie Ihre Anmeldung.')
+    . m_p('Guten Tag ' . h($d['name']) . ',')
+    . m_p('Sie möchten den DAVINCI Newsletter erhalten. Damit wir sicher sind, dass die Anmeldung von Ihnen kommt, bestätigen Sie sie bitte mit einem Klick. Ohne Bestätigung schreiben wir Ihnen keinen Newsletter.')
+    . m_knopf($link, 'Anmeldung bestätigen')
+    . m_klein('Sie haben sich nicht angemeldet? Dann ignorieren Sie diese E-Mail einfach. Sie erhalten dann nichts weiter von uns.');
+  return ['Bitte bestätigen: DAVINCI Newsletter', m_layout('Ein Klick, dann sind Sie dabei.', m_block($t . m_gruss(), '40px 40px 24px'))];
+}

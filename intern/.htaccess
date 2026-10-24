@@ -1,0 +1,27 @@
+# DAVINCI intern
+DirectoryIndex index.php
+Options -Indexes
+
+# Konfiguration, Daten und Bibliotheken nie ausliefern
+<FilesMatch "^(config|config\.example|cron)\.php$">
+  Require all denied
+</FilesMatch>
+RedirectMatch 403 ^/(daten|lib)(/|$)
+
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  <FilesMatch "\.php$">
+    Header set Cache-Control "private, no-store"
+  </FilesMatch>
+</IfModule>
+
+# Immer über HTTPS
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>

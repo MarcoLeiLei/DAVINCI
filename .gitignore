@@ -4,3 +4,8 @@ zugang.php
 data/
 diag.php
 .DS_Store
+intern/config.php
+intern/daten/*
+!intern/daten/.htaccess
+intern/medien/*
+!intern/medien/.htaccess

@@ -18,3 +18,13 @@ Nicht im Repository und auf dem Server nicht überschrieben:
 
 Einmalige Einrichtung: SSH-Schlüssel in SiteGround hinterlegen und die Secrets
 `SG_HOST`, `SG_USER`, `SG_PORT`, `SG_PATH`, `SG_KEY` unter Settings → Secrets and variables → Actions anlegen.
+
+## Interner Bereich (intern.davinci-homes.de)
+
+Ordner `intern/`, wird vom Workflow in `www/intern.davinci-homes.de/public_html` übertragen (oder in den Ordner aus dem Secret `SG_PATH_INTERN`).
+
+- Module: Übersicht mit Kennzahlen, Anfragen der Website, Kontakte (inkl. Import aus Excel/CSV), Projekte als Board, Aufgaben, Newsletter, Benutzer, Einstellungen.
+- Daten liegen als JSON in `intern/daten/` auf dem Server (nicht im Repository).
+- `intern/config.php` wird beim ersten Deploy aus `config.example.php` angelegt, wenn das Secret `INTERN_SCHLUESSEL` gesetzt ist.
+- Die Website legt Anfragen in `data/anfragen.php` und Newsletter-Anmeldungen in `data/newsletter.php` ab; der interne Bereich liest beide Dateien.
+- Cron-Job (SiteGround, alle 10 Minuten): `php /home/customer/www/intern.davinci-homes.de/public_html/cron.php`

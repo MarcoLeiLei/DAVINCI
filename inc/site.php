@@ -283,6 +283,7 @@ function seite_ende(): void { ?>
         <div class="fld full"><textarea id="t-msg" name="nachricht" placeholder=" " rows="2"></textarea><label for="t-msg"><?= t('Worum geht es? (optional)', 'What is it about? (optional)') ?></label></div>
         <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <label class="consent full"><input type="checkbox" name="datenschutz" required><span><?= t('Ich habe die <a href="/datenschutz/">Datenschutzerklärung</a> gelesen und bin mit der Verarbeitung meiner Angaben zur Terminabstimmung einverstanden.', 'I have read the <a href="/datenschutz/">privacy policy</a> (German) and agree to my details being processed to arrange a meeting.') ?></span></label>
+        <label class="consent full"><input type="checkbox" name="newsletter" value="1"><span><?= t('Optional: Ja, ich möchte den DAVINCI Newsletter mit Neuigkeiten zu Häusern, Projekten und Veranstaltungen per E-Mail erhalten. Abmeldung jederzeit möglich.', 'Optional: Yes, I would like to receive the DAVINCI newsletter with news on houses, projects and events by email (in German). You can unsubscribe at any time.') ?></span></label>
         <div class="full" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
           <button type="submit" class="btn btn--dark" data-label="<?= t('Termin anfragen', 'Request a meeting') ?>"><?= t('Termin anfragen', 'Request a meeting') ?></button>
           <p class="form__msg" data-form-msg role="status"></p>
@@ -312,6 +313,7 @@ function seite_ende(): void { ?>
         <div class="fld full"><input id="g-mail" name="email" type="email" placeholder=" " autocomplete="email" required><label for="g-mail"><?= t('E-Mail', 'Email') ?></label></div>
         <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <label class="consent full"><input type="checkbox" name="datenschutz" required><span><?= t('Ich bin einverstanden, dass DAVINCI mir den Grundriss zusendet und meine Angaben dafür verarbeitet. <a href="/datenschutz/">Datenschutz</a>', 'I agree that DAVINCI may send me the floor plan and process my details for this purpose. <a href="/datenschutz/">Privacy policy</a> (German)') ?></span></label>
+        <label class="consent full"><input type="checkbox" name="newsletter" value="1"><span><?= t('Optional: Ja, ich möchte den DAVINCI Newsletter mit Neuigkeiten zu Häusern, Projekten und Veranstaltungen per E-Mail erhalten. Abmeldung jederzeit möglich.', 'Optional: Yes, I would like to receive the DAVINCI newsletter with news on houses, projects and events by email (in German). You can unsubscribe at any time.') ?></span></label>
         <div class="full" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
           <button type="submit" class="btn btn--dark" data-label="<?= t('Grundriss anfordern', 'Request floor plan') ?>"><?= t('Grundriss anfordern', 'Request floor plan') ?></button>
           <p class="form__msg" data-form-msg role="status"></p>

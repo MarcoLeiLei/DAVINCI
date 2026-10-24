@@ -101,9 +101,38 @@ jobs:
           # Kein --delete: Dateien, die nur auf dem Server liegen (Zugangsdaten, Anfragen, hochgeladene Grundrisse), bleiben unangetastet.
           rsync -rlptz --itemize-changes \
             --exclude '.git/' --exclude '.github/' --exclude '.gitignore' --exclude 'README.md' \
-            --exclude '*.example.php' --exclude 'lib/config.php' --exclude 'zugang.php' --exclude 'data/' --exclude 'diag.php' \
+            --exclude '*.example.php' --exclude 'lib/config.php' --exclude 'zugang.php' --exclude 'data/' --exclude 'diag.php' --exclude 'intern/' \
             -e "ssh -i ~/.ssh/id_deploy -p $P -o StrictHostKeyChecking=yes" \
             ./ "$U@$H:$D/"
+
+      - name: Interner Bereich (intern.davinci-homes.de)
+        if: steps.check.outputs.ok == 'true'
+        env:
+          SG_PATH_INTERN: ${{ secrets.SG_PATH_INTERN }}
+          INTERN_SCHLUESSEL: ${{ secrets.INTERN_SCHLUESSEL }}
+        run: |
+          # Zielordner: Secret SG_PATH_INTERN oder neben der Website, z. B. www/intern.davinci-homes.de/public_html
+          DI=$(printf '%s' "$SG_PATH_INTERN" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s#^~/##; s#/$##')
+          [ -z "$DI" ] && DI=$(printf '%s' "$D" | sed -E 's#(^|/)davinci-homes\.de/#\1intern.davinci-homes.de/#')
+          SSH="ssh -i ~/.ssh/id_deploy -p $P -o BatchMode=yes -o StrictHostKeyChecking=yes"
+          if ! $SSH "$U@$H" "test -d '$DI'"; then
+            echo "::warning::Der interne Bereich wurde nicht übertragen: Ordner $DI fehlt. Bitte in SiteGround die Subdomain intern.davinci-homes.de anlegen (oder Secret SG_PATH_INTERN setzen)."
+            exit 0
+          fi
+          rsync -rlptz --itemize-changes \
+            --exclude 'config.php' --exclude 'config.example.php' \
+            --include 'daten/' --include 'daten/.htaccess' --exclude 'daten/*' \
+            --include 'medien/' --include 'medien/.htaccess' --exclude 'medien/*' \
+            -e "$SSH" ./intern/ "$U@$H:$DI/"
+          # config.php beim ersten Mal anlegen (Einrichtungsschlüssel aus dem Secret INTERN_SCHLUESSEL)
+          if ! $SSH "$U@$H" "test -f '$DI/config.php'"; then
+            if [ -n "$INTERN_SCHLUESSEL" ]; then
+              sed "s#HIER-EINEN-LANGEN-ZUFAELLIGEN-SCHLUESSEL-EINTRAGEN#$(printf '%s' "$INTERN_SCHLUESSEL" | tr -d '[:space:]#')#" intern/config.example.php | $SSH "$U@$H" "cat > '$DI/config.php' && chmod 640 '$DI/config.php'"
+              echo "config.php angelegt."
+            else
+              echo "::warning::Im internen Bereich fehlt config.php. Secret INTERN_SCHLUESSEL in GitHub anlegen und erneut ausführen, oder config.example.php auf dem Server als config.php kopieren."
+            fi
+          fi
 
       - name: Aufräumen
         if: always()
