@@ -46,7 +46,7 @@ seite_start([
 <section class="statement">
   <div class="wrap">
     <p class="eyebrow reveal" style="margin-bottom:36px"><?= t('Unsere Haltung', 'Our philosophy') ?></p>
-    <p class="statement__text" data-words><?= t('<span class="accent">Zeitlos.</span> Das ist unser Anspruch an jedes Haus. Wir bauen mit Holz und Glas und folgen keiner Mode.', '<span class="accent">Timeless.</span> That is what we ask of every house we build. We work with wood and glass and follow no fashion.') ?></p>
+    <p class="statement__text" data-words><?= t('<span class="accent">Zeitlos.</span> Das ist unser Anspruch an jedes Haus. Wir bauen mit Holz und Glas, Materialien, die nie aus der Zeit fallen.', '<span class="accent">Timeless.</span> That is what we ask of every house we build. We build with wood and glass, materials that never go out of date.') ?></p>
   </div>
 </section>
 
