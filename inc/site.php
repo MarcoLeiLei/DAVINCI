@@ -99,11 +99,18 @@ function seite_start(array $p): void {
 <link rel="preload" href="/assets/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
 <script>if('scrollRestoration' in history)history.scrollRestoration='manual';</script>
+<?php if ($slug === ''): ?><script>try{if(!sessionStorage.getItem('dv-intro')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('intro')}catch(e){}</script><?php endif; ?>
 <?php foreach ($schemas as $s): ?>
 <script type="application/ld+json"><?= json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
 <?php endforeach; ?>
 </head>
 <body class="seite-<?= e($slug === '' ? 'start' : $slug) ?>">
+<?php if ($slug === ''): ?>
+<div class="intro-overlay" aria-hidden="true">
+  <div class="intro__bg"></div>
+  <div class="intro__logo brand"><svg class="brand__signet intro__signet" viewBox="0 0 822 1073"><path class="intro__bar intro__bar--1" d="M252,0 L186,0 L0,230 L0,1072 L79,1072 L252,855Z"/><path class="intro__bar intro__bar--2" d="M536,631 L474,631 L285,860 L284,1072 L354,1072 L536,849Z"/><path class="intro__bar intro__bar--3" d="M536,0 L473,0 L284,230 L284,441 L353,441 L535,219Z"/><path class="intro__bar intro__bar--4" d="M820,0 L754,0 L569,229 L569,1072 L647,1072 L820,856Z"/></svg><span class="brand__word intro__word">DAVINCI</span></div>
+</div>
+<?php endif; ?>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="signet" viewBox="0 0 822 1073"><path d="M536,631 L474,631 L285,860 L284,1072 L354,1072 L536,849Z M820,0 L754,0 L569,229 L569,1072 L647,1072 L820,856Z M536,0 L473,0 L284,230 L284,441 L353,441 L535,219Z M252,0 L186,0 L0,230 L0,1072 L79,1072 L252,855Z"/></symbol>
