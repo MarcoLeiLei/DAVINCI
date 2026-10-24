@@ -45,7 +45,41 @@ jobs:
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$SG_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -p "${SG_PORT:-18765}" "$SG_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p "${SG_PORT:-18765}" "$SG_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          if [ ! -s ~/.ssh/known_hosts ]; then
+            echo "::error::Server nicht erreichbar: SG_HOST oder SG_PORT stimmt nicht (Hostname aus SiteGround → SSH-Zugangsdaten, Port meist 18765)."
+            exit 1
+          fi
+          if ! head -n1 ~/.ssh/id_deploy | grep -q "BEGIN OPENSSH PRIVATE KEY"; then
+            echo "::error::SG_KEY ist kein privater Schlüssel. Bitte den Inhalt von ~/.ssh/davinci_deploy (ohne .pub) komplett einfügen, inklusive der BEGIN- und END-Zeile."
+            exit 1
+          fi
+
+      - name: Verbindung testen
+        if: steps.check.outputs.ok == 'true'
+        env:
+          SG_HOST: ${{ secrets.SG_HOST }}
+          SG_USER: ${{ secrets.SG_USER }}
+          SG_PORT: ${{ secrets.SG_PORT }}
+          SG_PATH: ${{ secrets.SG_PATH }}
+        run: |
+          if ! out=$(ssh -i ~/.ssh/id_deploy -p "${SG_PORT:-18765}" -o BatchMode=yes -o ConnectTimeout=20 "$SG_USER@$SG_HOST" "echo verbunden; test -d \"$SG_PATH\" && echo pfad-ok || echo pfad-fehlt; command -v rsync >/dev/null && echo rsync-ok || echo rsync-fehlt" 2>&1); then
+            if echo "$out" | grep -qi "permission denied"; then
+              echo "::error::Anmeldung abgelehnt: SG_USER stimmt nicht oder der öffentliche Schlüssel ist in SiteGround nicht importiert."
+            else
+              echo "::error::SSH-Verbindung fehlgeschlagen: $(echo "$out" | tail -n 2 | tr '\n' ' ')"
+            fi
+            exit 1
+          fi
+          echo "$out"
+          if echo "$out" | grep -q pfad-fehlt; then
+            echo "::error::Zielordner nicht gefunden. SG_PATH prüfen, z. B. www/davinci-homes.de/public_html. Vorhanden in www/: $(ssh -i ~/.ssh/id_deploy -p "${SG_PORT:-18765}" -o BatchMode=yes "$SG_USER@$SG_HOST" 'ls www 2>/dev/null | tr "\n" " "')"
+            exit 1
+          fi
+          if echo "$out" | grep -q rsync-fehlt; then
+            echo "::error::Auf dem Server fehlt rsync."
+            exit 1
+          fi
 
       - name: Dateien übertragen
         if: steps.check.outputs.ok == 'true'
