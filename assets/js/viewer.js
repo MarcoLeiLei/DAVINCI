@@ -2,7 +2,7 @@
    DAVINCI – Bildbetrachter
    Bilder in Inhaltsbereichen lassen sich anklicken und groß ansehen.
    Öffnen: das Bild fliegt aus seiner Position leicht gedreht in die Mitte.
-   Blättern: per Pfeil, Taste oder Wischen, das Bild kippt wie eine Karte zur Seite.
+   Blättern: per Pfeil, Taste oder Wischen, das neue Bild gleitet horizontal herein.
    Schließen: das Bild fliegt an seinen Platz zurück (oder fällt sanft nach unten).
    ========================================================= */
 (() => {
@@ -68,10 +68,17 @@
     lb.classList.toggle('lb--einzeln', liste.length < 2);
   };
   // Lage des Vorschaubilds relativ zum großen Bild (für den Flug hin und zurück)
+  const RADIUS = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--r-img')) || 16;
+  const VOLL = `inset(0% 0% 0% 0% round ${RADIUS}px)`;
   const versatz = img => {
     const a = img.getBoundingClientRect(), b = frame.getBoundingClientRect();
     if (!a.width || a.bottom < 0 || a.top > innerHeight) return null;
-    return { x: (a.left + a.width / 2) - (b.left + b.width / 2), y: (a.top + a.height / 2) - (b.top + b.height / 2), scale: Math.max(a.width / b.width, a.height / b.height) };
+    const scale = Math.max(a.width / b.width, a.height / b.height);
+    // Ausschnitt wie im Vorschaubild (object-fit: cover), damit der Flug nahtlos beginnt und endet
+    const ix = Math.max(0, (b.width - a.width / scale) / 2 / b.width * 100), iy = Math.max(0, (b.height - a.height / scale) / 2 / b.height * 100);
+    const r = RADIUS / scale;
+    return { x: (a.left + a.width / 2) - (b.left + b.width / 2), y: (a.top + a.height / 2) - (b.top + b.height / 2), scale,
+      clip: `inset(${iy}% ${ix}% ${iy}% ${ix}% round ${r}px)` };
   };
 
   /* ---------- Öffnen ---------- */
@@ -87,12 +94,12 @@
     document.documentElement.classList.add('lb-offen');
     btnZu.focus({ preventScroll: true });
     if (!anim) { beschaeftigt = false; return; }
-    const v = versatz(img) || { x: 0, y: 80, scale: 0.6 };
+    const v = versatz(img) || { x: 0, y: 80, scale: 0.6, clip: VOLL };
     g.timeline({ onComplete: () => { beschaeftigt = false; g.set(knoepfe, { clearProps: 'transform,opacity' }); } })
-      .fromTo(bg, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'power2.out' })
-      .fromTo(frame, { x: v.x, y: v.y, scale: v.scale, rotation: -4, borderRadius: 18 },
-        { x: 0, y: 0, scale: 1, rotation: 0, borderRadius: 4, duration: 0.8, ease: 'back.out(1.25)' }, 0)
-      .fromTo(knoepfe, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(2)', stagger: 0.06 }, 0.35);
+      .fromTo(bg, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'sine.out' })
+      .fromTo(frame, { x: v.x, y: v.y, scale: v.scale, rotation: -2.5, clipPath: v.clip },
+        { x: 0, y: 0, scale: 1, rotation: 0, clipPath: VOLL, duration: 1, ease: 'expo.out', force3D: true }, 0)
+      .fromTo(knoepfe, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.05 }, 0.4);
   };
 
   /* ---------- Blättern ---------- */
@@ -102,15 +109,12 @@
     const neu = (idx + dir + liste.length) % liste.length;
     const geladen = laden(quelle(liste[neu]));
     if (anim) {
-      await g.to(frame, { x: -dir * Math.max(innerWidth * 0.55, Math.abs(schwung)), rotation: -dir * 14, opacity: 0, scale: 0.92, duration: 0.32, ease: 'power2.in' });
+      // Bild ganz einfach horizontal hinaus, das neue von der anderen Seite herein
+      await g.to(frame, { x: -dir * innerWidth, y: 0, rotation: 0, scale: 1, duration: 0.36, ease: 'power2.in' });
     }
     await geladen;
     idx = neu; zeigeDaten();
-    if (anim) {
-      g.fromTo(zahl, { scale: 1.35 }, { scale: 1, duration: 0.5, ease: 'back.out(3)' });
-      await g.fromTo(frame, { x: dir * innerWidth * 0.4, y: 0, rotation: dir * 9, opacity: 0, scale: 0.88 },
-        { x: 0, rotation: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.6)' });
-    }
+    if (anim) await g.fromTo(frame, { x: dir * innerWidth }, { x: 0, duration: 0.6, ease: 'power3.out' });
     beschaeftigt = false;
   };
 
@@ -124,8 +128,8 @@
       const tl = g.timeline();
       tl.to(knoepfe, { opacity: 0, y: 10, duration: 0.2, ease: 'power1.in' })
         .to(bg, { opacity: 0, duration: 0.45, ease: 'power2.inOut' }, 0.05);
-      if (v) tl.to(frame, { x: v.x, y: v.y, scale: v.scale, rotation: 3, borderRadius: 18, duration: 0.55, ease: 'power3.inOut' }, 0);
-      else tl.to(frame, { y: '+=' + innerHeight * 0.35, rotation: 10, scale: 0.85, opacity: 0, duration: 0.5, ease: 'power2.in' }, 0);
+      if (v) tl.fromTo(frame, { clipPath: VOLL }, { x: v.x, y: v.y, scale: v.scale, rotation: 2, clipPath: v.clip, duration: 0.65, ease: 'expo.inOut' }, 0);
+      else tl.to(frame, { y: '+=' + innerHeight * 0.3, scale: 0.9, opacity: 0, duration: 0.5, ease: 'power2.in' }, 0);
       await tl;
       g.set([frame, bg, ...knoepfe], { clearProps: 'all' });
     }
@@ -171,7 +175,7 @@
   frame.addEventListener('pointermove', e => {
     if (!start) return;
     const dx = e.clientX - start.x, dy = e.clientY - start.y;
-    if (anim) g.set(frame, { x: dx, y: Math.max(0, dy) * 0.9, rotation: dx * 0.03, scale: 1 - Math.min(Math.max(0, dy) / 1500, 0.15) });
+    if (anim) g.set(frame, Math.abs(dy) > Math.abs(dx) && dy > 0 ? { x: 0, y: dy * 0.9, scale: 1 - Math.min(dy / 1500, 0.15) } : { x: dx, y: 0, scale: 1 });
   });
   const loslassen = e => {
     if (!start) return;
@@ -180,7 +184,7 @@
     const schnell = Math.abs(dx) / dt > 0.5;
     if (dy > 120 && dy > Math.abs(dx)) schliessen(true);
     else if (liste.length > 1 && (Math.abs(dx) > 90 || (schnell && Math.abs(dx) > 30))) blaettern(dx < 0 ? 1 : -1, dx);
-    else if (anim) g.to(frame, { x: 0, y: 0, rotation: 0, scale: 1, duration: 0.7, ease: 'elastic.out(1, 0.5)' });
+    else if (anim) g.to(frame, { x: 0, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' });
   };
   frame.addEventListener('pointerup', loslassen);
   frame.addEventListener('pointercancel', loslassen);
