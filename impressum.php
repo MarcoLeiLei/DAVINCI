@@ -42,7 +42,7 @@ seite_start(['slug' => 'impressum', 'title' => 'Impressum | DAVINCI', 'desc' => 
     <p>Die durch uns erstellten Inhalte, Visualisierungen und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung.</p>
 
     <h2>Hinweis zu Preisen und Visualisierungen</h2>
-    <p>Alle auf dieser Website genannten Preise sind unverbindliche Orientierungswerte inkl. gesetzlicher MwSt. und stellen kein Angebot dar. Alle Abbildungen von Häusern auf dieser Website sind mit Unterstützung von künstlicher Intelligenz erstellte Visualisierungen. Sie zeigen Beispiele, können Sonderausstattungen enthalten und von der Ausführung abweichen.</p>
+    <p>Alle auf dieser Website genannten Preise sind unverbindliche Orientierungswerte inkl. gesetzlicher MwSt. und stellen kein Angebot dar. Viele Abbildungen von Häusern auf dieser Website zeigen Entwürfe, die mit Unterstützung von künstlicher Intelligenz visualisiert wurden. Diese Abbildungen sind als „KI-Visualisierung“ gekennzeichnet. Sie zeigen Beispiele, können Sonderausstattungen enthalten und von der Ausführung abweichen. Nicht gekennzeichnete Fotos zeigen bestehende DAVINCI Häuser.</p>
   </div>
 </section>
 <?php seite_ende();

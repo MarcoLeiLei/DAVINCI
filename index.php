@@ -11,9 +11,11 @@ seite_start([
 <section class="hero" id="hero">
   <div class="hero__media" data-hero-img>
     <div class="hero__slide is-active"><img src="/assets/img/dv-01-flachdach-weiss-abend.jpg" style="object-position:50% 55%" alt="<?= t('Weißes DAVINCI Haus mit Flachdach und raumhoher Verglasung in der Abenddämmerung', 'White DAVINCI house with flat roof and floor-to-ceiling glazing at dusk') ?>" fetchpriority="high"></div>
+    <div class="hero__slide"><img src="/assets/img/echt-ansicht-strasse.jpg" style="object-position:55% 60%" alt="<?= t('Echtes DAVINCI Haus: Bungalow mit Flachdach, Pultdach-Aufsatz und Carport im Herbst', 'A real DAVINCI house: bungalow with flat roof, raised mono-pitch roof and carport in autumn') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-12-hang-pool-nacht.jpg" style="object-position:45% 45%" alt="<?= t('DAVINCI Haus am Hang mit Pultdach, Terrasse und Pool bei Nacht', 'DAVINCI house on a slope with mono-pitch roof, terrace and pool at night') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-03-giebel-winter-tag.jpg" style="object-position:50% 35%" alt="<?= t('DAVINCI Haus mit Glasgiebel im Schnee vor Bergkulisse', 'DAVINCI house with glazed gable in the snow against a mountain backdrop') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-04-pultdach-bungalow-abend.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Bungalow mit versetzten Pultdächern im Sonnenuntergang', 'DAVINCI bungalow with offset mono-pitch roofs at sunset') ?>" loading="lazy"></div>
+    <div class="hero__slide"><img src="/assets/img/echt-luft-landschaft.jpg" style="object-position:50% 55%" alt="<?= t('Echtes DAVINCI Haus aus der Luft: Bungalow mit Pultdach-Aufsatz vor weiter Landschaft', 'A real DAVINCI house from above: bungalow with raised mono-pitch roof in an open landscape') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-06-flachdach-schwarz-tag.jpg" style="object-position:50% 45%" alt="<?= t('DAVINCI Haus mit schwarzem Holzskelett, Flachdach und Glasfassade', 'DAVINCI house with black timber frame, flat roof and glass facade') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-18-schwarz-giebel-hang-garage.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Haus mit dunklem Tragwerk, Satteldach und Garage bei Nacht', 'DAVINCI house with dark timber structure, pitched roof and garage at night') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-09-bungalow-flach-garten.jpg" style="object-position:50% 50%" alt="<?= t('Weißer DAVINCI Bungalow mit Flachdach und Garten', 'White DAVINCI bungalow with flat roof and garden') ?>" loading="lazy"></div>
@@ -90,7 +92,7 @@ seite_start([
       <p class="lead reveal" data-delay="2"><?= t('Sie steckt im System. Raster, Details und Materialien sind durchdacht und erprobt. Innerhalb dieses Systems ist vieles möglich, und jede Variante hat dieselbe Qualität. Wir nennen das Managed Diversity.', 'It is built into the system. Grid, details and materials are considered and proven. Much is possible within this system, and every variant has the same quality. We call it Managed Diversity.') ?></p>
       <p class="reveal" data-delay="3"><a href="<?= u('system') ?>" class="link-arrow"><?= t('Das System entdecken', 'Discover the system') ?> <svg><use href="#arrow"/></svg></a></p>
     </div>
-    <figure class="split__img reveal" data-delay="1"><img src="/assets/img/dv-05-flachdach-schwarz-abend.jpg" style="object-position:60% 50%" alt="<?= t('DAVINCI Haus mit sichtbarem schwarzem Holzskelett in der Abenddämmerung', 'DAVINCI house with exposed black timber frame at dusk') ?>" loading="lazy"></figure>
+    <figure class="split__img reveal" data-delay="1"><img src="/assets/img/echt-detail-dachecke.jpg" style="object-position:45% 50%" alt="<?= t('Detail eines echten DAVINCI Hauses: auskragende Holzbalken unter dem Flachdach', 'Detail of a real DAVINCI house: cantilevered timber beams under the flat roof') ?>" loading="lazy"></figure>
   </div>
 </section>
 

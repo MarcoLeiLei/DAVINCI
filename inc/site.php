@@ -236,7 +236,7 @@ function seite_ende(): void { ?>
       <span>© <span data-year>2026</span> DAVINCI</span>
       <nav aria-label="<?= t('Rechtliches', 'Legal') ?>"><a href="/impressum/"><?= t('Impressum', 'Legal notice') ?></a><a href="/datenschutz/"><?= t('Datenschutz', 'Privacy') ?></a><a href="#" data-cookie-settings><?= t('Cookie-Einstellungen', 'Cookie settings') ?></a></nav>
     </div>
-    <p class="footer__ki"><?= t('Alle Abbildungen von Häusern sind mit Unterstützung von KI erstellte Visualisierungen. Sie zeigen Beispiele und können Sonderausstattungen enthalten.', 'All images of houses are visualisations created with the help of AI. They show examples and may include optional extras.') ?></p>
+    <p class="footer__ki"><?= t('Viele Abbildungen auf dieser Website zeigen Entwürfe, die mit Unterstützung von KI visualisiert wurden. Sie sind als KI-Visualisierung gekennzeichnet, zeigen Beispiele und können Sonderausstattungen enthalten. Daneben zeigen wir Fotos echter DAVINCI Häuser.', 'Many images on this website show designs visualised with the help of AI. They are labelled as AI visualisations, show examples and may include optional extras. We also show photos of real DAVINCI houses.') ?></p>
   </div>
 </footer>
 

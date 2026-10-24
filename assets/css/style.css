@@ -1234,7 +1234,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .raster-svg .r-grid { stroke: #b9b5aa; stroke-width: 1; stroke-dasharray: 4 4; }
 .raster-svg .r-border { fill: none; stroke: var(--ink); stroke-width: 2; }
 .raster-svg .r-post { fill: var(--ink); }
-.raster-svg .r-room rect { stroke: var(--ink); stroke-width: 1.5; }
+.raster-svg .r-room polygon { stroke: var(--ink); stroke-width: 2; stroke-linejoin: miter; fill-opacity: .78; }
+.raster-svg .r-room polygon.r-open { stroke: none; }
+.raster-svg .r-room .r-qm { font-size: 11px; fill: var(--grey-4); letter-spacing: .04em; }
+.raster-svg .r-entry { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .raster-svg .r-room text { font-size: 15px; fill: var(--ink); text-anchor: middle; dominant-baseline: middle; }
 .raster-svg .r-room.r-b:not(.r-a) { opacity: 0; }
 .raster-svg .r-dim { font-size: 13px; fill: var(--grey-4); text-anchor: middle; }
@@ -1295,3 +1298,18 @@ html.intro .intro__word { opacity: 0; }
 html.intro .load-in { animation-play-state: paused; }
 /* Maske der Titelzeilen: Platz für Unterlängen (g, y), damit nichts abgeschnitten wird */
 .hero__title .line-mask { padding-bottom: .2em; margin-bottom: -.2em; padding-top: .06em; margin-top: -.06em; }
+
+/* ---------- Echte Fotos (Service) ---------- */
+.echt { display: grid; grid-template-columns: 1fr 1.55fr; grid-template-rows: 1fr 1fr auto; gap: 16px; }
+.echt__i { margin: 0; overflow: hidden; background: var(--grey-1, #eee); }
+.echt__i img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.echt__i--hoch { grid-row: 1 / 3; }
+.echt__i:not(.echt__i--hoch) { aspect-ratio: 16 / 9; }
+.echt__cap { grid-column: 1 / -1; font-size: 14px; color: var(--grey-4); margin: 4px 0 0; }
+@media (max-width: 860px) {
+  .echt { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+  .echt__i--hoch { grid-column: 1 / -1; grid-row: auto; aspect-ratio: 4 / 5; }
+  .echt__i:not(.echt__i--hoch) { aspect-ratio: 4 / 3; }
+}
+.ki-badge { transition: opacity .4s var(--ease); }
+.ki-aus > .ki-badge { opacity: 0; }

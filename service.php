@@ -8,7 +8,7 @@ seite_start([
 ]);
 seitenkopf('Service', t('Wir bleiben.<br>Auch nach der Übergabe.', 'We stay.<br>Even after handover.'),
   t('Viele sind nach der Schlüsselübergabe weg. Wir nicht. Mit Fivemeters Bau pflegen und reparieren wir seit 2024 bestehende DAVINCI Häuser. Dieselben Menschen sind auch für Ihr neues Haus da.', 'Many are gone once the keys are handed over. Not us. Through Fivemeters Bau we have been maintaining and repairing existing DAVINCI houses since 2024. The same people are there for your new house too.'),
-  'bestand.jpg', t('Ein bestehendes DAVINCI Haus mit Glasgiebel, Terrasse und Teich', 'An existing DAVINCI house with glazed gable, terrace and pond'));
+  'echt-fassade-herbst.jpg', t('Echtes DAVINCI Haus: weiße Fassade, dunkles Holztragwerk und auskragende Balken im Herbst', 'A real DAVINCI house: white facade, dark timber structure and cantilevered beams in autumn'));
 ?>
 
 <section class="section">
@@ -17,6 +17,17 @@ seitenkopf('Service', t('Wir bleiben.<br>Auch nach der Übergabe.', 'We stay.<br
       <div class="reveal"><span class="num">01</span><h3><?= t('Ein Ansprechpartner', 'One contact') ?></h3><p><?= t('Auch nach der Übergabe wissen Sie, wen Sie anrufen. Ohne Hotline und ohne Weiterleitung.', 'After handover too, you know whom to call. No hotline, no forwarding.') ?></p></div>
       <div class="reveal" data-delay="1"><span class="num">02</span><h3><?= t('Pflege und Reparatur', 'Care and repair') ?></h3><p><?= t('Dach und Rinnen, Holzkonstruktion, Glas und Jalousien. Wir kennen jedes Detail dieser Häuser.', 'Roof and gutters, timber structure, glass and blinds. We know every detail of these houses.') ?></p></div>
       <div class="reveal" data-delay="2"><span class="num">03</span><h3><?= t('Erweiterung', 'Extension') ?></h3><p><?= t('Anbau oder Carport, im Stil Ihres DAVINCI Hauses geplant und gebaut.', 'Extension or carport, planned and built in the style of your DAVINCI house.') ?></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section--tight" style="padding-top:0">
+  <div class="wrap">
+    <div class="echt">
+      <figure class="echt__i echt__i--hoch reveal"><img src="/assets/img/echt-detail-traufe-hoch.jpg" style="object-position:40% 50%" alt="<?= t('Detail eines echten DAVINCI Hauses: Dachüberstand, Holzstützen und Regenkette', 'Detail of a real DAVINCI house: roof overhang, timber columns and rain chain') ?>" loading="lazy"></figure>
+      <figure class="echt__i reveal" data-delay="1"><img src="/assets/img/echt-fassade-garten.jpg" alt="<?= t('Echtes DAVINCI Haus: Glasfassade mit dunklem Tragwerk zum Garten', 'A real DAVINCI house: glass facade with dark timber structure facing the garden') ?>" loading="lazy"></figure>
+      <figure class="echt__i reveal" data-delay="2"><img src="/assets/img/echt-carport-zufahrt.jpg" alt="<?= t('Echtes DAVINCI Haus mit Carport und Zufahrt im Herbstlicht', 'A real DAVINCI house with carport and driveway in autumn light') ?>" loading="lazy"></figure>
+      <p class="echt__cap reveal"><?= t('Ein bestehendes DAVINCI Haus, gepflegt und bewohnt. Echte Fotos, keine Visualisierung.', 'An existing DAVINCI house, cared for and lived in. Real photos, no visualisation.') ?></p>
     </div>
   </div>
 </section>

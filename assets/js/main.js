@@ -357,8 +357,10 @@ const GOOGLE_ADS_LABELS = {
   if (hm && 'IntersectionObserver' in window) {
     const imgs = $$('img', hm), cap = $('[data-history-cap]', hm);
     let akt = 0;
+    const kiAus = i => hm.classList.toggle('ki-aus', !/\/dv-/.test(imgs[i].getAttribute('src')));
+    kiAus(0);
     const zeige = i => {
-      if (i === akt || !imgs[i]) return; akt = i;
+      if (i === akt || !imgs[i]) return; akt = i; kiAus(i);
       imgs.forEach((im, k) => im.classList.toggle('is-active', k === i));
       if (cap) { cap.style.opacity = 0; setTimeout(() => { cap.textContent = imgs[i].dataset.cap || ''; cap.style.opacity = 1; }, 250); }
     };
