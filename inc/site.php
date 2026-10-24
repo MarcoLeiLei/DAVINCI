@@ -97,6 +97,7 @@ function seite_start(array $p): void {
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <link rel="preload" href="/assets/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+<?php if ($slug === ''): ?><link rel="preload" href="/assets/img/dv-drohne-poster.jpg" as="image" fetchpriority="high"><?php endif; ?>
 <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
 <script>if('scrollRestoration' in history)history.scrollRestoration='manual';</script>
 <?php if ($slug === ''): ?><script>try{if(!sessionStorage.getItem('dv-intro')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('intro')}catch(e){}</script><?php endif; ?>
@@ -323,6 +324,7 @@ function seite_ende(): void { ?>
 <?php foreach (['gsap', 'ScrollTrigger', 'SplitText', 'Flip', 'DrawSVGPlugin'] as $g): ?><script src="<?= asset('js/gsap/' . $g . '.min.js') ?>" defer></script>
 <?php endforeach; ?><script src="<?= asset('js/main.js') ?>" defer></script>
 <script src="<?= asset('js/animationen.js') ?>" defer></script>
+<script src="<?= asset('js/viewer.js') ?>" defer></script>
 </body>
 </html>
 <?php }

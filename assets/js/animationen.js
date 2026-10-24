@@ -22,7 +22,7 @@
   /* ---------- 0 · Intro: Das Zeichen baut sich auf, das Logo gleitet in die Navigation ---------- */
   const html = document.documentElement;
   const overlay = $('.intro-overlay');
-  const introFertig = new Promise(fertig => {
+  const introFertig = window.dvIntroFertig = new Promise(fertig => {
     if (!html.classList.contains('intro') || !overlay) { overlay?.remove(); return fertig(); }
     window.dvIntroLaeuft = true;
     try { sessionStorage.setItem('dv-intro', '1'); } catch (e) {}

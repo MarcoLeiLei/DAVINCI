@@ -380,8 +380,17 @@ const GOOGLE_ADS_LABELS = {
   window.dvVideoLaden = videoLaden;
   if (slides.length > 1) {
     let cur = 0, timer = null;
-    heroEl.style.setProperty('--slide-ms', HERO_INTERVALL + 'ms');
     $('.hero__media')?.classList.add('is-first');
+    // Standzeit je Motiv: Bilder HERO_INTERVALL, ein Video so lange, bis es fast durchgelaufen ist
+    const dauer = i => { const v = $('video', slides[i]); return v && !reduce ? Math.max(HERO_INTERVALL, ((v.duration || 8) - 1.4) * 1000) : HERO_INTERVALL; };
+    const balken = () => {
+      heroEl.style.setProperty('--slide-ms', dauer(cur) + 'ms');
+      dots.forEach((d, k) => {
+        d.setAttribute('aria-selected', k === cur);
+        const bar = d.querySelector('i'); if (bar) { bar.style.animation = 'none'; bar.offsetWidth; bar.style.animation = ''; }
+      });
+    };
+    const spiele = i => { const v = $('video', slides[i]); if (v && !reduce) { videoLaden(v); try { v.currentTime = 0; } catch (e) {} v.play().catch(() => {}); } };
     const go = i => {
       $('.hero__media')?.classList.remove('is-first');
       const prev = cur;
@@ -389,19 +398,17 @@ const GOOGLE_ADS_LABELS = {
       if (cur === prev) return;
       if (window.dvHeroWechsel && !reduce) window.dvHeroWechsel(slides[prev], slides[cur], slides);
       else slides.forEach((sl, k) => sl.classList.toggle('is-active', k === cur));
-      // Video im Hero: beim Einblenden von vorn abspielen, das vorige nach der Überblendung anhalten
-      const v = $('video', slides[cur]), vAlt = $('video', slides[prev]);
-      if (v && !reduce) { videoLaden(v); try { v.currentTime = 0; } catch (e) {} v.play().catch(() => {}); }
+      // Video: beim Einblenden von vorn abspielen, das vorige nach der Überblendung anhalten
+      spiele(cur);
+      const vAlt = $('video', slides[prev]);
       if (vAlt) setTimeout(() => { if (!slides[prev].classList.contains('is-active')) vAlt.pause(); }, 3200);
-      dots.forEach((d, k) => {
-        d.setAttribute('aria-selected', k === cur);
-        const bar = d.querySelector('i'); if (bar) { bar.style.animation = 'none'; bar.offsetWidth; bar.style.animation = ''; }
-      });
+      balken();
     };
-    const start = () => { clearInterval(timer); if (!reduce) timer = setInterval(() => go(cur + 1), HERO_INTERVALL); };
+    const start = () => { clearTimeout(timer); if (!reduce && !document.hidden) timer = setTimeout(() => { go(cur + 1); start(); }, dauer(cur)); };
     dots.forEach(d => d.addEventListener('click', () => { go(+d.dataset.slide); start(); }));
-    document.addEventListener('visibilitychange', () => document.hidden ? clearInterval(timer) : start());
-    start();
+    document.addEventListener('visibilitychange', () => document.hidden ? clearTimeout(timer) : start());
+    // Erst nach dem Intro starten, damit das erste Motiv (das Video) von vorn zu sehen ist
+    document.addEventListener('DOMContentLoaded', () => (window.dvIntroFertig || Promise.resolve()).then(() => { spiele(0); balken(); start(); }));
   }
 
   /* ---------- Cookie-Einwilligung ---------- */
