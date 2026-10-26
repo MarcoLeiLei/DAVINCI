@@ -25,8 +25,15 @@ RAEUME = {   # alter Text -> neuer Raumname (None = weglassen). Unbekanntes wird
     'Werkstatt/Motorrad/': 'Werkstatt', 'Keller': 'Keller', 'Fitness/Wellness': 'Fitness/Wellness', 'Doppelgarage': 'Doppelgarage', 'Bar': 'Bar',
     'Jacuzzi': 'Whirlpool', 'Sauna': 'Sauna', 'Kind/Gast': 'Kind/Gast', 'Diele/Gard.': 'Diele/Garderobe', 'Flachdach Doppelcarport': 'Carport', 'Doppelcarport': 'Carport', 'bauseitige Garage': 'Garage', 'Brennwert-': None,
     'Anna': 'Kind', 'Maya': 'Kind', 'Kind': 'Kind', 'Carport': 'Carport', 'Garage': 'Garage', 'Terrasse': 'Terrasse', 'Balkon': 'Balkon',
+    'Kind 1': 'Kind 1', 'Kind 2': 'Kind 2', 'Vorrat': 'Vorrat', 'Kamin': 'Kamin', 'Keller/Abstell': 'Keller/Abstell', 'Fitness/Hobby': 'Fitness/Hobby',
+    'Werkstatt/Elektro': 'Werkstatt', 'Werkstatt/Holz': 'Werkstatt', 'Windfang/Garderobe': 'Windfang/Garderobe', 'Technik': 'Technik', 'Gast/Arbeiten': 'Gast/Arbeiten',
+    'Relaxen': 'Ruheraum', 'Du.': 'Dusche', 'Du./': 'Dusche', 'Skiraum': 'Skiraum', 'Skiraum/Fahrräder': 'Skiraum', 'Hwr./Keller 1': 'HWR/Keller', 'Keller 2': 'Keller',
+    'Abstell/': 'Abstellraum', 'Kochen/Essen/': 'Kochen/Essen', 'baus.Sauna': 'Sauna', 'Flachdach Doppelgarage': 'Doppelgarage', 'Stellplätze': 'Stellplätze',
 }
-WEG = {'kessel', 'für Hochbett', 'bauseitige Absturzsicherung', 'noch geprüft !!!', 'WA', 'TR', 'Hausanschlüsse', 'Zählerkasten', 'BrennwertKessel', 'Leiter', 'Für Hochbett', 'Bodenplatte', 'Fahrrad', 'Nicole', 'Pierre',
+WEG = {'Stufe', 'Wäscheabwurf', 'baus.', 'Absturzsicherung', 'Deckenabsenkung', 'Stützenfundamente', 'Unterzug', 'Streifenfundamente', 'WP', 'LWP Außenaufstellung',
+       'Fahrräder', 'Unterzug/Deckenversprung', 'UZ/DV', 'bauseitiger Außenpool', 'Amalie-Zoe', 'Nur Entwurfsplanung', 'Die Vorentwurfsplanung ist Eigentum',
+       'von DAVINCI HAUS und ausschließlich', 'für Sie bestimmt !', 'Die endgültige Positionierung des Hauses', 'erfolgt im Zuge der Bauantragserstellung.',
+       'kessel', 'für Hochbett', 'bauseitige Absturzsicherung', 'noch geprüft !!!', 'WA', 'TR', 'Hausanschlüsse', 'Zählerkasten', 'BrennwertKessel', 'Leiter', 'Für Hochbett', 'Bodenplatte', 'Fahrrad', 'Nicole', 'Pierre',
        'Bauseitige Absturzsicherung', 'Heizungsart wird', 'Noch geprüft !!!', 'Flachdach', 'Abstell'}
 SIGNET = "M536,631 L474,631 L285,860 L284,1072 L354,1072 L536,849Z M820,0 L754,0 L569,229 L569,1072 L647,1072 L820,856Z M536,0 L473,0 L284,230 L284,441 L353,441 L535,219Z M252,0 L186,0 L0,230 L0,1072 L79,1072 L252,855Z"
 
@@ -321,8 +328,37 @@ def grundflaeche(zeichnungen, behalten, kern):
     return zus, innen
 
 
-def erzeugen(eingabe, ausgabe, titel=None, haus=None):
+def plankopf(S, titel, haus):
+    """Plankopf rechts: Signet, Hausname, Geschoss, Hinweis."""
+    x0 = 1190.55 - 260
+    S.draw_line(fitz.Point(x0 - 30, 40), fitz.Point(x0 - 30, 841.89 - 40), color=(0.88, 0.875, 0.86), width=0.6)
+    signet(S, x0, 46, 22, INK)
+    S.insert_text(fitz.Point(x0 + 26, 63), 'D A V I N C I', fontname='o250', fontsize=15.5, color=INK)
+    y = 150
+    S.draw_line(fitz.Point(x0, y - 4), fitz.Point(x0 + 18, y - 4), color=AKZENT, width=0.7)
+    S.insert_text(fitz.Point(x0 + 26, y), 'GRUNDRISS', fontname='o400', fontsize=7.5, color=AKZENT)
+    if haus:
+        S.insert_text(fitz.Point(x0, y + 34), haus, fontname='o250', fontsize=30, color=INK)
+        y += 40
+    S.insert_text(fitz.Point(x0, y + 34), titel, fontname='o250', fontsize=haus and 20 or 30, color=INK if not haus else TEXTGRAU)
+
+    hinweis = ['Beispielgrundriss. Jedes DAVINCI Haus wird', 'für Grundstück und Bauherren individuell', 'geplant. Maße, Fenster und Ausstattung', 'können im Entwurf abweichen.']
+    for k, z in enumerate(hinweis):
+        S.insert_text(fitz.Point(x0, 841.89 - 100 + k * 11.5), z, fontname='o300', fontsize=7.5, color=TEXTGRAU)
+    S.insert_text(fitz.Point(x0, 841.89 - 44), 'davinci-homes.de', fontname='o400', fontsize=8.5, color=INK)
+    S.insert_text(fitz.Point(x0 + 112, 841.89 - 44), 'Designed to stay.', fontname='o300', fontsize=8.5, color=TEXTGRAU)
+
+
+
+def erzeugen(eingabe, ausgabe, titel=None, haus=None, bereich=None, ohne=()):
     doc, p, M, W, H, zeichnungen, texte = lesen(eingabe)
+    if bereich:                                  # nur einen Ausschnitt des Blatts verwenden (Anteile 0..1)
+        b = fitz.Rect(bereich[0] * W, bereich[1] * H, bereich[2] * W, bereich[3] * H)
+        zeichnungen = [z for z in zeichnungen if b.contains(z['r'])]
+        texte = [t for t in texte if b.contains(fitz.Point((t['r'].x0 + t['r'].x1) / 2, (t['r'].y0 + t['r'].y1) / 2))]
+    for o in ohne:                               # Bereiche leeren (z. B. Bäume zwischen Haus und Garage)
+        b = fitz.Rect(o[0] * W, o[1] * H, o[2] * W, o[3] * H)
+        zeichnungen = [z for z in zeichnungen if not b.contains(z['r'])]
     kern, hülle, behalten = gebaeude_waehlen(W, H, zeichnungen)
 
     # Planname aus dem alten Plankopf (größte Schrift außerhalb des Hauses)
@@ -337,9 +373,10 @@ def erzeugen(eingabe, ausgabe, titel=None, haus=None):
 
     # Plan in den Planbereich mittig setzen (rechts 290 pt für den Plankopf)
     feld = fitz.Rect(40, 40, 1190.55 - 300, 841.89 - 40)
-    versatz = fitz.Point(feld.x0 + (feld.width - hülle.width) / 2 - hülle.x0, feld.y0 + (feld.height - hülle.height) / 2 - hülle.y0)
-    if hülle.width > feld.width or hülle.height > feld.height:
-        print('Warnung: Plan größer als Planbereich', hülle, file=sys.stderr)
+    k = min(1, feld.width / hülle.width, feld.height / hülle.height)   # zu große Pläne verkleinern
+    if k < 1:
+        print(f'  Plan verkleinert auf {k:.2f}', file=sys.stderr)
+    V = fitz.Matrix(1, 0, 0, 1, -hülle.x0, -hülle.y0) * fitz.Matrix(k, k) * fitz.Matrix(1, 0, 0, 1, feld.x0 + (feld.width - hülle.width * k) / 2, feld.y0 + (feld.height - hülle.height * k) / 2)
 
     # Bäume und Pflanzen: sehr viele kurze schräge Striche auf engem Raum
     dichte = {}
@@ -364,9 +401,9 @@ def erzeugen(eingabe, ausgabe, titel=None, haus=None):
     behalten = {i for i in behalten if not (zeichnungen[i]['d']['type'] == 'f' and sum(zeichnungen[i]['d'].get('fill') or (0, 0, 0)) > 0.3
                 and max(zeichnungen[i]['r'].width, zeichnungen[i]['r'].height) < 8)}
     for x0, y0, x1, y1 in flaechen:
-        S.draw_rect(fitz.Rect(x0 + versatz.x, y0 + versatz.y, x1 + versatz.x, y1 + versatz.y), color=None, fill=(0.975, 0.97, 0.955))
+        S.draw_rect(fitz.Rect(x0, y0, x1, y1) * V, color=None, fill=(0.975, 0.97, 0.955))
 
-    T = M * fitz.Matrix(1, 0, 0, 1, versatz.x, versatz.y)
+    T = M * V
     gruppen = {'hell': [], 'grau': [], 'ink': [], 'f_ink': [], 'f_hell': [], 'f_flaeche': []}
     for i in behalten:
         z = zeichnungen[i]
@@ -402,30 +439,13 @@ def erzeugen(eingabe, ausgabe, titel=None, haus=None):
         if not name:
             print('  Text weggelassen:', t['t'], file=sys.stderr)
             continue
-        mitte = fitz.Point((t['r'].x0 + t['r'].x1) / 2 + versatz.x, (t['r'].y0 + t['r'].y1) / 2 + versatz.y)
+        mitte = fitz.Point((t['r'].x0 + t['r'].x1) / 2, (t['r'].y0 + t['r'].y1) / 2) * V
         fs = 8.5 if t['size'] >= 8 else 7
         breite = schrift.text_length(name, fontsize=fs)
         S.draw_rect(fitz.Rect(mitte.x - breite / 2 - 3, mitte.y - fs * 0.62, mitte.x + breite / 2 + 3, mitte.y + fs * 0.5), color=None, fill=(1, 1, 1), fill_opacity=0.85)
         S.insert_text(fitz.Point(mitte.x - breite / 2, mitte.y + fs * 0.35), name, fontname='o400', fontsize=fs, color=INK)
 
-    # Plankopf rechts
-    x0 = 1190.55 - 260
-    S.draw_line(fitz.Point(x0 - 30, 40), fitz.Point(x0 - 30, 841.89 - 40), color=(0.88, 0.875, 0.86), width=0.6)
-    signet(S, x0, 46, 22, INK)
-    S.insert_text(fitz.Point(x0 + 26, 63), 'D A V I N C I', fontname='o250', fontsize=15.5, color=INK)
-    y = 150
-    S.draw_line(fitz.Point(x0, y - 4), fitz.Point(x0 + 18, y - 4), color=AKZENT, width=0.7)
-    S.insert_text(fitz.Point(x0 + 26, y), 'GRUNDRISS', fontname='o400', fontsize=7.5, color=AKZENT)
-    if haus:
-        S.insert_text(fitz.Point(x0, y + 34), haus, fontname='o250', fontsize=30, color=INK)
-        y += 40
-    S.insert_text(fitz.Point(x0, y + 34), titel, fontname='o250', fontsize=haus and 20 or 30, color=INK if not haus else TEXTGRAU)
-
-    hinweis = ['Beispielgrundriss. Jedes DAVINCI Haus wird', 'für Grundstück und Bauherren individuell', 'geplant. Maße, Fenster und Ausstattung', 'können im Entwurf abweichen.']
-    for k, z in enumerate(hinweis):
-        S.insert_text(fitz.Point(x0, 841.89 - 100 + k * 11.5), z, fontname='o300', fontsize=7.5, color=TEXTGRAU)
-    S.insert_text(fitz.Point(x0, 841.89 - 44), 'davinci-homes.de', fontname='o400', fontsize=8.5, color=INK)
-    S.insert_text(fitz.Point(x0 + 112, 841.89 - 44), 'Designed to stay.', fontname='o300', fontsize=8.5, color=TEXTGRAU)
+    plankopf(S, titel, haus)
 
     neu.set_metadata({'title': f'DAVINCI Grundriss · {haus + " · " if haus else ""}{titel}', 'author': 'DAVINCI', 'creator': 'DAVINCI', 'producer': 'DAVINCI', 'subject': 'Grundriss', 'keywords': ''})
     neu.save(ausgabe, garbage=4, deflate=True, clean=True)
@@ -434,6 +454,6 @@ def erzeugen(eingabe, ausgabe, titel=None, haus=None):
 
 if __name__ == '__main__':
     a = argparse.ArgumentParser()
-    a.add_argument('eingabe'); a.add_argument('ausgabe'); a.add_argument('--titel'); a.add_argument('--haus')
+    a.add_argument('eingabe'); a.add_argument('ausgabe'); a.add_argument('--titel'); a.add_argument('--haus'); a.add_argument('--bereich', help='x0,y0,x1,y1 als Anteile des Blatts'); a.add_argument('--ohne', action='append', default=[])
     x = a.parse_args()
-    print(erzeugen(x.eingabe, x.ausgabe, x.titel, x.haus))
+    print(erzeugen(x.eingabe, x.ausgabe, x.titel, x.haus, [float(v) for v in x.bereich.split(',')] if x.bereich else None, [[float(v) for v in o.split(',')] for o in x.ohne]))
