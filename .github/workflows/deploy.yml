@@ -101,7 +101,7 @@ jobs:
           # Kein --delete: Dateien, die nur auf dem Server liegen (Zugangsdaten, Anfragen, hochgeladene Grundrisse), bleiben unangetastet.
           rsync -rlptz --itemize-changes \
             --exclude '.git/' --exclude '.github/' --exclude '.gitignore' --exclude 'README.md' \
-            --exclude '*.example.php' --exclude 'lib/config.php' --exclude 'zugang.php' --exclude 'data/' --exclude 'diag.php' --exclude 'intern/' \
+            --exclude '*.example.php' --exclude 'lib/config.php' --exclude 'zugang.php' --exclude 'data/' --exclude 'diag.php' --exclude 'intern/' --exclude 'werkzeuge/' \
             -e "ssh -i ~/.ssh/id_deploy -p $P -o StrictHostKeyChecking=yes" \
             ./ "$U@$H:$D/"
 
