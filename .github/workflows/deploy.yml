@@ -105,6 +105,17 @@ jobs:
             -e "ssh -i ~/.ssh/id_deploy -p $P -o StrictHostKeyChecking=yes" \
             ./ "$U@$H:$D/"
 
+      - name: Entfernte Dateien löschen
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          # Liste in .github/entfernen.txt, nur Pfade unter assets/ oder downloads/ ohne ".."
+          grep -vE '^[[:space:]]*(#|$)' .github/entfernen.txt 2>/dev/null | tr -d '\r' | while read -r f; do
+            case "$f" in assets/*|downloads/*) ;; *) echo "::warning::Übersprungen: $f"; continue ;; esac
+            case "$f" in *..*) continue ;; esac
+            [ -e "$f" ] && { echo "Noch im Repo, nicht gelöscht: $f"; continue; }
+            ssh -i ~/.ssh/id_deploy -p "$P" -o BatchMode=yes -o StrictHostKeyChecking=yes "$U@$H" "rm -f '$D/$f'" && echo "gelöscht: $f"
+          done
+
       - name: Interner Bereich (intern.davinci-homes.de)
         if: steps.check.outputs.ok == 'true'
         env:

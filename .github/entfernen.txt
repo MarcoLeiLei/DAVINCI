@@ -1,0 +1,3 @@
+# Dateien, die auf dem Server gelöscht werden sollen (rsync löscht nichts von selbst).
+# Eine Datei pro Zeile, relativ zum Website-Ordner. Nur assets/ und downloads/ sind erlaubt.
+assets/img/dv-21-giebel-3achser-abend.jpg
