@@ -10,3 +10,4 @@ intern/daten/*
 intern/medien/*
 !intern/medien/.htaccess
 werkzeuge/grundriss/schriften/
+__pycache__/
