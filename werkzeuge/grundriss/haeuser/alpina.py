@@ -7,6 +7,7 @@ from zeichnen import Plan, speichern, BELAG, HELL, D_AUSSEN
 
 HAUS = 'DAVINCI Alpina'
 BOX = (-12.6, -2.3, 15.4, 17.2)
+DETAILS = [('Dach', 'SD 30°'), ('Typ', 'DA 10-09 VA'), ('Ebenen', 'EG · DG'), ('Raster', '1,15 m')]
 X = [0.06, 1.21, 2.36, 3.51, 4.66, 5.81, 6.96, 8.11, 9.26, 10.41]
 DACH_FLAECHE = (0.965, 0.96, 0.95)
 
@@ -28,7 +29,7 @@ def nebengebaeude(P, dg=False):
 
 
 def erdgeschoss(doc):
-    P = Plan(doc, HAUS, 'Erdgeschoss', BOX)
+    P = Plan(doc, HAUS, 'Erdgeschoss', BOX, DETAILS)
     # Außenanlagen
     P.terrasse(-5.40, 1.79, 0.06, 6.39)
     P.stuetzen([(-5.40, 1.79), (-5.40, 4.09), (-5.40, 6.39)])
@@ -108,7 +109,7 @@ def erdgeschoss(doc):
 
 
 def dachgeschoss(doc):
-    P = Plan(doc, HAUS, 'Dachgeschoss', BOX)
+    P = Plan(doc, HAUS, 'Dachgeschoss', BOX, DETAILS)
     nebengebaeude(P, dg=True)
     # Dachflächen der eingeschossigen Teile
     P.dachflaeche([(-1.50, 1.20), (-1.50, -1.50), (6.98, -1.50), (6.98, 0.15), (11.75, 0.15), (11.75, 1.20)])
@@ -173,4 +174,4 @@ def dachgeschoss(doc):
 if __name__ == '__main__':
     doc = fitz.open()
     erdgeschoss(doc); dachgeschoss(doc)
-    speichern(doc, HAUS, sys.argv[1])
+    speichern(doc, HAUS, sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)

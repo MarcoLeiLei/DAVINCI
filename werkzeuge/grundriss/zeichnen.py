@@ -28,7 +28,7 @@ FELD = fitz.Rect(40, 40, 1190.55 - 300, 841.89 - 40)     # Planbereich links vom
 
 
 class Plan:
-    def __init__(self, doc, haus, titel, box):
+    def __init__(self, doc, haus, titel, box, details=()):
         """box = (x0, y0, x1, y1) in m: alles, was gezeichnet wird. Der Plan wird darin mittig gesetzt."""
         self.S = S = doc.new_page(width=SEITE.width, height=SEITE.height)
         for n, f in (('mt', 'MundialThin'), ('ml', 'MundialLight'), ('mr', 'MundialRegular')):
@@ -39,7 +39,7 @@ class Plan:
             raise ValueError(f'Plan zu groß für A3 1:100: {bw / M:.1f} x {bh / M:.1f} m')
         self.ox = FELD.x0 + (FELD.width - bw) / 2 - box[0] * M
         self.oy = FELD.y0 + (FELD.height - bh) / 2 - box[1] * M
-        self.haus, self.titel = haus, titel
+        self.haus, self.titel, self.details = haus, titel, details
 
     # ---------- Grundlagen ----------
     def p(self, x, y):
@@ -433,6 +433,14 @@ class Plan:
         S.insert_text(fitz.Point(x0 + 26, y), 'G R U N D R I S S', fontname='mr', fontsize=7, color=AKZENT)
         S.insert_text(fitz.Point(x0, y + 36), self.haus, fontname='ml', fontsize=30, color=INK)
         S.insert_text(fitz.Point(x0, y + 66), self.titel, fontname='ml', fontsize=19, color=TEXTGRAU)
+        # Eckdaten aus dem Originalentwurf, klein
+        yd = y + 104
+        for k, (lab, wert) in enumerate(self.details):
+            S.draw_line(fitz.Point(x0, yd + k * 17 - 10.5), fitz.Point(x0 + 200, yd + k * 17 - 10.5), color=(0.9, 0.895, 0.88), width=0.5)
+            S.insert_text(fitz.Point(x0, yd + k * 17), lab, fontname='mr', fontsize=7, color=TEXTGRAU)
+            S.insert_text(fitz.Point(x0 + 78, yd + k * 17), wert, fontname='mr', fontsize=7.5, color=INK)
+        if self.details:
+            S.draw_line(fitz.Point(x0, yd + len(self.details) * 17 - 10.5), fitz.Point(x0 + 200, yd + len(self.details) * 17 - 10.5), color=(0.9, 0.895, 0.88), width=0.5)
         hinweis = ['Beispielgrundriss. Jedes DAVINCI Haus wird', 'für Grundstück und Bauherren individuell', 'geplant. Maße, Fenster und Ausstattung', 'können im Entwurf abweichen.']
         for k, z in enumerate(hinweis):
             S.insert_text(fitz.Point(x0, SEITE.height - 100 + k * 11.5), z, fontname='ml', fontsize=7.5, color=TEXTGRAU)
@@ -440,6 +448,14 @@ class Plan:
         S.insert_text(fitz.Point(x0 + 118, SEITE.height - 44), 'Designed to stay.', fontname='ml', fontsize=8.5, color=TEXTGRAU)
 
 
-def speichern(doc, haus, pfad):
+def speichern(doc, haus, pfad, einzeln=None):
+    """Alle Geschosse in pfad; mit einzeln = Ordner zusätzlich je Geschoss eine Datei."""
+    if einzeln:
+        for i in range(len(doc)):
+            e = fitz.open(); e.insert_pdf(doc, from_page=i, to_page=i)
+            titel = doc[i].get_text().split('\n')
+            g = next((t for t in titel if t.strip().endswith(('geschoss', 'haus'))), f'Seite {i + 1}')
+            e.set_metadata({'title': f'{haus} · {g}', 'author': 'DAVINCI', 'creator': 'DAVINCI', 'producer': 'DAVINCI', 'subject': 'Grundriss', 'keywords': ''})
+            e.save(os.path.join(einzeln, f'{haus} - {g.strip()}.pdf'), garbage=4, deflate=True, clean=True)
     doc.set_metadata({'title': f'{haus} · Grundrisse', 'author': 'DAVINCI', 'creator': 'DAVINCI', 'producer': 'DAVINCI', 'subject': 'Grundriss', 'keywords': ''})
     doc.save(pfad, garbage=4, deflate=True, clean=True)
