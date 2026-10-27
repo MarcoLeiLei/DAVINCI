@@ -390,6 +390,23 @@ class Plan:
     def kaminofen(self, x, y, rad=0.3):
         self.kreis(x, y, rad, INK, 0.45, (1, 1, 1)); self.kreis(x, y, rad * 0.45, INK, 0.3, INK)
 
+    def drehkasten(self, x, y, w, l, winkel=0, farbe=GRAU, innen=None):
+        """Gedrehtes Rechteck um Mittelpunkt (x, y), z. B. Chaiselongue; innen = Abstand einer inneren Kontur."""
+        a = math.radians(winkel)
+        def ecken(w, l):
+            return [(x + px * math.cos(a) - py * math.sin(a), y + px * math.sin(a) + py * math.cos(a))
+                    for px, py in ((-w / 2, -l / 2), (w / 2, -l / 2), (w / 2, l / 2), (-w / 2, l / 2))]
+        self.linie(ecken(w, l), farbe, 0.35, zu=True)
+        if innen:
+            self.linie(ecken(w - 2 * innen, l - 2 * innen), farbe, 0.3, zu=True)
+
+    def lichtschacht(self, x0, y0, x1, y1):
+        self.ton(x0, y0, x1, y1, BELAG); self.kasten(x0, y0, x1, y1, INK, 0.45)
+
+    def tor(self, x0, y0, x1, y1):
+        """Garagentor: Öffnung mit Torlinie."""
+        self.linie([(x0, y0), (x1, y1)], INK, 0.5, '[4 2] 0')
+
     def liege(self, x, y, w=0.7, l=1.9, winkel=0):
         a = math.radians(winkel)
         ecken = [(-w / 2, -l / 2), (w / 2, -l / 2), (w / 2, l / 2), (-w / 2, l / 2)]
