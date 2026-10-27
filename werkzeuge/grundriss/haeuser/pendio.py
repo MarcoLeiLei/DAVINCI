@@ -49,9 +49,9 @@ def erdgeschoss(doc):
     P.sofa(0.20, 6.95, 1.00, 9.10, '-x'); P.couchtisch(1.45, 7.45, 2.25, 8.55); P.sessel(2.85, 7.85, '+x', 0.65); P.sessel(2.30, 8.80, '+y', 0.65)
     P.kaminofen(4.15, 8.05, 0.26); P.kasten(0.20, 9.30, 0.85, 9.95); P.kreis(0.52, 9.62, 0.13)
     P.kasten(3.35, 9.75, 4.25, 11.25); P.linie([(3.35, 10.30), (4.25, 10.30)]); P.kreis(2.75, 10.85, 0.30)
-    for t, x, y in (('Gast', 1.15, 3.05), ('Diele', 3.45, 3.05), ('Windfang', 5.75, 1.00), ('WC', 7.45, 1.40), ('Speisekammer', 8.61, 1.40),
+    for t, x, y in (('Gast', 1.15, 3.05), ('Diele', 3.45, 3.05), ('Windfang', 5.75, 1.00), ('WC', 7.45, 1.40), ('Vorrat', 8.61, 1.40),
                     ('Kochen', 7.55, 3.60), ('Essen', 6.00, 6.20), ('Wohnen', 2.30, 6.40), ('Terrasse', -2.60, 5.75)):
-        P.name(t, x, y, klein=t == 'Speisekammer')
+        P.name(t, x, y)
     P.fertig()
 
 
