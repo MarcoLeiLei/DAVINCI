@@ -9,3 +9,4 @@ intern/daten/*
 !intern/daten/.htaccess
 intern/medien/*
 !intern/medien/.htaccess
+werkzeuge/grundriss/schriften/
