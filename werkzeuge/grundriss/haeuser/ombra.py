@@ -30,7 +30,7 @@ def kellergeschoss(doc):
     P = Plan(doc, HAUS, 'Kellergeschoss', BOX, DETAILS)
     carport(P)
     P.terrasse(2.34, 6.98, 6.95, 9.15)
-    P.kasten(2.60, 7.40, 4.40, 9.10); P.kasten(2.75, 7.55, 4.25, 8.95, rund=0.2); P.liege(5.40, 8.05, winkel=55)
+    P.kasten(2.60, 7.40, 4.40, 9.10); P.kasten(2.75, 7.55, 4.25, 8.95, rund=0.2); P.liege(5.25, 8.10); P.liege(6.20, 8.10)
     P.terrasse(18.20, 6.94, 22.90, 10.45); P.rundtisch(19.55, 8.62, 0.45, 4); P.liege(21.70, 8.00, winkel=-30)
     for x0, x1 in ((2.95, 3.95), (7.55, 8.55), (12.15, 13.15), (16.17, 17.18)):
         P.lichtschacht(x0, -0.44, x1, -0.04)
@@ -67,7 +67,10 @@ def kellergeschoss(doc):
     P.zeile(2.40, 3.50, 2.90, 5.60); P.zeile(3.95, 3.50, 4.95, 5.60)
     for y in (4.00, 4.55, 5.05):
         P.kreis(5.30, y, 0.2)
-    P.drehkasten(7.20, 3.50, 0.55, 1.60, 40); P.drehkasten(7.05, 5.00, 0.55, 1.60, 25); P.drehkasten(8.35, 5.45, 0.40, 1.30, -45)
+    for x in (6.00, 7.05):                                                    # Laufbänder
+        P.kasten(x, 2.95, x + 0.80, 4.85, rund=0.08); P.kasten(x + 0.08, 3.05, x + 0.72, 3.35)
+    P.kasten(8.25, 3.10, 8.75, 4.55, rund=0.05); P.kasten(8.05, 3.20, 8.95, 3.40)   # Hantelbank
+    P.regal(5.90, 6.35, 8.10, 6.80)                                           # Hantelablage
     P.dusche(8.05, 7.04, 8.95, 9.14); P.ton(8.95, 7.04, 9.11, 9.14, (0.86, 0.85, 0.82)); P.kasten(8.95, 7.04, 9.11, 9.14, (0.45, 0.45, 0.47), 0.3)
     P.kasten(7.06, 10.00, 9.10, 11.38); P.linie([(7.06, 10.45), (9.10, 10.45)]); P.linie([(7.06, 10.90), (9.10, 10.90)])
     P.schrank(13.00, 6.95, 13.62, 10.40)
@@ -78,7 +81,7 @@ def kellergeschoss(doc):
     for x in (18.75, 19.40, 20.05):
         P.kreis(x, 2.85, 0.2)
     P.sofa(19.70, 4.00, 20.56, 6.60, '+x'); P.sessel(18.45, 4.00, '-y', 0.6); P.couchtisch(18.40, 4.90, 19.00, 5.50); P.regal(16.20, 3.50, 16.65, 5.60)
-    for t, x, y in (('Werkstatt', -0.58, 1.70), ('Doppelgarage', -0.58, 2.60), ('Technik', 5.75, 1.72), ('Fitness/Wellness', 6.20, 2.95),
+    for t, x, y in (('Werkstatt', -0.58, 1.70), ('Doppelgarage', -0.58, 2.60), ('Technik', 5.75, 1.72), ('Fitness/Wellness', 4.60, 6.20),
                     ('Bar', 3.45, 4.59), ('Whirlpool', 3.50, 8.25), ('Sauna', 8.10, 9.65), ('Windfang', 11.50, 8.62), ('Keller', 12.07, 1.72),
                     ('Du/WC', 16.33, 1.71), ('Schlafen', 14.40, 6.10), ('Kochen', 18.97, 1.14), ('Wohnen', 17.82, 4.59), ('Terrasse', 21.30, 9.90)):
         P.name(t, x, y)
