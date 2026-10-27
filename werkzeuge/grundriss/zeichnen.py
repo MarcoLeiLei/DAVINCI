@@ -40,10 +40,38 @@ class Plan:
         self.ox = FELD.x0 + (FELD.width - bw) / 2 - box[0] * M
         self.oy = FELD.y0 + (FELD.height - bh) / 2 - box[1] * M
         self.haus, self.titel, self.details = haus, titel, details
+        self._waende, self._beim_zeichnen = [], False
 
     # ---------- Grundlagen ----------
     def p(self, x, y):
+        if self._waende and not self._beim_zeichnen:
+            self._waende_zeichnen()
         return fitz.Point(self.ox + x * M, self.oy + y * M)
+
+    def _waende_zeichnen(self):
+        """Gesammelte Wände als eine Fläche zeichnen: erst alle Konturen (doppelt breit), dann alle Füllungen.
+        So verschwinden innere Kanten an Ecken und Anschlüssen, nur der Außenumriss bleibt sichtbar."""
+        self._beim_zeichnen = True
+        rects = []
+        for (x0, y0, x1, y1, d, fuell, senk) in self._waende:
+            def trifft(px, py):
+                for (a0, b0, a1, b1, dd, _, sk) in self._waende:
+                    r = (a0 - dd / 2, b0, a1 + dd / 2, b1) if sk else (a0, b0 - dd / 2, a1, b1 + dd / 2)
+                    if (a0, b0, a1, b1) != (x0, y0, x1, y1) and r[0] - 1e-3 <= px <= r[2] + 1e-3 and r[1] - 1e-3 <= py <= r[3] + 1e-3:
+                        return True
+                return False
+            if senk:
+                e0 = d / 2 if trifft(x0, y0) else 0; e1 = d / 2 if trifft(x0, y1) else 0
+                rects.append(((x0 - d / 2, y0 - e0, x0 + d / 2, y1 + e1), d, fuell))
+            else:
+                e0 = d / 2 if trifft(x0, y0) else 0; e1 = d / 2 if trifft(x1, y0) else 0
+                rects.append(((x0 - e0, y0 - d / 2, x1 + e1, y0 + d / 2), d, fuell))
+        for r, d, f in rects:
+            self.S.draw_rect(self.r(*r), color=INK, width=(1.1 if d >= D_AUSSEN else 0.9), fill=None)
+        for r, d, f in rects:
+            self.S.draw_rect(self.r(*r), color=None, fill=f)
+        self._waende = []
+        self._beim_zeichnen = False
 
     def r(self, x0, y0, x1, y1):
         return fitz.Rect(self.p(min(x0, x1), min(y0, y1)), self.p(max(x0, x1), max(y0, y1)))
@@ -128,10 +156,9 @@ class Plan:
     def wand(self, x0, y0, x1, y1, d=D_INNEN, fuellung=WAND):
         """Wand auf der Achse (x0,y0)-(x1,y1), Dicke d."""
         if x0 == x1:
-            rect = (x0 - d / 2, min(y0, y1), x0 + d / 2, max(y0, y1))
+            self._waende.append((x0, min(y0, y1), x0, max(y0, y1), d, fuellung, True))
         else:
-            rect = (min(x0, x1), y0 - d / 2, max(x0, x1), y0 + d / 2)
-        self.S.draw_rect(self.r(*rect), color=INK, fill=fuellung, width=0.55 if d >= D_AUSSEN else 0.45)
+            self._waende.append((min(x0, x1), y0, max(x0, x1), y0, d, fuellung, False))
 
     def aussenwand(self, x0, y0, x1, y1):
         self.wand(x0, y0, x1, y1, D_AUSSEN)
@@ -156,23 +183,28 @@ class Plan:
         for x, y in punkte:
             self.stuetze(x, y)
 
-    def tuer(self, x, y, b, achse, entlang=1, auf=1, d=D_INNEN):
+    def tuer(self, x, y, b, achse, entlang=1, auf=1, d=D_INNEN, winkel=90):
         """Drehtür. Anschlag bei (x, y); achse 'h' = Wand waagrecht, 'v' = senkrecht.
-        entlang: Richtung der Öffnung entlang der Wand (+1/-1), auf: Schlagrichtung quer zur Wand (+1/-1)."""
+        entlang: Richtung der Öffnung entlang der Wand (+1/-1), auf: Schlagrichtung quer zur Wand (+1/-1).
+        winkel: Öffnungswinkel des gezeichneten Türblatts (Standard 90°)."""
         if achse == 'h':
             xa, xb = sorted((x, x + entlang * b))
             self.S.draw_rect(self.r(xa, y - d / 2 - 0.01, xb, y + d / 2 + 0.01), color=None, fill=(1, 1, 1))
-            blatt = (x, y + auf * b)
-            a0, a1 = (90 if auf > 0 else -90), (0 if entlang > 0 else 180)
+            for xx in (xa, xb):
+                self.linie([(xx, y - d / 2), (xx, y + d / 2)], INK, 0.55)
+            senk, wand = (90 if auf > 0 else -90), (0 if entlang > 0 else 180)
         else:
             ya, yb = sorted((y, y + entlang * b))
             self.S.draw_rect(self.r(x - d / 2 - 0.01, ya, x + d / 2 + 0.01, yb), color=None, fill=(1, 1, 1))
-            blatt = (x + auf * b, y)
-            a0, a1 = (0 if auf > 0 else 180), (90 if entlang > 0 else -90)
-        if abs(a1 - a0) > 180:
-            a1 += 360 if a1 < a0 else -360
+            for yy in (ya, yb):
+                self.linie([(x - d / 2, yy), (x + d / 2, yy)], INK, 0.55)
+            senk, wand = (0 if auf > 0 else 180), (90 if entlang > 0 else -90)
+        if abs(senk - wand) > 180:
+            senk += 360 if senk < wand else -360
+        a0 = wand + (senk - wand) * winkel / 90
+        blatt = (x + b * math.cos(math.radians(a0)), y + b * math.sin(math.radians(a0)))
         self.linie([(x, y), blatt], INK, 0.55)
-        self.bogen(x, y, b, a0, a1, GRAU, 0.3)
+        self.bogen(x, y, b, a0, wand, GRAU, 0.3)
 
     def schiebetuer(self, x0, y0, x1, y1, d=D_AUSSEN):
         """Schiebetür in einer Glasfassade: Glas plus versetzte Flügel."""
@@ -440,6 +472,8 @@ class Plan:
 
     def fertig(self):
         """Plankopf rechts."""
+        if self._waende:
+            self._waende_zeichnen()
         S = self.S
         x0 = SEITE.width - 260
         S.draw_line(fitz.Point(x0 - 30, 40), fitz.Point(x0 - 30, SEITE.height - 40), color=(0.88, 0.875, 0.86), width=0.6)

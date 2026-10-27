@@ -7,7 +7,7 @@ from zeichnen import Plan, speichern, BELAG, HELL, D_AUSSEN
 
 HAUS = 'DAVINCI Alpina'
 BOX = (-12.6, -2.3, 15.4, 17.2)
-DETAILS = [('Dach', 'SD 30°'), ('Typ', 'DA 10-09 VA'), ('Ebenen', 'EG · DG'), ('Raster', '1,15 m')]
+DETAILS = [('Dach', 'SD 30°'), ('Ebenen', 'EG · DG')]
 X = [0.06, 1.21, 2.36, 3.51, 4.66, 5.81, 6.96, 8.11, 9.26, 10.41]
 DACH_FLAECHE = (0.965, 0.96, 0.95)
 
