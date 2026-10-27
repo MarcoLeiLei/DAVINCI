@@ -248,6 +248,64 @@ class Plan:
             else:
                 self.linie([(c - 0.15, y1), (c + 0.15, y0)], INK, 0.45)
 
+    def treppe_u(self, x0, y0, x1, y1, stufen, podest=0.9, oben='-y', start='rechts', gestrichelt=False):
+        """Zweiläufige Treppe (U) im Rechteck, Podest an der Seite 'oben'. start: Lauf, in dem es losgeht.
+        gestrichelt: Treppe liegt über der Schnittebene (z. B. im OG die Läufe nach unten)."""
+        senk = oben[1] == 'y'
+        st = '[2 2] 0' if gestrichelt else None
+        self.S.draw_rect(self.r(x0, y0, x1, y1), color=INK, fill=(1, 1, 1), width=0.45)
+        if senk:
+            xm = (x0 + x1) / 2
+            py = (y0, y0 + podest) if oben == '-y' else (y1 - podest, y1)
+            ly = (py[1], y1) if oben == '-y' else (y0, py[0])
+            self.linie([(xm, ly[0]), (xm, ly[1])], INK, 0.45)
+            self.linie([(x0, py[1] if oben == '-y' else py[0]), (x1, py[1] if oben == '-y' else py[0])], GRAU, 0.3, st)
+            for k in range(1, stufen):
+                t = ly[0] + (ly[1] - ly[0]) * k / stufen
+                self.linie([(x0, t), (x1, t)], GRAU, 0.3, st)
+            a, b = (x0 + xm) / 2, (xm + x1) / 2
+            erst, zweit = (b, a) if start == 'rechts' else (a, b)
+            unten = ly[1] if oben == '-y' else ly[0]
+            mitte = (py[0] + py[1]) / 2
+            pts = [(erst, unten - 0.15 * (1 if oben == '-y' else -1)), (erst, mitte), (zweit, mitte), (zweit, unten - 0.15 * (1 if oben == '-y' else -1))]
+        else:
+            ym = (y0 + y1) / 2
+            px = (x0, x0 + podest) if oben == '-x' else (x1 - podest, x1)
+            lx = (px[1], x1) if oben == '-x' else (x0, px[0])
+            self.linie([(lx[0], ym), (lx[1], ym)], INK, 0.45)
+            self.linie([(px[1] if oben == '-x' else px[0], y0), (px[1] if oben == '-x' else px[0], y1)], GRAU, 0.3, st)
+            for k in range(1, stufen):
+                t = lx[0] + (lx[1] - lx[0]) * k / stufen
+                self.linie([(t, y0), (t, y1)], GRAU, 0.3, st)
+            a, b = (y0 + ym) / 2, (ym + y1) / 2
+            erst, zweit = (b, a) if start == 'rechts' else (a, b)
+            unten = lx[1] if oben == '-x' else lx[0]
+            mitte = (px[0] + px[1]) / 2
+            pts = [(unten - 0.15 * (1 if oben == '-x' else -1), erst), (mitte, erst), (mitte, zweit), (unten - 0.15 * (1 if oben == '-x' else -1), zweit)]
+        self.kreis(*pts[0], 0.06, INK, 0.4, (1, 1, 1))
+        self.linie(pts, INK, 0.4)
+        e, v = pts[-1], pts[-2]
+        dx, dy = e[0] - v[0], e[1] - v[1]
+        n = (dx ** 2 + dy ** 2) ** 0.5 or 1
+        dx, dy = dx / n, dy / n
+        self.linie([(e[0] - dx * 0.22 - dy * 0.13, e[1] - dy * 0.22 + dx * 0.13), e, (e[0] - dx * 0.22 + dy * 0.13, e[1] - dy * 0.22 - dx * 0.13)], INK, 0.4)
+
+    def aussentreppe_rund(self, x, y, r_aussen, r_innen, stufen=6, nach='-y'):
+        """Halbrunde Außentreppe (gestrichelt), Mittelpunkt an der Hauswand."""
+        a0, a1 = (180, 360) if nach == '-y' else (0, 180)
+        self.bogen(x, y, r_aussen, a0, a1, HELL, 0.5, 40)
+        self.bogen(x, y, r_innen, a0, a1, HELL, 0.5, 30)
+        for k in range(1, stufen):
+            a = math.radians(a0 + (a1 - a0) * k / stufen)
+            self.linie([(x + r_innen * math.cos(a), y + r_innen * math.sin(a)), (x + r_aussen * math.cos(a), y + r_aussen * math.sin(a))], HELL, 0.4)
+
+    def ovaltisch(self, x, y, l, b, stuehle=6):
+        self.S.draw_oval(self.r(x - l / 2, y - b / 2, x + l / 2, y + b / 2), color=GRAU, width=0.35)
+        for k in range(stuehle):
+            a = 2 * math.pi * k / stuehle
+            cx, cy = x + (l / 2 + 0.3) * math.cos(a), y + (b / 2 + 0.3) * math.sin(a)
+            self.kasten(cx - 0.2, cy - 0.2, cx + 0.2, cy + 0.2, rund=0.05)
+
     def luftraum(self, x0, y0, x1, y1):
         self.linie([(x0, y0), (x1, y1)], HELL, 0.4, '[3 2] 0'); self.linie([(x0, y1), (x1, y0)], HELL, 0.4, '[3 2] 0')
 
