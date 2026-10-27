@@ -449,6 +449,19 @@ class Plan:
         else:
             self.kasten(x - 0.15, y - 0.2, x, y + 0.2); self.S.draw_oval(self.r(x - 0.6, y - 0.18, x - 0.15, y + 0.18), color=GRAU, width=0.35)
 
+    def bidet(self, x, y, rueck='-y'):
+        """Bidet: Becken ohne Spülkasten, mit Armatur."""
+        if rueck == '-y':
+            r = self.r(x - 0.18, y + 0.05, x + 0.18, y + 0.55); a = (x, y + 0.15)
+        elif rueck == '+y':
+            r = self.r(x - 0.18, y - 0.55, x + 0.18, y - 0.05); a = (x, y - 0.15)
+        elif rueck == '-x':
+            r = self.r(x + 0.05, y - 0.18, x + 0.55, y + 0.18); a = (x + 0.15, y)
+        else:
+            r = self.r(x - 0.55, y - 0.18, x - 0.05, y + 0.18); a = (x - 0.15, y)
+        self.S.draw_oval(r, color=GRAU, width=0.35)
+        self.kreis(*a, 0.035)
+
     def waschtisch(self, x0, y0, x1, y1, becken=1):
         self.kasten(x0, y0, x1, y1)
         quer = (y1 - y0) > (x1 - x0)
