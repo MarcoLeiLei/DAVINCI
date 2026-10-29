@@ -207,7 +207,9 @@ def dachgeschoss(doc):
         for pts in ([(0.12, -8.0), (4.55, -8.0), (4.55, -3.05), (0.12, -3.05)], [(-3.35, 5.85), (0.24, 5.85), (0.24, 10.6), (-3.35, 10.6)]):
             P.dachflaeche([g(*q) for q in pts])
         P.name('Doppelcarport', *g(2.45, -5.5), klein=True)
-        P.polygon([(-0.05, -1.95), (11.60, -1.95), (11.60, 9.25), (-0.05, 9.25)], DACH_DG)
+        # Umgebung zurücknehmen: das DG liegt eine Ebene darüber
+        P.S.draw_rect(FELD, color=None, fill=(1, 1, 1), fill_opacity=0.55)
+        P.polygon([(-0.05, -1.95), (11.60, -1.95), (11.60, 9.25), (-0.05, 9.25)], (0.875, 0.875, 0.87))
     for a, b in ((0.10, 1.22), (10.57, 11.60)):
         P.terrasse(a, 1.38, b, 6.05)
         aussen = a if a < 1 else b
