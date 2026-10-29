@@ -16,14 +16,18 @@ DETAILS = [('Dach', 'SD'), ('Ebenen', 'EG · DG')]
 FARBIG = '--farbig' in sys.argv
 
 # Farben der colorierten Fassung (gedämpft, passend zum DAVINCI Look)
-HOLZ = (0.945, 0.915, 0.865)
-FLIESE = (0.905, 0.915, 0.920)
-RASEN = (0.875, 0.910, 0.835)
-BAUM = (0.735, 0.800, 0.680)
-BAUM_RAND = (0.62, 0.70, 0.57)
-WASSER = (0.800, 0.875, 0.915)
-KIES = (0.900, 0.895, 0.875)
-STEIN = (0.925, 0.905, 0.870)
+HOLZ = (0.935, 0.880, 0.790)
+FLIESE = (0.865, 0.890, 0.905)
+RASEN = (0.790, 0.870, 0.700)
+RASEN_DUNKEL = (0.700, 0.810, 0.610)
+BAUM = (0.560, 0.700, 0.480)
+BAUM_RAND = (0.420, 0.560, 0.360)
+STRAUCH = (0.640, 0.760, 0.540)
+WASSER = (0.600, 0.780, 0.880)
+UFER = (0.420, 0.600, 0.700)
+KIES = (0.885, 0.875, 0.845)
+STEIN = (0.900, 0.850, 0.760)
+DACH_DG = (0.800, 0.800, 0.800)
 
 
 class EG(Plan):
@@ -78,25 +82,49 @@ PFLASTER = [(-4.95, -9.6), (4.6, -9.6), (4.6, 1.2), (0.24, 1.2), (0.24, 10.5), (
             (-3.6, 11.4), (-3.6, 5.6), (-4.0, 4.5), (-4.0, -2.5), (-4.95, -3.2)]
 
 
+def eg_plan(x, y):
+    return (y - 1.29) * 9.2 / 9.21, (9.40 - x) * 9.2 / 9.16
+
+
+BAEUME = [(5.9, -7.4, 0.95), (7.4, -6.3, 0.6), (10.2, -2.2, 0.8), (12.6, -1.8, 1.0), (13.6, -0.9, 0.8), (12.9, 8.6, 0.9),
+          (13.4, 3.0, 0.7), (-3.9, 13.4, 0.8), (12.2, 10.6, 0.7), (-4.4, 0.5, 0.9), (-4.6, 2.4, 0.8)]
+STRAEUCHER = [(10.6, 3.6), (11.3, 5.4), (10.4, 6.6), (11.0, 0.6), (10.7, 9.9), (4.0, 11.5), (8.4, 11.6), (11.8, 11.0), (-1.0, 12.4),
+              (-4.3, 12.5), (6.5, -8.3), (8.6, -8.0), (9.8, -4.6), (12.2, 1.2), (12.8, 4.8), (9.6, 10.9), (2.4, 12.2), (11.6, 13.6),
+              (1.4, 19.3), (6.8, 18.6)]
+
+
+def garten(P, f, farbig=None):
+    """Grundstück, Pflaster, Teich, Sitzplatz, Bäume. Koordinaten im EG-Scan, f bildet auf den Plan ab."""
+    farbig = FARBIG if farbig is None else farbig
+    F = lambda pts: [f(*q) for q in pts]
+    if farbig:
+        P.polygon(F(GRUNDSTUECK), RASEN)
+        for x, y, r in ((6.3, -4.5, 1.3), (6.25, -1.6, 0.5)):
+            scheibe(P, *f(x, y), r, KIES, (0.78, 0.77, 0.74))
+        scheibe(P, *f(9.4, 4.0), 2.3, STEIN, (0.80, 0.74, 0.64))
+    else:
+        scheibe(P, *f(9.4, 4.0), 2.3, (0.975, 0.97, 0.96))
+    P.strichlinie(F(GRUNDSTUECK), HELL, 0.6, zu=True)
+    P.polygon(F(PFLASTER), KIES if farbig else BELAG)
+    teich = glatt(F(TEICH))
+    if farbig:
+        ufer = glatt(F([(x + (x - 5.8) * 0.06, y + (y - 15.0) * 0.06) for x, y in TEICH]))
+        P.polygon(ufer, STEIN)
+    P.polygon(teich, WASSER if farbig else (0.965, 0.975, 0.98)); P.linie(teich, UFER if farbig else HELL, 0.6, zu=True)
+    scheibe(P, *f(5.85, 12.6), 1.45, STEIN if farbig else BELAG, HELL)
+    x0, y0 = f(5.45, 12.2); x1, y1 = f(6.25, 13.0)
+    P.tisch(min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1), laengs=1, stirn=1)
+    if farbig:
+        for x, y in STRAEUCHER:
+            scheibe(P, *f(x, y), 0.38, STRAUCH, BAUM_RAND)
+        for x, y, r in BAEUME:
+            scheibe(P, *f(x, y), r, BAUM, BAUM_RAND)
+            scheibe(P, *f(x - r * 0.25, y - r * 0.25), r * 0.45, (0.62, 0.75, 0.53))
+
+
 def erdgeschoss(doc):
     P = EG(doc, HAUS, 'Erdgeschoss', BOX, DETAILS)
-    # Garten
-    if FARBIG:
-        P.polygon(GRUNDSTUECK, RASEN)
-        scheibe(P, 9.4, 4.0, 2.3, STEIN)
-        for x, y, r in ((6.3, -4.5, 1.3), (6.25, -1.6, 0.5)):
-            scheibe(P, x, y, r, KIES, HELL)
-    else:
-        scheibe(P, 9.4, 4.0, 2.3, (0.975, 0.97, 0.96))
-    P.strichlinie(GRUNDSTUECK, HELL, 0.6, zu=True)
-    P.polygon(PFLASTER, KIES if FARBIG else BELAG)
-    teich = glatt(TEICH)
-    P.polygon(teich, WASSER if FARBIG else (0.965, 0.975, 0.98)); P.linie(teich, (0.55, 0.66, 0.72) if FARBIG else HELL, 0.5, zu=True)
-    scheibe(P, 5.85, 12.6, 1.45, STEIN if FARBIG else BELAG, HELL)
-    P.tisch(5.45, 12.2, 6.25, 13.0, laengs=1, stirn=1)
-    if FARBIG:
-        for x, y, r in ((5.9, -7.4, 0.95), (7.4, -6.3, 0.6), (10.2, -2.2, 0.8), (12.9, 8.6, 0.9), (13.4, 3.0, 0.7), (-3.9, 13.4, 0.8)):
-            scheibe(P, x, y, r, BAUM, BAUM_RAND)
+    garten(P, lambda x, y: (x, y))
     for l in [(-0.22, 1.89, 0.16, 2.99), (-0.22, 6.49, 0.16, 7.55), (4.89, 0.78, 5.91, 1.17), (2.58, 10.6, 3.64, 11.0),
               (9.47, 3.6, 10.0, 5.9), (9.47, 7.3, 10.0, 9.3)]:
         P.lichtschacht(*l)
@@ -109,7 +137,7 @@ def erdgeschoss(doc):
     # Haus
     P.polygon([(0.24, 1.29), (9.40, 1.29), (9.40, 10.50), (0.24, 10.50)], HOLZ if FARBIG else FLAECHE)
     if FARBIG:
-        P.ton(0.24, 1.29, 4.80, 3.60, FLIESE); P.ton(7.10, 1.29, 9.40, 2.44, FLIESE)
+        P.ton(0.24, 1.29, 4.80, 3.60, FLIESE); R0 = [eg_inv(0.0, 0.0), eg_inv(1.12, 2.20)]; P.ton(R0[1][0], R0[0][1], R0[0][0], R0[1][1], FLIESE)
     for w in [(0.24, 1.29, 2.53, 1.29), (7.10, 1.29, 9.40, 1.29), (0.24, 1.89, 0.24, 2.99), (0.24, 5.90, 0.24, 10.50), (9.40, 1.29, 9.40, 2.52),
               (9.40, 3.50, 9.40, 5.90), (9.40, 7.00, 9.40, 9.37), (2.53, 10.50, 4.80, 10.50)]:
         P.aussenwand(*w)
@@ -135,13 +163,24 @@ def erdgeschoss(doc):
     # WC, Windfang
     P.wc(0.31, 2.05, '-x'); P.waschtisch(0.31, 2.44, 0.85, 2.95)
     P.kasten(1.52, 1.42, 2.58, 1.63); P.regal(1.52, 2.92, 2.45, 3.50)
-    # Kochen, Spk.
-    P.regal(7.22, 1.46, 7.56, 2.30); P.regal(7.56, 1.46, 9.00, 1.72); P.regal(9.00, 1.46, 9.30, 2.30); P.linie([(7.60, 2.40), (8.80, 2.40)], INK, 0.5)
-    P.linie([(7.00, 3.58), (6.75, 3.58), (6.52, 4.00), (6.40, 4.65), (6.50, 5.30), (6.70, 5.78), (7.00, 5.78)], GRAU, 0.35, zu=True)
-    for y in (4.10, 4.70, 5.30):
-        P.sessel(6.05, y, '-x', 0.42)
-    P.zeile(8.71, 3.71, 9.32, 5.15); P.kochfeld(9.02, 4.30); P.zeile(7.22, 5.15, 9.32, 5.80); P.spuele(7.95, 5.47)
-    P.sessel(5.55, 1.68, '-y', 0.60); P.bogen(4.89, 2.48, 0.75, -90, 90); P.linie([(4.89, 1.73), (4.89, 3.23)])
+    # Kochen, Speisekammer (in Plan-Koordinaten bemessen)
+    def K(X, Y):
+        return eg_inv(X, Y)
+    def R(fn, X0, Y0, X1, Y1, *a, **k):
+        x0, y0 = K(X0, Y0); x1, y1 = K(X1, Y1)
+        fn(min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1), *a, **k)
+    for w in [((0.08, 2.20), (1.12, 2.20))]:
+        (xa, ya), (xb, yb) = K(*w[0]), K(*w[1])
+        P.wand(xa, ya, xb, yb)
+    R(P.kasten, 0.99, 0.12, 1.07, 1.25, INK, 0.45, (1, 1, 1)); R(P.kasten, 1.07, 1.00, 1.15, 2.15, INK, 0.45, (1, 1, 1))  # Schiebetür, geschlossen
+    R(P.regal, 0.10, 0.10, 0.44, 2.12); R(P.regal, 0.44, 0.10, 0.98, 0.40)
+    R(P.zeile, 2.43, 0.10, 3.89, 0.68); R(P.zeile, 3.89, 0.10, 4.52, 2.18)
+    P.kochfeld(*K(3.16, 0.40)); P.spuele(*K(4.21, 1.17))
+    P.linie([K(X, Y) for X, Y in ((2.30, 2.18), (4.52, 2.18), (4.52, 2.62), (4.15, 2.88), (3.70, 3.00), (3.10, 3.00), (2.62, 2.86),
+                                  (2.30, 2.58))], GRAU, 0.35, zu=True)
+    for X, Y in ((2.90, 3.38), (3.47, 3.48), (4.04, 3.38)):
+        P.kreis(*K(X, Y), 0.2)
+    P.sessel(*K(0.48, 3.72), '+x', 0.5); P.bogen(*K(1.45, 4.47), 0.65, 0, 180); P.linie([K(0.80, 4.47), K(2.10, 4.47)])
     # Essen, Wohnen
     P.rundtisch(7.69, 8.18, 0.55, 6); P.sideboard(9.07, 6.96, 9.30, 9.41)
     P.sideboard(2.50, 6.00, 4.70, 6.48); P.sideboard(2.50, 9.88, 4.70, 10.38)
@@ -163,7 +202,12 @@ def erdgeschoss(doc):
 def dachgeschoss(doc):
     P = DG(doc, HAUS, 'Dachgeschoss', BOX, DETAILS)
     if FARBIG:
-        P.polygon([(-0.05, -1.95), (11.60, -1.95), (11.60, 9.25), (-0.05, 9.25)], (0.955, 0.952, 0.945))
+        g = lambda x, y: (eg_plan(x, y)[0] + 1.30, eg_plan(x, y)[1] - 0.82)
+        garten(P, g)
+        for pts in ([(0.12, -8.0), (4.55, -8.0), (4.55, -3.05), (0.12, -3.05)], [(-3.35, 5.85), (0.24, 5.85), (0.24, 10.6), (-3.35, 10.6)]):
+            P.dachflaeche([g(*q) for q in pts])
+        P.name('Doppelcarport', *g(2.45, -5.5), klein=True)
+        P.polygon([(-0.05, -1.95), (11.60, -1.95), (11.60, 9.25), (-0.05, 9.25)], DACH_DG)
     for a, b in ((0.10, 1.22), (10.57, 11.60)):
         P.terrasse(a, 1.38, b, 6.05)
         aussen = a if a < 1 else b
@@ -206,6 +250,8 @@ def dachgeschoss(doc):
         P.name(t, x, y)
     for t, x, y in (('Balkon', 0.66, 3.70), ('Balkon', 11.08, 3.70)):
         P.name(t, x, y, klein=True)
+    if FARBIG:
+        maske(P)
     P.hinweis = HINWEIS
     P.fertig()
 
