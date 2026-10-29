@@ -290,6 +290,29 @@ class Plan:
         dx, dy = dx / n, dy / n
         self.linie([(e[0] - dx * 0.22 - dy * 0.13, e[1] - dy * 0.22 + dx * 0.13), e, (e[0] - dx * 0.22 + dy * 0.13, e[1] - dy * 0.22 - dx * 0.13)], INK, 0.4)
 
+    def treppe_winkel(self, x0, y0, x1, y1, gerade, wendel=4, schnitt=None):
+        """Viertelgewendelte Treppe: Antritt oben links (von -y), Wendelstufen im linken Quadrat,
+        danach gerader Lauf nach +x. schnitt: Anteil des geraden Laufs, ab dem gestrichelt wird."""
+        w = y1 - y0
+        self.S.draw_rect(self.r(x0, y0, x1, y1), color=INK, fill=(1, 1, 1), width=0.45)
+        px, py = x0 + w, y0                       # Drehpunkt der Wendelstufen
+        rand = [(x0, y0 + w * k / wendel) for k in range(1, wendel)] + [(x0, y1)] + [(x0 + w * k / wendel, y1) for k in range(1, wendel)]
+        for q in rand[:wendel - 1] + rand[wendel:]:
+            self.linie([(px, py), q], GRAU, 0.3)
+        self.linie([(px, py), (px, y1)], GRAU, 0.3)
+        for k in range(1, gerade):
+            t = px + (x1 - px) * k / gerade
+            gestr = schnitt is not None and k / gerade > schnitt
+            self.linie([(t, y0), (t, y1)], GRAU, 0.3, '[2 2] 0' if gestr else None)
+        m, ym = x0 + w / 2, (y0 + y1) / 2
+        ende = px + (x1 - px) * (schnitt if schnitt else 1) - (0 if schnitt else 0.12)
+        self.kreis(m, y0 + 0.15, 0.06, INK, 0.4, (1, 1, 1))
+        self.linie([(m, y0 + 0.21), (m, ym - 0.15), (m + 0.15, ym), (ende, ym)], INK, 0.4)
+        self.linie([(ende - 0.22, ym - 0.13), (ende, ym), (ende - 0.22, ym + 0.13)], INK, 0.4)
+        if schnitt:
+            c = px + (x1 - px) * schnitt
+            self.linie([(c - 0.15, y1), (c + 0.15, y0)], INK, 0.45)
+
     def aussentreppe_rund(self, x, y, r_aussen, r_innen, stufen=6, nach='-y'):
         """Halbrunde Außentreppe (gestrichelt), Mittelpunkt an der Hauswand."""
         a0, a1 = (180, 360) if nach == '-y' else (0, 180)
