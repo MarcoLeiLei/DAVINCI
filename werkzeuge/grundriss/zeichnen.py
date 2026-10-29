@@ -586,7 +586,7 @@ class Plan:
             S.insert_text(fitz.Point(x0 + 78, yd + k * 17), wert, fontname='mr', fontsize=7.5, color=INK)
         if self.details:
             S.draw_line(fitz.Point(x0, yd + len(self.details) * 17 - 10.5), fitz.Point(x0 + 200, yd + len(self.details) * 17 - 10.5), color=(0.9, 0.895, 0.88), width=0.5)
-        hinweis = ['Beispielgrundriss. Jedes DAVINCI Haus wird', 'für Grundstück und Bauherren individuell', 'geplant. Maße, Fenster und Ausstattung', 'können im Entwurf abweichen.']
+        hinweis = getattr(self, 'hinweis', None) or ['Beispielgrundriss. Jedes DAVINCI Haus wird', 'für Grundstück und Bauherren individuell', 'geplant. Maße, Fenster und Ausstattung', 'können im Entwurf abweichen.']
         for k, z in enumerate(hinweis):
             S.insert_text(fitz.Point(x0, SEITE.height - 100 + k * 11.5), z, fontname='ml', fontsize=7.5, color=TEXTGRAU)
         S.insert_text(fitz.Point(x0, SEITE.height - 44), 'davinci-homes.de', fontname='mr', fontsize=8.5, color=INK)
