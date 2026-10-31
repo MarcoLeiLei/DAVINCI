@@ -2,8 +2,8 @@
 require __DIR__ . '/inc/site.php';
 seite_start([
   'slug'  => 'design-book',
-  'title' => t('Design-Book anfordern: 48 Seiten Holz und Glas | DAVINCI', 'Request the Design Book: 48 pages of wood and glass | DAVINCI'),
-  'desc'  => t('Häuser, Grundrisse, Materialien und die Geschichte hinter DAVINCI auf 48 Seiten. Als PDF sofort in Ihrem Postfach.', 'Houses, floor plans, materials and the story behind DAVINCI on 48 pages (in German). As an instant PDF.'),
+  'title' => t('Design-Book anfordern: 50 Seiten Holz und Glas | DAVINCI', 'Request the Design Book: 50 pages of wood and glass | DAVINCI'),
+  'desc'  => t('Häuser, Grundrisse, Materialien und die Geschichte hinter DAVINCI auf 50 Seiten. Als PDF sofort in Ihrem Postfach.', 'Houses, floor plans, materials and the story behind DAVINCI on 50 pages (in German). As an instant PDF.'),
   'crumb' => 'Design-Book',
 ]);
 ?>
@@ -14,7 +14,7 @@ seite_start([
       <div class="section-head" style="margin-bottom:0">
         <span class="eyebrow load-in">Design-Book</span>
         <h1 class="h1 load-in d1"><?= t('Inspiration für<br>zu Hause.', 'Inspiration<br>for your home.') ?></h1>
-        <p class="lead load-in d2"><?= t('Häuser, Grundrisse, Materialien und die Geschichte hinter DAVINCI auf 48 Seiten. Als PDF sofort in Ihrem Postfach.', 'Houses, floor plans, materials and the story behind DAVINCI on 48 pages (in German). As a PDF straight to your inbox.') ?></p>
+        <p class="lead load-in d2"><?= t('Häuser, Grundrisse, Materialien und die Geschichte hinter DAVINCI auf 50 Seiten. Als PDF sofort in Ihrem Postfach.', 'Houses, floor plans, materials and the story behind DAVINCI on 50 pages (in German). As a PDF straight to your inbox.') ?></p>
       </div>
       <form class="form dbook__form reveal" data-delay="2" action="/send.php" method="post" data-contact data-success-title="<?= t('Ihr Design-Book ist unterwegs.', 'Your Design Book is on its way.') ?>" data-success="<?= t('Vielen Dank. Bitte schauen Sie in Ihr Postfach, auch im Spam-Ordner.', 'Thank you. Please check your inbox, including the spam folder.') ?>" data-aktion="designbook" novalidate>
         <input type="hidden" name="anfrage_typ" value="Design-Book"><input type="hidden" name="sprache" value="<?= en() ? 'en' : 'de' ?>">
