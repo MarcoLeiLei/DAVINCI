@@ -149,7 +149,7 @@ echt_haus('traufe', ['garten', 'carport'], t('Gebaut und bewohnt', 'Built and li
     <div class="section-head" style="margin-bottom:0">
       <span class="eyebrow reveal">Design-Book</span>
       <h2 class="h1 reveal" data-delay="1"><?= t('Inspiration für<br>zu Hause.', 'Inspiration<br>for home.') ?></h2>
-      <p class="lead reveal" data-delay="2"><?= t('Häuser, Grundrisse, Materialien und die Geschichte hinter DAVINCI auf 48 Seiten. In Ruhe durchblättern, bevor wir uns kennenlernen.', 'Homes, floor plans, materials and the story behind DAVINCI across 48 pages. Browse at your leisure before we meet.') ?></p>
+      <p class="lead reveal" data-delay="2"><?= t('Häuser, Grundrisse, Materialien und die Geschichte hinter DAVINCI auf 50 Seiten. In Ruhe durchblättern, bevor wir uns kennenlernen.', 'Homes, floor plans, materials and the story behind DAVINCI across 50 pages. Browse at your leisure before we meet.') ?></p>
       <ul class="ticks reveal" data-delay="2">
         <li><?= t('Als PDF sofort in Ihrem Postfach', 'As a PDF, instantly in your inbox') ?></li>
         <li><?= t('Kostenfrei und unverbindlich', 'Free and without obligation') ?></li>

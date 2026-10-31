@@ -9,7 +9,7 @@ const DV_EMPFAENGER = 'bauen@davinci-homes.de';   // interne Benachrichtigungen
 const DV_ABSENDER   = 'bauen@davinci-homes.de';   // Absender (Postfach muss in SiteGround existieren)
 const DV_NAME       = 'DAVINCI';
 const DV_SEITE      = 'https://davinci-homes.de';
-const DV_PDF        = DV_SEITE . '/downloads/DAVINCI_Design-Book_Vol01.pdf';
+const DV_PDF        = DV_SEITE . '/downloads/DAVINCI-Design-Book-Vol-01.pdf';
 const DV_TELEFON    = '+49 157 868 328 59';
 const DV_ADRESSE    = 'Kaiser-Friedrich-Ring 43 · 40545 Düsseldorf';
 const DV_FIRMA      = 'Fivemeters UG (haftungsbeschränkt)';
@@ -119,9 +119,9 @@ function v_designbook($d, $links = []) {
     . m_p('vielen Dank für Ihr Interesse. ' . ($print
         ? 'Ihr gedrucktes Design-Book geht in den nächsten Tagen an folgende Adresse auf die Reise: <strong style="font-weight:600;color:#1d1d1f;">' . h($d['adresse']) . '</strong>. Damit Sie nicht warten müssen, finden Sie hier schon die digitale Ausgabe.'
         : 'Ihr persönliches Design-Book steht ab sofort für Sie bereit.'))
-    . m_p('Auf 48 Seiten zeigen wir Ihnen, wie wir Grundstücke lesen und Räume nach der Sonne ausrichten, welche Grundrisse zu welcher Lebenssituation passen und wie Sauna, Garage und Carport Teil der Architektur werden.')
+    . m_p('Auf 50 Seiten zeigen wir Ihnen, wie wir Grundstücke lesen und Räume nach der Sonne ausrichten, welche Grundrisse zu welcher Lebenssituation passen und wie Sauna, Garage und Carport Teil der Architektur werden.')
     . m_knopf(DV_PDF, 'Design-Book herunterladen &nbsp;→')
-    . m_klein('PDF · 48 Seiten · ca. 10 MB');
+    . m_klein('PDF · 50 Seiten · ca. 17 MB');
   $k = '';
   if (!empty($links['bestaetigen'])) {
     $k = m_kasten('Noch ein Klick für mehr Inspiration', m_p('Sie möchten in den nächsten Wochen Ideen zu Grundstück, Grundrissen und Ausstattung von uns erhalten? Bitte bestätigen Sie das kurz. Ohne Bestätigung schreiben wir Ihnen nicht weiter.') . m_knopf($links['bestaetigen'], 'Ja, Inspiration erhalten', false));

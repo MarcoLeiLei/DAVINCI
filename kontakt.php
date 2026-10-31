@@ -19,7 +19,7 @@ seitenkopf(t('Kontakt', 'Contact'), t('Lassen Sie uns sprechen.', "Let's talk.")
         <div><dt><?= t('Büro', 'Office') ?></dt><dd>Kaiser-Friedrich-Ring 43<br>40545 Düsseldorf<?= t('', ', Germany') ?></dd></div>
       </dl>
       <div class="mini-book reveal" data-delay="2">
-        <p><strong>Design-Book</strong> <?= t('Häuser, Grundrisse und Materialien auf 48 Seiten. Als PDF zum Download.', 'Houses, floor plans and materials on 48 pages (in German). As a PDF download.') ?></p>
+        <p><strong>Design-Book</strong> <?= t('Häuser, Grundrisse und Materialien auf 50 Seiten. Als PDF zum Download.', 'Houses, floor plans and materials on 50 pages (in German). As a PDF download.') ?></p>
         <a href="<?= u('design-book') ?>" class="link-arrow"><?= t('Design-Book anfordern', 'Request the Design Book') ?> <svg><use href="#arrow"/></svg></a>
       </div>
     </div>
