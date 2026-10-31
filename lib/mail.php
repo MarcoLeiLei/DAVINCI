@@ -121,7 +121,7 @@ function v_designbook($d, $links = []) {
         : 'Ihr persönliches Design-Book steht ab sofort für Sie bereit.'))
     . m_p('Auf 50 Seiten zeigen wir Ihnen, wie wir Grundstücke lesen und Räume nach der Sonne ausrichten, welche Grundrisse zu welcher Lebenssituation passen und wie Sauna, Garage und Carport Teil der Architektur werden.')
     . m_knopf(DV_PDF, 'Design-Book herunterladen &nbsp;→')
-    . m_klein('PDF · 50 Seiten · ca. 11 MB');
+    . m_klein('PDF · 50 Seiten · ca. 14 MB');
   $k = '';
   if (!empty($links['bestaetigen'])) {
     $k = m_kasten('Noch ein Klick für mehr Inspiration', m_p('Sie möchten in den nächsten Wochen Ideen zu Grundstück, Grundrissen und Ausstattung von uns erhalten? Bitte bestätigen Sie das kurz. Ohne Bestätigung schreiben wir Ihnen nicht weiter.') . m_knopf($links['bestaetigen'], 'Ja, Inspiration erhalten', false));

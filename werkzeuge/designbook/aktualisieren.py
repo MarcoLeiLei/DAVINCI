@@ -65,13 +65,63 @@ def bild(datei, aspekt, pos=(0.5, 0.5), breite_px=1700):
     return b.getvalue()
 
 
+def pille(p, r, s):
+    """Bild-Etikett wie im Original: Light 10,5 auf schwarzer Pille (35 %), unten links im Bild."""
+    w = breite(s, 'ml', 10.5) + 18
+    k = fitz.Rect(r.x0 + 13.5, r.y1 - 13.25 - 19.5, r.x0 + 13.5 + w, r.y1 - 13.25)
+    p.draw_rect(k, color=None, fill=(0, 0, 0), fill_opacity=0.349, radius=0.5)
+    text(p, k.x0 + 9, k.y1 - 6.75, s, 'ml', 10.5, (1, 1, 1))
+
+
 def foto_hinweis(p, r, s='Foto · gebautes DAVINCI Haus'):
-    """Kleines Etikett unten links im Bild, wie in der Historie."""
-    size = 9.8
-    w = breite(s, 'mr', size) + 20
-    k = fitz.Rect(r.x0 + 12, r.y1 - 12 - 22, r.x0 + 12 + w, r.y1 - 12)
-    p.draw_rect(k, color=None, fill=(0, 0, 0), fill_opacity=0.45, radius=0.5)
-    text(p, k.x0 + 10, k.y1 - 7.5, s, 'mr', size, (1, 1, 1))
+    pille(p, r, s)
+
+
+def sichtbar(doc, i, xref):
+    """Exakter sichtbarer Bereich eines Bildes auf Seite i (Bild testweise magenta einfärben)."""
+    import numpy as np
+    e = fitz.open(stream=doc.tobytes(), filetype='pdf')
+    b = io.BytesIO(); Image.new('RGB', (32, 32), (255, 0, 255)).save(b, 'PNG')
+    e[i].replace_image(xref, stream=b.getvalue())
+    pix = e[i].get_pixmap(dpi=144)
+    a = np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width, pix.n)[:, :, :3].astype(int)
+    m = (a[:, :, 0] > 230) & (a[:, :, 1] < 30) & (a[:, :, 2] > 230)
+    ys, xs = np.where(m); k = 0.5
+    return fitz.Rect(xs.min() * k, ys.min() * k, (xs.max() + 1) * k, (ys.max() + 1) * k)
+
+
+def bild_tauschen(doc, i, datei, pos=(0.5, 0.5), etikett=None, rect=None):
+    """Bild auf Seite i neu zuschneiden (oder ersetzen) und darüberlegen; optional Etikett."""
+    p = doc[i]
+    if rect is None:
+        infos = [x for x in p.get_image_info(xrefs=True) if x['xref']]
+        rect = max((sichtbar(doc, i, x['xref']) for x in infos if fitz.Rect(x['bbox']).contains(fitz.Point(*pos_hint[i]))),
+                   key=lambda r: r.get_area()) if i in pos_hint else None
+    p.insert_image(rect, stream=bild(datei, rect.width / rect.height, pos), keep_proportion=False)
+    if etikett:
+        schriften(p); pille(p, rect, etikett)
+    return rect
+
+
+pos_hint = {}
+
+
+def spans(p, texte):
+    return [s for b in p.get_text('dict')['blocks'] for l in b.get('lines', []) for s in l['spans'] if s['text'] in texte]
+
+
+def text_tauschen(p, paare, rechts=False, xmin=0, xmax=1e9):
+    """Textzeilen gleicher Schrift ersetzen (alt -> neu); Schrift, Größe, Farbe und Position bleiben."""
+    alle = [sp for sp in spans(p, [a for a, _ in paare]) if xmin <= sp['bbox'][0] <= xmax]
+    assert len(alle) == len(paare), [a for a, _ in paare]
+    for sp in alle:
+        p.add_redact_annot(fitz.Rect(sp['bbox']))
+    p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE, graphics=fitz.PDF_REDACT_LINE_ART_NONE)
+    schriften(p)
+    neu = dict(paare)
+    for sp in alle:
+        name = 'mr' if 'Regular' in sp['font'] else ('mt' if 'Thin' in sp['font'] else 'ml')
+        text(p, sp['bbox'][0], sp['origin'][1], neu[sp['text']], name, sp['size'], farbe(sp['color']))
 
 
 def plan_ausschnitt(pdf, seite):
@@ -111,9 +161,12 @@ def titel(p, t, unter):
     absatz(p, 45, 182.2, umbrechen(unter, 'ml', 15.8, 860), 'ml', 15.8, GRAU, 22.6)
 
 
-def karte(p, x0, x1, name, info, beschreibung):
+def karte(p, x0, x1, name, info, beschreibung, rendering=None):
     r = fitz.Rect(x0, 240, x1, 712.5)
     p.draw_rect(r, color=None, fill=(1, 1, 1))
+    if rendering:
+        b = fitz.Rect(x1 - 21 - 120, 255, x1 - 21, 255 + 75)
+        p.insert_image(b, stream=bild(rendering, b.width / b.height, (0.5, 0.45), 600), keep_proportion=False)
     text(p, x0 + 21, 273.8, name, 'mr', 18, INK)
     text(p, x0 + 21, 289.5, info, 'ml', 11.2, GRAU)
     absatz(p, x0 + 21, 671.2, umbrechen(beschreibung, 'ml', 12, x1 - x0 - 42))
@@ -127,15 +180,15 @@ def seite_kollektion(doc, nr):
     titel(p, 'Grundrisse aus der Kollektion.',
           'Drei Häuser der Kollektion, gezeigt ist jeweils die Wohnebene. Alle Geschosse aller zehn Häuser '
           'finden Sie auf davinci-homes.de.')
-    for x0, haus, name, info, txt in (
+    for x0, haus, name, info, txt, rnd in (
             (45, 'piano', 'DAVINCI Piano', 'ca. 150 m² · 1 Ebene · Flachdach',
-             'Wohnen, Essen und Kochen in einem Raum, Schlafen mit Ankleide und Bad, Kinderzimmer und Doppelgarage unter einem Dach.'),
+             'Wohnen, Essen und Kochen in einem Raum, Schlafen mit Ankleide und Bad, Kinderzimmer und Doppelgarage unter einem Dach.', 'dv-09-bungalow-flach-garten.jpg'),
             (501, 'corte', 'DAVINCI Corte', 'Erdgeschoss · Bungalow im Winkel',
-             'Zwei Flügel fassen die Terrasse. Wohnen, Essen und Kochen öffnen sich zum Garten, die Schlafräume liegen im Untergeschoss.'),
+             'Zwei Flügel fassen die Terrasse. Wohnen, Essen und Kochen öffnen sich zum Garten, die Schlafräume liegen im Untergeschoss.', 'dv-23-bungalow-winkel-abend.jpg'),
             (957, 'vista', 'DAVINCI Vista', 'Wohnebene · Pultdach · Hanglage',
-             'Die Wohnebene als gläserner Pavillon mit Bad und Sauna, Terrassen und Pool. Darunter eine eigene Einliegerwohnung.')):
-        r = karte(p, x0, x0 + 438, name, info, txt)
-        plan_zeigen(p, fitz.Rect(r.x0 + 18, 308, r.x1 - 18, 640), haus, 0)
+             'Die Wohnebene als gläserner Pavillon mit Bad und Sauna, Terrassen und Pool. Darunter eine eigene Einliegerwohnung.', 'dv-12-hang-pool-nacht.jpg')):
+        r = karte(p, x0, x0 + 438, name, info, txt, rnd)
+        plan_zeigen(p, fitz.Rect(r.x0 + 18, 342, r.x1 - 18, 640), haus, 0)
     text(p, 45, 742, 'Beispielgrundrisse. Jedes DAVINCI Haus wird für Grundstück und Bauherren individuell geplant.', 'ml', 9.8, HELLGRAU)
 
 
@@ -146,14 +199,14 @@ def seite_tre(doc, nr):
     titel(p, 'Zwei Ebenen, ein Raum.',
           'Der Klassiker DAVINCI Tre: Der Luftraum über dem Wohnen verbindet beide Geschosse, die Galerie wird zum Studio.')
     r = karte(p, 45, 939, 'DAVINCI Tre', '2 Ebenen · Satteldach · 3 Achsen',
-              'Unten Wohnen mit Kamin, Essen, Kochen und Windfang, oben Studio, Galerie, Schlafen mit Ankleide und Bad. Doppelgarage mit Flachdach.')
+              'Unten Wohnen mit Kamin, Essen, Kochen und Windfang, oben Studio, Galerie, Schlafen mit Ankleide und Bad. Doppelgarage mit Flachdach.', 'dv-24-giebel-3achser-tag.jpg')
     pdf = os.path.join(GR, 'tre.pdf')
     a, b = plan_ausschnitt(pdf, 0), plan_ausschnitt(pdf, 1)
     u = fitz.Rect(min(a.x0, b.x0), min(a.y0, b.y0), max(a.x1, b.x1), max(a.y1, b.y1))
     halb = (r.width - 36 - 24) / 2
-    s = min(halb / u.width, (612 - 308) / u.height)
+    s = min(halb / u.width, (612 - 342) / u.height)
     for k, (seite, g) in enumerate(((0, 'Erdgeschoss'), (1, 'Dachgeschoss'))):
-        f = fitz.Rect(r.x0 + 18 + k * (halb + 24), 308, r.x0 + 18 + k * (halb + 24) + halb, 612)
+        f = fitz.Rect(r.x0 + 18 + k * (halb + 24), 342, r.x0 + 18 + k * (halb + 24) + halb, 612)
         plan_zeigen(p, f, 'tre', seite, u, s)
         text(p, (f.x0 + f.x1) / 2 - breite(g, 'mr', 11.5) / 2, 633, g, 'mr', 11.5, GRAU)
     # Hinweis auf die Website
@@ -235,6 +288,58 @@ def hinweise(doc):
             text(p, x, sp['origin'][1], z, 'ml', sp['size'], farbe(sp['color']), rechts=rechts)
 
 
+def haltung_bilder(doc):
+    """Seite 6: Holz, Glas, Zeitlos im Querformat, damit kein Haus angeschnitten wird; Texte rücken nach oben."""
+    p = doc[5]
+    alt = [sp for b in p.get_text('dict')['blocks'] for l in b.get('lines', []) for sp in l['spans'] if sp['bbox'][1] > 600 and sp['bbox'][3] < 760]
+    p.add_redact_annot(fitz.Rect(30, 100, 1410, 760), fill=PAPIER)
+    p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_REMOVE, graphics=fitz.PDF_REDACT_LINE_ART_NONE)
+    schriften(p)
+    h = 438 / 1.5
+    for x0, datei, pos in ((45, 'tragwerk.jpg', (0.5, 0.5)), (501, 'dv-05-flachdach-schwarz-abend.jpg', (0.5, 0.5)),
+                           (957, 'dv-02-giebel-winter-abend.jpg', (0.8, 0.5))):
+        r = fitz.Rect(x0, 112.5, x0 + 438, 112.5 + h)
+        p.insert_image(r, stream=bild(datei, 1.5, pos), keep_proportion=False)
+    dy = (112.5 + h + 50.5) - 658.5
+    for sp in alt:
+        name = 'mr' if 'Regular' in sp['font'] else 'ml'
+        text(p, sp['bbox'][0], sp['origin'][1] + dy, sp['text'], name, sp['size'], farbe(sp['color']))
+
+
+def korrekturen(doc):
+    haltung_bilder(doc)
+    # Seite 8 · 1995: kein Hinweis auf einen Vorgängernamen
+    text_tauschen(doc[7], [('Aus dem Holz-Glas-Haus wird DAVINCI HAUS.', 'Die Marke DAVINCI HAUS entsteht.')])
+    # Seite 10 · Kollektion
+    text_tauschen(doc[9], [('200 m² · 2 Ebenen · Flachdach · Dachterrasse', '200 m² · Staffelgeschoss · Flachdach · Dachterrasse'),
+                           ('1 Ebene · Pultdach · Bungalow', '1 Ebene · Doppel-Pultdach & Flachdach · Bungalow')])
+    # Detailseiten Terrazza und Ala: Eckdaten und Bild-Etikett
+    text_tauschen(doc[12], [('2 Ebenen', '2 Ebenen · Staffelgeschoss')], xmin=400, xmax=700)
+    text_tauschen(doc[13], [('Pultdach · Bungalow', 'Doppel-Pultdach & Flachdach'), ('1 Ebene', '1 Ebene · Bungalow')], xmin=1100)
+    for i, x, datei, et in ((12, 45, 'dv-11-flachdach-weiss-tag.jpg', '05 · Flachdach · Staffelgeschoss · Dachterrasse'),
+                            (13, 739, 'dv-04-pultdach-bungalow-abend.jpg', '08 · Doppel-Pultdach & Flachdach · Bungalow')):
+        p = doc[i]
+        alt = [sp for sp in spans(p, ['05 · Flachdach · Dachterrasse', '08 · Pultdach · Bungalow'])]
+        xr = [y['xref'] for y in p.get_image_info(xrefs=True) if y['xref'] and abs(y['bbox'][0] - x) < 3][0]
+        r = sichtbar(doc, i, xr)
+        for sp in alt:
+            p.add_redact_annot(fitz.Rect(sp['bbox']))
+        p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE, graphics=fitz.PDF_REDACT_LINE_ART_NONE)
+        im = Image.open(os.path.join(IMG, datei)); a = im.width / im.height
+        # gleicher Ausschnitt wie bisher (object-fit: cover, mittig)
+        p.insert_image(r, stream=bild(datei, r.width / r.height, (0.5, 0.5)), keep_proportion=False)
+        schriften(p); pille(p, r, et)
+    # Bildausschnitte, bei denen das Haus angeschnitten war
+    for i, x, datei, pos in ((15, 396, 'dv-10-hang-pultdach-terrasse.jpg', (0.75, 0.5)),
+                             (38, 880, 'dv-19-schwarz-giebel-garten-nacht.jpg', (0.3, 0.5)),
+                             (39, 45, 'dv-23-bungalow-winkel-abend.jpg', (0.5, 0.55))):
+        p = doc[i]
+        cand = [y for y in p.get_image_info(xrefs=True) if y['xref']]
+        xr = min(cand, key=lambda y: abs(y['bbox'][0] - x) + abs(y['bbox'][1] - 112))['xref']
+        r = sichtbar(doc, i, xr)
+        p.insert_image(r, stream=bild(datei, r.width / r.height, pos), keep_proportion=False)
+
+
 def main(ziel):
     roh = subprocess.run(['git', '-C', REPO, 'show', BASIS], capture_output=True, check=True).stdout
     doc = fitz.open(stream=roh, filetype='pdf')
@@ -254,6 +359,7 @@ def main(ziel):
             p.add_redact_annot(r); p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_REMOVE, graphics=fitz.PDF_REDACT_LINE_ART_NONE, text=fitz.PDF_REDACT_TEXT_NONE)
         p.insert_image(r, stream=neu, keep_proportion=False)
         schriften(p); foto_hinweis(p, r)
+    korrekturen(doc)
     # KI-Hinweise: Das Buch enthält jetzt auch Fotos gebauter Häuser
     hinweise(doc)
     # 3 · Seitenzahlen ab Kapitel 07 und Inhaltsverzeichnis
