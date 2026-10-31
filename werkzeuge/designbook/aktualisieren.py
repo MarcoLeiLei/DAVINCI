@@ -31,10 +31,10 @@ def breite(text, name, size):
         FONT[name] = fitz.Font(fontfile=f'{SCHRIFTEN}/' + {'mt': 'MundialThin', 'ml': 'MundialLight', 'mr': 'MundialRegular'}[name] + '.otf')
     return FONT[name].text_length(text, fontsize=size)
 
-def text(p, x, y, s, name, size, col, rechts=False):
+def text(p, x, y, s, name, size, col, rechts=False, deckkraft=1):
     if rechts:
         x -= breite(s, name, size)
-    p.insert_text(fitz.Point(x, y), s, fontname=name, fontsize=size, color=col)
+    p.insert_text(fitz.Point(x, y), s, fontname=name, fontsize=size, color=col, fill_opacity=deckkraft)
 
 def absatz(p, x, y, zeilen, name='ml', size=12, col=GRAU, abstand=18):
     for k, z in enumerate(zeilen):
@@ -53,7 +53,10 @@ def umbrechen(s, name, size, w):
 
 def bild(datei, aspekt, pos=(0.5, 0.5), breite_px=1700):
     """Bild auf Seitenverhältnis zuschneiden (object-fit: cover), als JPEG-Bytes."""
-    im = Image.open(os.path.join(IMG, datei)).convert('RGB')
+    pfad = os.path.join(IMG, datei)
+    if not os.path.exists(pfad):
+        pfad = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bilder', datei)
+    im = Image.open(pfad).convert('RGB')
     w, h = im.size
     if w / h > aspekt:
         nw = int(h * aspekt); x0 = int((w - nw) * pos[0]); im = im.crop((x0, 0, x0 + nw, h))
@@ -285,7 +288,7 @@ def hinweise(doc):
         schriften(p)
         for sp, z in zip(spans, neu):
             x = sp['bbox'][2] if rechts else sp['bbox'][0]
-            text(p, x, sp['origin'][1], z, 'ml', sp['size'], farbe(sp['color']), rechts=rechts)
+            text(p, x, sp['origin'][1], z, 'ml', sp['size'], farbe(sp['color']), rechts=rechts, deckkraft=sp.get('alpha', 255) / 255)
 
 
 def haltung_bilder(doc):
@@ -306,10 +309,51 @@ def haltung_bilder(doc):
         text(p, sp['bbox'][0], sp['origin'][1] + dy, sp['text'], name, sp['size'], farbe(sp['color']))
 
 
+def chronik(doc):
+    """Seite 8: Zeitleiste mit 1974 neu setzen."""
+    p = doc[7]
+    pix = p.get_pixmap(clip=fitz.Rect(1300, 650, 1304, 654), dpi=72)
+    bg = tuple(v / 255 for v in pix.pixel(1, 1)[:3])
+    p.add_redact_annot(fitz.Rect(900, 100, 1405, 640), fill=bg)
+    p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE, graphics=fitz.PDF_REDACT_LINE_ART_REMOVE_IF_COVERED)
+    schriften(p)
+    weiss = (1, 1, 1)
+    eintraege = [('1936', 'Die Wurzeln', 'Gestartet als Sägewerk im Westerwald. Holz ist von Anfang an das Material, um das sich alles dreht.', weiss),
+                 ('1974', 'Das Modulhaus', 'Der Vorgänger des späteren DAVINCI HAUS entsteht: ein Architektenhaus, geplant in Holz und Glas.', weiss),
+                 ('1981', 'Die Idee', 'Gemeinsam mit Architekten entsteht das Prinzip: freier Grundriss, wenige Wände, Glas vom Boden bis zur Decke.', weiss),
+                 ('1995', 'Der Name', 'Die Marke DAVINCI HAUS entsteht.', weiss),
+                 ('2023', 'Das Ende', 'Das Unternehmen stellt den Betrieb ein. Die Häuser bleiben.', weiss),
+                 ('2024', 'Der Service', 'Mit Fivemeters Bau beginnen wir, bestehende DAVINCI Häuser zu betreuen und zu erhalten.', AKZENT),
+                 ('Heute', 'DAVINCI baut wieder', 'Mit neuen Gründern, der zeitlosen Architektur von damals, einem durchdachten System und allem, was wir im Service an diesen Häusern gelernt haben.', AKZENT)]
+    y = 112.5
+    for jahr, titel_, txt, fj in eintraege:
+        p.draw_rect(fitz.Rect(907.5, y, 1395, y + 0.75), color=None, fill=weiss, fill_opacity=0.2)
+        text(p, 907.1, y + 39.75, jahr, 'mt', 33, fj)
+        text(p, 1027.1, y + 28.5, titel_, 'mr', 15.75, weiss)
+        zeilen = umbrechen(txt, 'ml', 12, 362)
+        absatz(p, 1027.1, y + 48.75, zeilen, 'ml', 12, weiss, 18)
+        y += 48.75 + 18 * (len(zeilen) - 1) + 24
+    p.draw_rect(fitz.Rect(907.5, y, 1395, y + 0.75), color=None, fill=weiss, fill_opacity=0.2)
+
+
+def ohne_preis(doc):
+    """Hausseiten 11–15: Zeile 'Schlüsselfertig ab …' samt Spiegelstrich entfernen."""
+    for i in range(10, 15):
+        p = doc[i]
+        alt = [sp for sp in spans(p, ['Schlüsselfertig ab 5.400 €/m²'])]
+        assert len(alt) == 2, i
+        for sp in alt:
+            p.add_redact_annot(fitz.Rect(sp['bbox']))
+        p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE, graphics=fitz.PDF_REDACT_LINE_ART_NONE)
+        for sp in alt:
+            y = sp['origin'][1] - 3.75
+            p.draw_rect(fitz.Rect(sp['bbox'][0] - 17, y - 2, sp['bbox'][0] - 6, y + 2), color=None, fill=PAPIER)
+
+
 def korrekturen(doc):
     haltung_bilder(doc)
-    # Seite 8 · 1995: kein Hinweis auf einen Vorgängernamen
-    text_tauschen(doc[7], [('Aus dem Holz-Glas-Haus wird DAVINCI HAUS.', 'Die Marke DAVINCI HAUS entsteht.')])
+    chronik(doc)
+    ohne_preis(doc)
     # Seite 10 · Kollektion
     text_tauschen(doc[9], [('200 m² · 2 Ebenen · Flachdach · Dachterrasse', '200 m² · Staffelgeschoss · Flachdach · Dachterrasse'),
                            ('1 Ebene · Pultdach · Bungalow', '1 Ebene · Doppel-Pultdach & Flachdach · Bungalow')])
@@ -329,6 +373,11 @@ def korrekturen(doc):
         # gleicher Ausschnitt wie bisher (object-fit: cover, mittig)
         p.insert_image(r, stream=bild(datei, r.width / r.height, (0.5, 0.5)), keep_proportion=False)
         schriften(p); pille(p, r, et)
+    # Sauna: Gartensauna oben rechts
+    p = doc[34]
+    xr = min((y for y in p.get_image_info(xrefs=True) if y['xref']), key=lambda y: abs(y['bbox'][0] - 903) + abs(y['bbox'][1] - 93))['xref']
+    r = sichtbar(doc, 34, xr)
+    p.insert_image(r, stream=bild('sauna-gartenhaus.jpg', r.width / r.height, (0.5, 0.5)), keep_proportion=False)
     # Bildausschnitte, bei denen das Haus angeschnitten war
     for i, x, datei, pos in ((15, 396, 'dv-10-hang-pultdach-terrasse.jpg', (0.75, 0.5)),
                              (38, 880, 'dv-19-schwarz-giebel-garten-nacht.jpg', (0.3, 0.5)),
@@ -340,6 +389,50 @@ def korrekturen(doc):
         p.insert_image(r, stream=bild(datei, r.width / r.height, pos), keep_proportion=False)
 
 
+def flach(doc):
+    """Seiten mit Verlaufs-Mustern (Tiling-Pattern mit Transparenz) flach rechnen: manche PDF-Programme
+    (z. B. Vorschau auf dem Mac) zeigen diese Ebenen sonst rosa. Hintergrund als Bild, Text bleibt echter Text."""
+    FN = {'Thin': 'mt', 'Light': 'ml', 'Regular': 'mr'}
+    seiten = [i for i, p in enumerate(doc) if doc.xref_get_key(p.xref, 'Resources/Pattern')[0] != 'null']
+    for i in seiten:
+        roh = fitz.open(); roh.insert_pdf(doc, from_page=i, to_page=i)
+        q = roh[0]
+        zeichen = []
+        for b in q.get_text('rawdict')['blocks']:
+            for l in b.get('lines', []):
+                for sp in l['spans']:
+                    t = ''.join(c['c'] for c in sp['chars']).strip()
+                    if t.isdigit() and sp['size'] < 12 and sp['bbox'][1] > 760 and sp['bbox'][0] > 1300 and int(t) != i + 1:
+                        continue          # überdeckte alte Seitenzahl
+                    name = next((v for k, v in FN.items() if k in sp['font']), 'ml')
+                    # Ligaturen (fl, fi, ff …) liegen als mehrere Zeichen auf derselben Position: zusammenfassen
+                    gruppen = []
+                    for c in sp['chars']:
+                        if gruppen and (c['bbox'][2] - c['bbox'][0] < 0.05 or abs(c['origin'][0] - gruppen[-1][0][0]) < 0.3):
+                            gruppen[-1][1] += c['c']
+                        else:
+                            gruppen.append([c['origin'], c['c']])
+                    for o, ch in gruppen:
+                        if ch.strip():
+                            zeichen.append((o, ch, name, sp['size'], farbe(sp['color']), sp.get('alpha', 255) / 255))
+        for b in q.get_text('dict')['blocks']:
+            if b['type'] == 0:
+                q.add_redact_annot(fitz.Rect(b['bbox']))
+        q.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE, graphics=fitz.PDF_REDACT_LINE_ART_NONE)
+        pix = q.get_pixmap(dpi=200)
+        jpg = pix.tobytes('jpeg', jpg_quality=90)
+        links = doc[i].get_links()
+        neu = doc.new_page(i, width=q.rect.width, height=q.rect.height)
+        neu.insert_image(neu.rect, stream=jpg)
+        schriften(neu)
+        for (x, y), ch, name, size, col, a in zeichen:
+            neu.insert_text(fitz.Point(x, y), ch, fontname=name, fontsize=size, color=col, fill_opacity=a)
+        for ln in links:
+            neu.insert_link(ln)
+        doc.delete_page(i + 1)
+    return seiten
+
+
 def main(ziel):
     roh = subprocess.run(['git', '-C', REPO, 'show', BASIS], capture_output=True, check=True).stdout
     doc = fitz.open(stream=roh, filetype='pdf')
@@ -349,7 +442,7 @@ def main(ziel):
     # 2 · Fotos gebauter Häuser wie auf der Website
     for i, datei, r, pos in ((4, 'echt-fassade-garten.jpg', fitz.Rect(398, 112, 1395, 742), (0.5, 0.5)),
                              (21, 'echt-luft-landschaft.jpg', fitz.Rect(398, 112, 1395, 742), (0.5, 0.5)),
-                             (37, 'echt-carport-zufahrt.jpg', fitz.Rect(397, 430, 972, 742), (0.6, 0.6))):
+                             (37, 'carport.jpg', fitz.Rect(397, 430, 972, 742), (0.5, 0.6))):
         p = doc[i]
         alt = [x['xref'] for x in p.get_image_info(xrefs=True)]
         neu = bild(datei, r.width / r.height, pos)
@@ -358,7 +451,9 @@ def main(ziel):
             # Bild nur hier verwendet: ersetzen und mit passendem Ausschnitt neu platzieren
             p.add_redact_annot(r); p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_REMOVE, graphics=fitz.PDF_REDACT_LINE_ART_NONE, text=fitz.PDF_REDACT_TEXT_NONE)
         p.insert_image(r, stream=neu, keep_proportion=False)
-        schriften(p); foto_hinweis(p, r)
+        schriften(p)
+        if datei.startswith('echt-'):
+            foto_hinweis(p, r)
     korrekturen(doc)
     # KI-Hinweise: Das Buch enthält jetzt auch Fotos gebauter Häuser
     hinweise(doc)
@@ -371,6 +466,7 @@ def main(ziel):
     seite_tre(doc, NEU_NACH + 3)
     doc.move_page(n, NEU_NACH + 1)
     doc.move_page(n + 1, NEU_NACH + 2)
+    flach(doc)
     doc.set_metadata({'title': 'DAVINCI Design-Book Vol. 01', 'author': 'DAVINCI', 'creator': 'DAVINCI', 'producer': 'DAVINCI',
                       'subject': 'Häuser aus Holz und Glas', 'keywords': ''})
     doc.save(ziel, garbage=4, deflate=True, clean=True)
