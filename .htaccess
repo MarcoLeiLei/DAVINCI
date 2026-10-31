@@ -11,6 +11,8 @@ ErrorDocument 404 /route.php
   RewriteRule ^(impressum|datenschutz)\.html$ /$1/ [R=301,L]
   RewriteRule ^index\.html$ / [R=301,L]
   RewriteRule ^en\.php$ /en/ [R=301,L]
+  # Design-Book: alte Dateinamen (Links in bereits versendeten E-Mails) auf die aktuelle Ausgabe
+  RewriteRule ^downloads/DAVINCI_Design-Book_Vol01\.pdf$ /downloads/DAVINCI-Design-Book-Vol-01.pdf [R=301,L]
   # .php in der Adresse auf die saubere Adresse umleiten (nur Seiten, keine Skripte)
   RewriteCond %{THE_REQUEST} \s/+((en/)?(haeuser|system|manufaktur|geschichte|service|kontakt|design-book|impressum|datenschutz))\.php[\s?] [NC]
   RewriteRule ^ /%1/ [R=301,L]

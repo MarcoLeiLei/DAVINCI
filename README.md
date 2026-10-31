@@ -7,7 +7,7 @@ Website von DAVINCI, Häuser aus Holz und Glas. PHP ohne Datenbank, gehostet bei
 - `inc/site.php`: gemeinsames Gerüst, Häuser (`PRODUKTE`) und Preise
 - `assets/`: CSS, JavaScript (inkl. GSAP unter `assets/js/gsap/`), Bilder, Schrift
 - `send.php`, `lib/`: Formulare und E-Mails
-- `downloads/`: Design-Book und Grundrisse (`downloads/grundrisse/<haus>.pdf`)
+- `downloads/`: Design-Book (`DAVINCI-Design-Book-Vol-01.pdf`, erzeugt mit `werkzeuge/designbook/aktualisieren.py`) und Grundrisse (`downloads/grundrisse/<haus>.pdf`)
 
 ## Deployment
 Jeder Push auf `main` überträgt die Website per SSH zu SiteGround (`.github/workflows/deploy.yml`).

@@ -3,7 +3,7 @@
 - Bilder: Tre mit dem aktuellen Website-Motiv, drei Seiten mit Fotos gebauter DAVINCI Häuser (wie auf der Website).
 - Zwei neue Seiten am Ende von Kapitel 06 mit Grundrissen der Kollektion als Teaser und Hinweis auf die Website.
 - Seitenzahlen und Inhaltsverzeichnis werden nachgezogen.
-Aufruf (im Repo-Ordner): DV_SCHRIFTEN=<Mundial-Ordner> python3 werkzeuge/designbook/aktualisieren.py downloads/DAVINCI_Design-Book_Vol01.pdf"""
+Aufruf (im Repo-Ordner): DV_SCHRIFTEN=<Mundial-Ordner> python3 werkzeuge/designbook/aktualisieren.py downloads/DAVINCI-Design-Book-Vol-01.pdf"""
 import sys, os, io, subprocess
 import fitz
 from PIL import Image
