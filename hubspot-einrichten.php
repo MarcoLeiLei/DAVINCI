@@ -5,6 +5,7 @@
    Aufruf: https://davinci-homes.de/hubspot-einrichten.php (nur eingeloggt)
    Danach diese Datei wieder löschen.
    ========================================================= */
+$immer_schuetzen = true;
 require __DIR__ . '/gate.php';
 require __DIR__ . '/lib/hubspot.php';
 header('Content-Type: text/html; charset=utf-8');

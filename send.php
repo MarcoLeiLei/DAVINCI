@@ -19,7 +19,8 @@ require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/store.php';
 require __DIR__ . '/lib/hubspot.php';
 require __DIR__ . '/lib/schutz.php';
-if (SCHUTZ_AKTIV && (!isset($_COOKIE['dv_access']) || !hash_equals(ZUGANG, (string) $_COOKIE['dv_access']))) { http_response_code(403); echo json_encode(['ok'=>false]); exit; }
+require_once __DIR__ . '/lib/live.php';
+if (SCHUTZ_AKTIV && !WEBSITE_LIVE && (!isset($_COOKIE['dv_access']) || !hash_equals(ZUGANG, (string) $_COOKIE['dv_access']))) { http_response_code(403); echo json_encode(['ok'=>false]); exit; }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['ok'=>false]); exit; }
 $spam = spam_pruefen();
 if ($spam) {
