@@ -95,6 +95,7 @@ function seite_start(array $p): void {
 <meta property="og:image" content="<?= e($img) ?>">
 <meta property="og:url" content="<?= e($canon) ?>">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="1ljma2zmqu1y_IJWmPWSvP-yuXuXTnFro-E9-3GXJ6w">
 <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <link rel="preload" href="/assets/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
 <?php if ($slug === ''): ?><link rel="preload" href="/assets/img/dv-drohne-poster.jpg" as="image" fetchpriority="high"><?php endif; ?>
