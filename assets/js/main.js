@@ -38,7 +38,7 @@ const RECAPTCHA_SITE_KEY = '';
    GOOGLE_ADS_ID: Konto-ID aus Google Ads → Tools → Conversions → Tag einrichten (Format 'AW-123456789').
    Labels: je Conversion-Aktion der Teil nach dem Schrägstrich ('AW-123456789/AbCdEf…' → 'AbCdEf…').
    Solange die ID leer ist, wird nichts geladen und kein Cookie-Banner gezeigt. */
-const GOOGLE_ADS_ID = '';
+const GOOGLE_ADS_ID = 'AW-11462922872';
 const GOOGLE_ADS_LABELS = {
   designbook: '',      // Design-Book angefordert
   grundriss: '',       // Grundriss angefordert
