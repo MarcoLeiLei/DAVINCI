@@ -40,6 +40,7 @@ const RECAPTCHA_SITE_KEY = '';
    Solange die ID leer ist, wird nichts geladen und kein Cookie-Banner gezeigt. */
 const GOOGLE_ADS_ID = 'AW-11462922872';
 const GOOGLE_ADS_LABELS = {
+  cta: 'YdktCMTMiYgZEPik-dkq',   // Klick auf einen CTA (Termin, Design-Book, Grundriss, Kontakt, Telefon, E-Mail)
   designbook: '',      // Design-Book angefordert
   grundriss: '',       // Grundriss angefordert
   terminanfrage: '',   // Terminanfrage
@@ -479,6 +480,27 @@ const GOOGLE_ADS_LABELS = {
   };
   document.addEventListener('consentchange', ladeAds);
   ladeAds();
+  /* gtag_report_conversion wie von Google vorgegeben; navigiert nach dem Senden zu url (falls angegeben) */
+  window.gtag_report_conversion = url => {
+    const weiter = () => { if (typeof url !== 'undefined') window.location = url; };
+    if (!(adsGeladen && consent && consent.marketing)) { weiter(); return false; }
+    let fertig = false;
+    const cb = () => { if (!fertig) { fertig = true; weiter(); } };
+    gtag('event', 'conversion', { send_to: GOOGLE_ADS_ID + '/' + GOOGLE_ADS_LABELS.cta, event_callback: cb });
+    setTimeout(cb, 800);   // falls Google nicht antwortet: trotzdem weiter
+    return false;
+  };
+  /* CTA-Klicks erfassen: Buttons und Links, die zu Termin, Design-Book, Kontakt, Grundriss, Telefon oder E-Mail führen */
+  const CTA = 'a.btn, button.btn, .gr-btn, [data-booking], a[href^="tel:"], a[href^="mailto:"], a[href*="/design-book"], a[href*="/kontakt"]';
+  document.addEventListener('click', e => {
+    const el = e.target.closest(CTA);
+    if (!el || el.closest('.cookie') || el.matches('[data-cookie], [data-load-hubspot]') || !GOOGLE_ADS_LABELS.cta) return;
+    if (!(adsGeladen && consent && consent.marketing)) return;
+    const href = el.tagName === 'A' ? el.getAttribute('href') : null;
+    const wechselt = href && !href.startsWith('#') && !href.startsWith('tel:') && !href.startsWith('mailto:') && el.target !== '_blank' && !e.metaKey && !e.ctrlKey && !e.shiftKey;
+    if (wechselt) { e.preventDefault(); window.gtag_report_conversion(el.href); }
+    else gtag('event', 'conversion', { send_to: GOOGLE_ADS_ID + '/' + GOOGLE_ADS_LABELS.cta });
+  }, true);
   window.dvConversion = aktion => {
     const label = GOOGLE_ADS_LABELS[aktion];
     if (adsGeladen && label && consent && consent.marketing) gtag('event', 'conversion', { send_to: GOOGLE_ADS_ID + '/' + label });
