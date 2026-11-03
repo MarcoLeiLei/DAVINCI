@@ -12,6 +12,7 @@ if (ist_post()) {
     $x['paket'] = max(1, min(50, (int) p('paket')));
     $x['gruppen'] = array_values(array_filter(array_map('trim', explode("\n", p('gruppen')))));
     $x['pflichtangaben'] = p('pflichtangaben');
+    $x['messen'] = p('messen') === '1';
   });
   protokoll('Einstellungen geändert');
   meldung('Einstellungen gespeichert.');
@@ -30,6 +31,7 @@ seitenkopf('Verwaltung', 'Einstellungen');
       <label class="feld voll">Antworten gehen an<input type="email" name="antwort" value="<?= e($e['antwort']) ?>"></label>
       <label class="feld">Höchstens E-Mails pro Stunde<input type="number" name="stundenlimit" value="<?= (int) $e['stundenlimit'] ?>" min="10" max="2000"></label>
       <label class="feld">E-Mails pro Paket<input type="number" name="paket" value="<?= (int) $e['paket'] ?>" min="1" max="50"></label>
+      <label class="check voll"><input type="checkbox" name="messen" value="1"<?= ($e['messen'] ?? true) ? ' checked' : '' ?>><span>Öffnungen und Klicks messen (unsichtbares Bild und gezählte Links im Newsletter)</span></label>
       <p class="muted klein voll">SiteGround begrenzt die Zahl der E-Mails pro Stunde je nach Tarif (StartUp etwa 400, GrowBig 800, GoGeek 1.200). Bleiben Sie mit etwas Abstand darunter, die Website verschickt ja auch E-Mails. Größere Listen werden automatisch über mehrere Stunden verteilt.</p>
       <h2 class="voll" style="margin-top:10px">Signatur</h2>
       <label class="feld voll">Pflichtangaben unter jeder E-Mail (§ 35a GmbHG)<textarea name="pflichtangaben" rows="2" style="min-height:60px"><?= e(pflichtangaben()) ?></textarea></label>

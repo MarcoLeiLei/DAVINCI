@@ -29,6 +29,11 @@ function leere_kampagne(): array {
 function kampagne_zahlen(array $k): array {
   $z = ['gesamt' => count($k['empfaenger'] ?? []), 'ok' => 0, 'fehler' => 0, 'offen' => 0, 'uebersprungen' => 0, 'abgemeldet' => (int) ($k['abmeldungen'] ?? 0)];
   foreach ($k['empfaenger'] ?? [] as $e) $z[$e['status']] = ($z[$e['status']] ?? 0) + 1;
+  $st = nl_statistik($k['id'] ?? '');
+  $z['geoeffnet'] = count(array_filter($st, fn($x) => !empty($x['o']) || !empty($x['k'])));   // ein Klick zählt auch als Öffnung
+  $z['geklickt'] = count(array_filter($st, fn($x) => !empty($x['k'])));
+  $z['oeffnungsrate'] = $z['ok'] ? round($z['geoeffnet'] / $z['ok'] * 100) : null;
+  $z['klickrate'] = $z['ok'] ? round($z['geklickt'] / $z['ok'] * 100) : null;
   return $z;
 }
 
@@ -122,6 +127,43 @@ function nl_block(array $b, ?array $k): string {
   }
   return '';
 }
+/* ---------- Öffnungen und Klicks messen ----------
+   Pro Empfänger: unsichtbares Pixel (oeffnung.php) und Links über klick.php. Signiert, damit niemand Zahlen fälschen
+   oder klick.php als offene Weiterleitung missbrauchen kann. Abschaltbar unter Einstellungen. */
+function nl_messen(): bool { return (bool) (einstellungen()['messen'] ?? true); }
+function nl_geheim(): string {
+  $g = lesen('geheim')['nl'] ?? '';
+  if (!$g) $g = aendern('geheim', function (&$d) { if (empty($d['nl'])) $d['nl'] = bin2hex(random_bytes(32)); return $d['nl']; });
+  return $g;
+}
+function nl_sig(string $kid, string $cid, string $url = ''): string { return substr(hash_hmac('sha256', "$kid|$cid|$url", nl_geheim()), 0, 20); }
+function nl_statistik(string $kid): array { return $kid === '' ? [] : (lesen('nl_statistik')[$kid] ?? []); }
+/** Öffnung ('o') oder Klick ('k') festhalten: erster Zeitpunkt und Anzahl. */
+function nl_ereignis(string $kid, string $cid, string $art): void {
+  $kamp = lesen('kampagnen')[$kid] ?? null;
+  if (!$kamp || !isset($kamp['empfaenger'][$cid])) return;
+  aendern('nl_statistik', function (&$d) use ($kid, $cid, $art) {
+    $e = $d[$kid][$cid] ?? [];
+    if (empty($e[$art])) $e[$art] = date('c');
+    $e[$art . 'n'] = (int) ($e[$art . 'n'] ?? 0) + 1;
+    $d[$kid][$cid] = $e;
+  });
+}
+/** Mess-Daten eines Kontakts löschen (bei Abmeldung). */
+function nl_statistik_loeschen(string $cid): void {
+  aendern('nl_statistik', function (&$d) use ($cid) { foreach ($d as $kid => $_) unset($d[$kid][$cid]); });
+}
+function nl_verfolgen(string $html, string $kid, string $cid, string $abmelden): string {
+  $basis = basis_url();
+  $html = preg_replace_callback('#<a href="(https?://[^"]+)"#', function ($m) use ($kid, $cid, $abmelden, $basis) {
+    $url = html_entity_decode($m[1], ENT_QUOTES, 'UTF-8');
+    if ($url === $abmelden || str_contains($url, 'newsletter-abmelden.php')) return $m[0];
+    return '<a href="' . e($basis . '/klick.php?k=' . $kid . '&c=' . $cid . '&u=' . rawurlencode($url) . '&s=' . nl_sig($kid, $cid, $url)) . '"';
+  }, $html);
+  $pixel = '<img src="' . e($basis . '/oeffnung.php?k=' . $kid . '&c=' . $cid . '&s=' . nl_sig($kid, $cid)) . '" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;">';
+  return str_replace('</body>', $pixel . '</body>', $html);
+}
+
 function nl_html(array $kamp, ?array $k, string $abmelden): string {
   $inhalt = '';
   foreach ($kamp['bloecke'] as $b) $inhalt .= nl_block($b, $k);
@@ -243,7 +285,9 @@ function versand_schritt(string $kid): array {
       $k = $kontakte[$cid] ?? null;
       if (!$k || !nl_erlaubt($k) || gesperrt($k['email'])) { $ergebnis[$cid] = 'uebersprungen'; continue; }
       $ab = abmelde_url($k, $kid);
-      $ok = nl_mail($k['email'], nl_ersetzen($kamp['betreff'], $k), nl_html($kamp, $k, $ab), $ab);
+      $html = nl_html($kamp, $k, $ab);
+      if (nl_messen()) $html = nl_verfolgen($html, $kid, $cid, $ab);
+      $ok = nl_mail($k['email'], nl_ersetzen($kamp['betreff'], $k), $html, $ab);
       $ergebnis[$cid] = $ok ? 'ok' : 'fehler';
       $zeiten[] = time();
       if ($ok) $erhalten[] = $cid;

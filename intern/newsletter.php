@@ -26,10 +26,10 @@ seitenkopf('E-Mail an Kunden', 'Newsletter', '<a class="btn" href="kampagne.php?
     <h2 style="margin-bottom:14px">Ausgaben</h2>
     <?php if (!$kampagnen): ?><?= leer('Noch kein Newsletter. Legen Sie den ersten an: Betreff, Bilder und Text, dann Empfänger wählen und versenden.') ?><?php else: ?>
     <div class="tabelle-wrap"><table class="tabelle">
-      <thead><tr><th>Betreff</th><th>Status</th><th class="rechts">Empfänger</th><th class="rechts">Zugestellt</th><th class="rechts">Abmeldungen</th><th>Datum</th></tr></thead>
+      <thead><tr><th>Betreff</th><th>Status</th><th class="rechts">Empfänger</th><th class="rechts">Zugestellt</th><th class="rechts">Geöffnet</th><th class="rechts">Geklickt</th><th class="rechts">Abmeldungen</th><th>Datum</th></tr></thead>
       <tbody><?php foreach ($kampagnen as $k): $s = kampagne_zahlen($k); ?>
         <tr data-href="kampagne.php?id=<?= e($k['id']) ?>"><td><a href="kampagne.php?id=<?= e($k['id']) ?>"><?= e($k['betreff'] ?: 'Ohne Betreff') ?></a></td><td><?= status_pill($k['status'], KAMPAGNE_STATUS) ?></td>
-          <td class="rechts"><?= $s['gesamt'] ?: '–' ?></td><td class="rechts"><?= $k['status'] === 'entwurf' ? '–' : $s['ok'] ?></td><td class="rechts"><?= $s['abgemeldet'] ?: '–' ?></td>
+          <td class="rechts"><?= $s['gesamt'] ?: '–' ?></td><td class="rechts"><?= $k['status'] === 'entwurf' ? '–' : $s['ok'] ?></td><td class="rechts"><?= $s['oeffnungsrate'] === null ? '–' : $s['oeffnungsrate'] . ' %' ?></td><td class="rechts"><?= $s['klickrate'] === null ? '–' : $s['klickrate'] . ' %' ?></td><td class="rechts"><?= $s['abgemeldet'] ?: '–' ?></td>
           <td class="nowrap muted klein"><?= $k['status'] === 'geplant' ? 'am ' . datum($k['geplant_fuer'], true) : ($k['fertig'] ? datum($k['fertig']) : ($k['gestartet'] ? 'seit ' . datum($k['gestartet']) : relativ($k['geaendert']))) ?></td></tr>
       <?php endforeach; ?></tbody></table></div><?php endif; ?>
   </section>

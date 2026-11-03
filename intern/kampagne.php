@@ -192,13 +192,22 @@ if ($kamp['status'] !== 'entwurf') {
           <dt>Gruppen</dt><dd><?= $kamp['gruppen'] ? e(implode(', ', $kamp['gruppen'])) : 'Alle Empfänger mit Einwilligung' ?></dd>
           <dt>Abmeldungen</dt><dd><?= $z['abgemeldet'] ?></dd>
         </dl>
+        <div class="kpis kpis--4" style="margin-top:18px">
+          <div class="kpi"><span class="kpi__label">Öffnungsrate</span><span class="kpi__wert"><?= $z['oeffnungsrate'] === null ? '–' : $z['oeffnungsrate'] . ' %' ?></span><span class="kpi__sub"><?= $z['geoeffnet'] ?> von <?= $z['ok'] ?> geöffnet</span></div>
+          <div class="kpi"><span class="kpi__label">Klickrate</span><span class="kpi__wert"><?= $z['klickrate'] === null ? '–' : $z['klickrate'] . ' %' ?></span><span class="kpi__sub"><?= $z['geklickt'] ?> haben geklickt</span></div>
+          <div class="kpi"><span class="kpi__label">Klicks je Öffnung</span><span class="kpi__wert"><?= $z['geoeffnet'] ? round($z['geklickt'] / $z['geoeffnet'] * 100) . ' %' : '–' ?></span><span class="kpi__sub">Anteil der Leser mit Klick</span></div>
+          <div class="kpi"><span class="kpi__label">Abmelderate</span><span class="kpi__wert"><?= $z['ok'] ? round($z['abgemeldet'] / $z['ok'] * 100, 1) . ' %' : '–' ?></span><span class="kpi__sub"><?= $z['abgemeldet'] ?> Abmeldungen</span></div>
+        </div>
+        <p class="muted klein" style="margin-top:10px">Öffnungen sind ein Richtwert: Apple Mail lädt Bilder oft automatisch (zählt dann als geöffnet), andere Programme blockieren sie (zählt nicht). Klicks sind genau.</p>
       </section>
       <section class="card">
         <h2 style="margin-bottom:12px">Empfänger</h2>
-        <div class="tabelle-wrap"><table class="tabelle"><thead><tr><th>Name</th><th>E-Mail</th><th>Status</th><th>Zeit</th></tr></thead><tbody>
+        <div class="tabelle-wrap"><table class="tabelle"><thead><tr><th>Name</th><th>E-Mail</th><th>Status</th><th>Geöffnet</th><th>Geklickt</th><th>Zeit</th></tr></thead><tbody>
+          <?php $stat = nl_statistik($id); ?>
           <?php foreach (array_slice($kamp['empfaenger'], 0, 500, true) as $cid => $e): $c = $kontakte[$cid] ?? null; ?>
             <tr><td><?= $c ? '<a href="kontakte.php?id=' . e($cid) . '">' . e(kontakt_name($c)) . '</a>' : '<span class="muted">gelöscht</span>' ?></td><td><?= e($e['email']) ?></td>
-              <td><?= status_pill($e['status'], ['offen' => 'wartet', 'ok' => 'zugestellt', 'fehler' => 'Fehler', 'uebersprungen' => 'übersprungen']) ?></td><td class="muted klein nowrap"><?= $e['zeit'] ? datum($e['zeit'], true) : '' ?></td></tr>
+              <td><?= status_pill($e['status'], ['offen' => 'wartet', 'ok' => 'zugestellt', 'fehler' => 'Fehler', 'uebersprungen' => 'übersprungen']) ?></td>
+              <?php $st = $stat[$cid] ?? []; $auf = $st['o'] ?? ($st['k'] ?? null); ?><td class="muted klein nowrap"><?= $auf ? datum($auf, true) . (($st['on'] ?? 0) > 1 ? ' · ' . (int) $st['on'] . '×' : '') : '–' ?></td><td class="muted klein nowrap"><?= !empty($st['k']) ? (int) $st['kn'] . '×' : '–' ?></td><td class="muted klein nowrap"><?= $e['zeit'] ? datum($e['zeit'], true) : '' ?></td></tr>
           <?php endforeach; ?>
         </tbody></table></div>
         <?php if (count($kamp['empfaenger']) > 500): ?><p class="muted klein" style="margin-top:10px">… und <?= count($kamp['empfaenger']) - 500 ?> weitere</p><?php endif; ?>

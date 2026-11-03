@@ -18,6 +18,7 @@ if (ist_post() && $kontakt) {
     });
     sperren($kontakt['email']);
     website_nl_abmelden($kontakt['email']);
+    nl_statistik_loeschen($kontakt['id']);
     if ($kamp) aendern('kampagnen', function (&$a) use ($kamp) { if (isset($a[$kamp])) $a[$kamp]['abmeldungen'] = (int) ($a[$kamp]['abmeldungen'] ?? 0) + 1; });
   }
   if (isset($_POST['List-Unsubscribe'])) { http_response_code(200); exit('OK'); }   // One-Click aus dem Mailprogramm
