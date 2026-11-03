@@ -23,6 +23,7 @@ function kampagne_aus_post(array $k): array {
   $k['betreff'] = mb_substr(p('betreff'), 0, 200);
   $k['preheader'] = mb_substr(p('preheader'), 0, 200);
   $k['gruppen'] = array_values(array_filter((array) ($_POST['gruppen'] ?? []), 'is_string'));
+  $k['ausgeschlossen'] = array_values(array_filter((array) ($_POST['ausschliessen'] ?? []), fn($x) => is_string($x) && preg_match('/^[a-f0-9]{1,32}$/', $x)));
   $k['bloecke'] = bloecke_aus_post();
   $k['geaendert'] = date('c');
   return $k;
@@ -88,7 +89,7 @@ if (ist_post()) {
     case 'starten':
       if ($kamp['status'] !== 'entwurf') weiter('kampagne.php?id=' . $id);
       $k = kampagne_aus_post($kamp);
-      $empf = empfaenger_waehlen(kontakte(), $k['gruppen']);
+      $empf = empfaenger_waehlen(kontakte(), $k['gruppen'], $k['ausgeschlossen']);
       $fehler = $k['betreff'] === '' ? 'Bitte einen Betreff eintragen.' : (!$k['bloecke'] ? 'Der Newsletter hat noch keinen Inhalt.' : (!$empf ? 'Für diese Auswahl gibt es keine Empfänger mit Einwilligung.' : (!p('bestaetigt') ? 'Bitte den Versand bestätigen.' : '')));
       if ($fehler) { aendern('kampagnen', function (&$a) use ($id, $k) { $a[$id] = $k; }); meldung($fehler, 'fehler'); weiter('kampagne.php?id=' . $id); }
       // Später versenden: Zeitpunkt prüfen und Newsletter einplanen
@@ -117,7 +118,7 @@ if (ist_post()) {
       weiter('kampagne.php?id=' . $id);
     case 'kopieren':
       $neu = leere_kampagne();
-      foreach (['betreff', 'preheader', 'gruppen', 'bloecke'] as $f) $neu[$f] = $kamp[$f];
+      foreach (['betreff', 'preheader', 'gruppen', 'bloecke', 'ausgeschlossen'] as $f) $neu[$f] = $kamp[$f] ?? [];
       $neu['betreff'] = $kamp['betreff'] . ' (Kopie)';
       aendern('kampagnen', function (&$a) use ($neu) { $a[$neu['id']] = $neu; });
       meldung('Kopie angelegt.');
@@ -224,7 +225,10 @@ $gruppenZahl = [];
 $erlaubt = array_filter($kontakte, 'nl_erlaubt');
 foreach ($erlaubt as $k) foreach ($k['gruppen'] as $g) $gruppenZahl[$g] = ($gruppenZahl[$g] ?? 0) + 1;
 $alleGruppen = array_values(array_unique(array_merge($einst['gruppen'], array_keys($gruppenZahl))));
-$gruppenListe = array_values(array_map(fn($k) => $k['gruppen'], $erlaubt));   // für die Live-Zählung, ohne persönliche Daten
+$kandidaten = empfaenger_waehlen($kontakte, []);   // alle, die überhaupt angeschrieben werden dürfen
+$ausgeschlossen = $kamp['ausgeschlossen'] ?? [];
+$gruppenListe = array_values(array_map(fn($k) => ['id' => $k['id'], 'g' => $k['gruppen']], $kandidaten));   // für die Live-Zählung
+usort($kandidaten, fn($a, $b) => strcasecmp(kontakt_name($a), kontakt_name($b)));
 kopf($kamp['betreff'] ?: 'Neuer Newsletter', 'newsletter', ['body' => 'editor-seite']);
 seitenkopf('Newsletter · Entwurf', e($kamp['betreff'] ?: 'Neuer Newsletter'),
   '<form method="post" action="kampagne.php?id=' . e($id) . '&aktion=loeschen" data-bestaetigen="Entwurf löschen?">' . csrf_feld() . '<button class="btn btn--hell">' . icon('trash') . ' Löschen</button></form>');
@@ -254,7 +258,17 @@ seitenkopf('Newsletter · Entwurf', e($kamp['betreff'] ?: 'Neuer Newsletter'),
     <section class="card form">
       <h2>Empfänger</h2>
       <div class="checks"><?php foreach ($alleGruppen as $g): ?><label class="chip"><input type="checkbox" name="gruppen[]" value="<?= e($g) ?>"<?= in_array($g, $kamp['gruppen'], true) ? ' checked' : '' ?>><span><?= e($g) ?> · <?= $gruppenZahl[$g] ?? 0 ?></span></label><?php endforeach; ?></div>
-      <p class="hinweis"><b data-anzahl><?= count(empfaenger_waehlen($kontakte, $kamp['gruppen'])) ?></b> Empfänger. <span data-anzahl-text><?= $kamp['gruppen'] ? 'Kontakte in mindestens einer der gewählten Gruppen' : 'Keine Gruppe gewählt: alle Kontakte' ?></span> mit Einwilligung oder als Bestandskunde. Abgemeldete werden nie angeschrieben.</p>
+      <details class="ausschluss" style="margin-top:14px"<?= $ausgeschlossen ? ' open' : '' ?>>
+        <summary><b>Einzelne Empfänger ausschließen</b> <span class="muted klein" data-aus-zahl><?= $ausgeschlossen ? count($ausgeschlossen) . ' ausgeschlossen' : '' ?></span></summary>
+        <input type="search" placeholder="Name oder E-Mail suchen" data-aus-suche style="margin:10px 0">
+        <div class="ausschluss__liste">
+          <?php foreach ($kandidaten as $c): ?><label class="ausschluss__zeile" data-aus-zeile data-gruppen="<?= e(json_encode($c['gruppen'], JSON_UNESCAPED_UNICODE)) ?>" data-text="<?= e(mb_strtolower(kontakt_name($c) . ' ' . $c['email'])) ?>">
+            <input type="checkbox" name="ausschliessen[]" value="<?= e($c['id']) ?>"<?= in_array($c['id'], $ausgeschlossen, true) ? ' checked' : '' ?>>
+            <span><?= e(kontakt_name($c)) ?> <span class="muted klein"><?= e($c['email']) ?></span></span></label><?php endforeach; ?>
+        </div>
+        <p class="muted klein" style="margin-top:8px">Angehakte Kontakte bekommen diesen Newsletter nicht. Sie bleiben im Verteiler und erhalten spätere Newsletter normal.</p>
+      </details>
+      <p class="hinweis"><b data-anzahl><?= count(empfaenger_waehlen($kontakte, $kamp['gruppen'], $ausgeschlossen)) ?></b> Empfänger. <span data-anzahl-text><?= $kamp['gruppen'] ? 'Kontakte in mindestens einer der gewählten Gruppen' : 'Keine Gruppe gewählt: alle Kontakte' ?></span> mit Einwilligung oder als Bestandskunde. Abgemeldete werden nie angeschrieben.</p>
     </section>
     <section class="card form">
       <h2>Testen</h2>
@@ -268,7 +282,7 @@ seitenkopf('Newsletter · Entwurf', e($kamp['betreff'] ?: 'Neuer Newsletter'),
         <label class="chip"><input type="radio" name="wann" value="spaeter" data-wann><span><?= icon('clock') ?> Später senden</span></label>
       </div>
       <label class="feld" data-zeitpunkt hidden>Versenden am<input type="datetime-local" name="zeitpunkt" value="<?= e(date('Y-m-d\TH:i', strtotime('tomorrow 09:00'))) ?>" min="<?= e(date('Y-m-d\TH:i')) ?>"></label>
-      <label class="check"><input type="checkbox" name="bestaetigt" value="1"><span>Ich habe den Test geprüft. Der Newsletter geht an <b data-anzahl><?= count(empfaenger_waehlen($kontakte, $kamp['gruppen'])) ?></b> Empfänger.</span></label>
+      <label class="check"><input type="checkbox" name="bestaetigt" value="1"><span>Ich habe den Test geprüft. Der Newsletter geht an <b data-anzahl><?= count(empfaenger_waehlen($kontakte, $kamp['gruppen'], $ausgeschlossen)) ?></b> Empfänger.</span></label>
       <p class="muted klein" data-zeitpunkt hidden>Die Empfänger werden zum Versandzeitpunkt aus den gewählten Gruppen zusammengestellt. Wer sich bis dahin abmeldet, bekommt nichts. Für den pünktlichen Start muss der Cron-Job eingerichtet sein.</p>
       <div class="knopfreihe"><button class="btn" type="submit">Entwurf speichern</button><button class="btn btn--akzent" type="submit" formaction="kampagne.php?id=<?= e($id) ?>&aktion=starten" data-starten><?= icon('mail') ?> <span data-starten-text>Jetzt versenden</span></button></div>
     </section>

@@ -38,10 +38,10 @@ function kampagne_zahlen(array $k): array {
 }
 
 /** Kontakte, die einen Newsletter an diese Gruppen bekommen dürfen (keine Gruppe = alle). */
-function empfaenger_waehlen(array $kontakte, array $gruppen): array {
-  $o = []; $mails = [];
+function empfaenger_waehlen(array $kontakte, array $gruppen, array $ausgeschlossen = []): array {
+  $o = []; $mails = []; $aus = array_flip($ausgeschlossen);
   foreach ($kontakte as $k) {
-    if (!nl_erlaubt($k)) continue;
+    if (!nl_erlaubt($k) || isset($aus[$k['id']])) continue;
     if ($gruppen && !array_intersect($gruppen, $k['gruppen'])) continue;
     $m = strtolower($k['email']); if (isset($mails[$m]) || gesperrt($m)) continue;
     $mails[$m] = 1; $o[$k['id']] = $k;
@@ -240,7 +240,8 @@ function mail_roh(string $an, string $betreff, string $html, array $o = []): boo
 
 /** Empfänger festhalten und Versand starten (sofort oder zum geplanten Zeitpunkt). */
 function kampagne_starten(string $id): int {
-  $empf = empfaenger_waehlen(kontakte(), lesen('kampagnen')[$id]['gruppen'] ?? []);
+  $kk = lesen('kampagnen')[$id] ?? [];
+  $empf = empfaenger_waehlen(kontakte(), $kk['gruppen'] ?? [], $kk['ausgeschlossen'] ?? []);
   aendern('kampagnen', function (&$a) use ($id, $empf) {
     $a[$id]['empfaenger'] = [];
     foreach ($empf as $cid => $c) $a[$id]['empfaenger'][$cid] = ['email' => $c['email'], 'status' => 'offen', 'zeit' => null];

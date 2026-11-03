@@ -120,11 +120,19 @@
   // Empfänger live zählen
   const zaehlen = () => {
     const gew = $$('[name="gruppen[]"]:checked', form).map(c => c.value);
-    const n = gew.length ? gruppenListe.filter(g => g.some(x => gew.includes(x))).length : gruppenListe.length;
+    const aus = new Set($$('[name="ausschliessen[]"]:checked', form).map(c => c.value));
+    const inGruppe = g => !gew.length || g.some(x => gew.includes(x));
+    const n = gruppenListe.filter(k => inGruppe(k.g) && !aus.has(k.id)).length;
+    // Ausschlussliste: nur Kontakte der gewählten Gruppen zeigen
+    const q = ($('[data-aus-suche]')?.value || '').trim().toLowerCase();
+    $$('[data-aus-zeile]').forEach(z => { z.hidden = !inGruppe(JSON.parse(z.dataset.gruppen || '[]')) || (q && !z.dataset.text.includes(q)); });
+    const za = $('[data-aus-zahl]'); if (za) za.textContent = aus.size ? aus.size + ' ausgeschlossen' : '';
     $$('[data-anzahl]').forEach(el => { el.textContent = n; });
     $('[data-anzahl-text]').textContent = gew.length ? 'Kontakte in mindestens einer der gewählten Gruppen' : 'Keine Gruppe gewählt: alle Kontakte';
   };
-  $$('[name="gruppen[]"]', form).forEach(c => c.addEventListener('change', () => { zaehlen(); sync(); }));
+  $$('[name="gruppen[]"], [name="ausschliessen[]"]', form).forEach(c => c.addEventListener('change', () => { zaehlen(); sync(); }));
+  $('[data-aus-suche]')?.addEventListener('input', zaehlen);
+  zaehlen();
   $$('[name="betreff"], [name="preheader"]', form).forEach(el => el.addEventListener('input', sync));
 
   // Test senden

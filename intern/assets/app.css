@@ -281,3 +281,11 @@ details.card > summary { list-style: none; } details.card > summary::-webkit-det
 [hidden] { display: none !important; }
 .editor > * { min-width: 0; }
 input[type=file] { max-width: 100%; font: inherit; font-size: 14px; }
+
+/* Newsletter: einzelne Empfänger ausschließen */
+.ausschluss summary { cursor: pointer; }
+.ausschluss__liste { max-height: 320px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
+.ausschluss__zeile { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-top: 1px solid var(--line); cursor: pointer; }
+.ausschluss__zeile:first-child { border-top: 0; }
+.ausschluss__zeile[hidden] { display: none; }
+.ausschluss__zeile:has(input:checked) > span { text-decoration: line-through; opacity: .55; }
