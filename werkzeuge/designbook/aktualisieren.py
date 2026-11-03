@@ -350,8 +350,18 @@ def ohne_preis(doc):
             p.draw_rect(fitz.Rect(sp['bbox'][0] - 17, y - 2, sp['bbox'][0] - 6, y + 2), color=None, fill=PAPIER)
 
 
+def telefon(doc):
+    for i in range(len(doc)):
+        if '157 868 328 59' in doc[i].get_text():
+            text_tauschen(doc[i], [('+49 157 868 328 59', '+49 151 681 079 08')])
+            for l in doc[i].get_links():
+                if l.get('uri', '').startswith('tel:'):
+                    l['uri'] = 'tel:+4915168107908'; doc[i].update_link(l)
+
+
 def korrekturen(doc):
     haltung_bilder(doc)
+    telefon(doc)
     chronik(doc)
     ohne_preis(doc)
     # Seite 10 · Kollektion

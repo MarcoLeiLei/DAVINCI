@@ -9,7 +9,7 @@ const KAMPAGNE_STATUS = ['entwurf' => 'Entwurf', 'geplant' => 'Geplant', 'laeuft
 const NL_F = "font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;";
 const FIRMA = 'Fivemeters UG (haftungsbeschränkt)';
 const ADRESSE = 'Kaiser-Friedrich-Ring 43 · 40545 Düsseldorf';
-const TELEFON = '+49 157 868 328 59';
+const TELEFON = '+49 151 681 079 08';
 
 function website_url(): string { return rtrim((string) cfg('website_url', 'https://davinci-homes.de'), '/'); }
 

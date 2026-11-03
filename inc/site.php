@@ -65,7 +65,7 @@ function seite_start(array $p): void {
   $org = ['@context' => 'https://schema.org', '@type' => 'HomeAndConstructionBusiness', 'name' => 'DAVINCI', 'url' => SITE,
     'slogan' => 'Designed to stay.', 'logo' => SITE . '/assets/img/signet.svg', 'image' => SITE . '/assets/img/dv-01-flachdach-weiss-abend.jpg',
     'description' => t('Häuser aus Holz und Glas aus einem durchdachten System: zehn DAVINCI Produkte und individuelle Entwürfe.', 'Homes in wood and glass from a considered system: ten DAVINCI models and bespoke designs.'),
-    'email' => 'bauen@davinci-homes.de', 'telephone' => '+4915786832859',
+    'email' => 'bauen@davinci-homes.de', 'telephone' => '+4915168107908',
     'address' => ['@type' => 'PostalAddress', 'streetAddress' => 'Kaiser-Friedrich-Ring 43', 'postalCode' => '40545', 'addressLocality' => 'Düsseldorf', 'addressCountry' => 'DE'],
     'areaServed' => 'DE'];
   $schemas = [$org];
@@ -160,7 +160,7 @@ function seite_start(array $p): void {
   </nav>
   <div class="mobile-menu__foot">
     <a href="#termin" class="btn btn--light mm-cta" data-booking><?= t('Termin vereinbaren', 'Book a meeting') ?></a>
-    <p class="mm-contact"><a href="tel:+4915786832859">+49 157 868 328 59</a><a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></p>
+    <p class="mm-contact"><a href="tel:+4915168107908">+49 151 681 079 08</a><a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></p>
   </div>
 </div>
 
@@ -228,7 +228,7 @@ function seite_ende(): void { ?>
         <h5><?= t('Kontakt', 'Contact') ?></h5>
         <ul>
           <li><a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></li>
-          <li><a href="tel:+4915786832859">+49 157 868 328 59</a></li>
+          <li><a href="tel:+4915168107908">+49 151 681 079 08</a></li>
           <li>Kaiser-Friedrich-Ring 43<br>40545 Düsseldorf<?= t('', ', Germany') ?></li>
           <li><a href="#termin" data-booking><?= t('Termin vereinbaren', 'Book a meeting') ?></a></li>
         </ul>
@@ -289,7 +289,7 @@ function seite_ende(): void { ?>
           <button type="submit" class="btn btn--dark" data-label="<?= t('Termin anfragen', 'Request a meeting') ?>"><?= t('Termin anfragen', 'Request a meeting') ?></button>
           <p class="form__msg" data-form-msg role="status"></p>
         </div>
-        <p class="booking__alt full"><?= t('Lieber direkt?', 'Prefer to talk directly?') ?> <a href="tel:+4915786832859">+49 157 868 328 59</a> · <a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></p>
+        <p class="booking__alt full"><?= t('Lieber direkt?', 'Prefer to talk directly?') ?> <a href="tel:+4915168107908">+49 151 681 079 08</a> · <a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></p>
       </form>
     </div>
   </div>

@@ -18,7 +18,7 @@ seite_start(['slug' => 'impressum', 'title' => 'Impressum | DAVINCI', 'desc' => 
     <p>Marco Lei Zimmermann (Geschäftsführer)</p>
 
     <h3>Kontakt</h3>
-    <p>Telefon: +49 157 868 328 59<br>
+    <p>Telefon: +49 151 681 079 08<br>
     E-Mail: <a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></p>
 
     <h3>Registereintrag</h3>

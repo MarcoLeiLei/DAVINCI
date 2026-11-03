@@ -7,7 +7,7 @@ seite_start(['slug' => 'datenschutz', 'title' => 'Datenschutzerklärung | DAVINC
     <p class="eyebrow">Rechtliches</p>
     <h1 class="h1" style="margin-top:20px">Datenschutz&shy;erklärung</h1>
     <h2>1. Verantwortlicher</h2>
-    <p>Fivemeters UG (haftungsbeschränkt)<br>vertreten durch den Geschäftsführer Marco Lei Zimmermann<br>Kaiser-Friedrich-Ring 43, 40545 Düsseldorf<br>E-Mail: <a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a><br>Telefon: +49 157 868 328 59</p>
+    <p>Fivemeters UG (haftungsbeschränkt)<br>vertreten durch den Geschäftsführer Marco Lei Zimmermann<br>Kaiser-Friedrich-Ring 43, 40545 Düsseldorf<br>E-Mail: <a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a><br>Telefon: +49 151 681 079 08</p>
 
     <h2>2. Allgemeines</h2>
     <p>DAVINCI ist ein Angebot der Fivemeters UG (haftungsbeschränkt). Wir verarbeiten personenbezogene Daten ausschließlich im Rahmen der Datenschutz-Grundverordnung (DSGVO) und des Bundesdatenschutzgesetzes (BDSG). Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>

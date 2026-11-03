@@ -517,7 +517,7 @@ const GOOGLE_ADS_LABELS = {
         <p class="lead">${T.bLead}</p>
         <p>${T.bText}</p>
         <button type="button" class="btn btn--dark" data-load-hubspot>${T.bLaden}</button>
-        <p>${T.bDirekt} <a href="tel:+4915786832859">+49 157 868 328 59</a> · <a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></p>
+        <p>${T.bDirekt} <a href="tel:+4915168107908">+49 151 681 079 08</a> · <a href="mailto:bauen@davinci-homes.de">bauen@davinci-homes.de</a></p>
       </div>`;
       $('[data-load-hubspot]', body).addEventListener('click', () => saveConsent(true));
       return;
