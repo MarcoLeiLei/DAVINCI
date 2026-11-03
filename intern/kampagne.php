@@ -126,6 +126,7 @@ if (ist_post()) {
     case 'loeschen':
       if ($kamp['status'] === 'laeuft') { meldung('Bitte den Versand zuerst pausieren.', 'fehler'); weiter('kampagne.php?id=' . $id); }
       aendern('kampagnen', function (&$a) use ($id) { unset($a[$id]); });
+      aendern('nl_statistik', function (&$d) use ($id) { unset($d[$id]); });
       meldung('Newsletter gelöscht.');
       weiter('newsletter.php');
   }
