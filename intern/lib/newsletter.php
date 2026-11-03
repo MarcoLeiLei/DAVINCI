@@ -192,7 +192,7 @@ function abmelde_url(array $k, string $kampagne = ''): string {
 /* ---------- Versand ---------- */
 function nl_mail(string $an, string $betreff, string $html, string $abmelden = ''): bool {
   $e = einstellungen();
-  return mail_roh($an, $betreff, $html, ['von' => $e['absender'], 'von_name' => $e['absender_name'], 'antwort' => $e['antwort'], 'abmelden' => $abmelden]);
+  return mail_roh($an, $betreff, $html, ['von' => $e['absender'], 'von_name' => $e['absender_name'], 'antwort' => $e['antwort'], 'abmelden' => $abmelden, 'einbetten' => true]);
 }
 
 /** HTML in lesbaren Klartext umwandeln (zweiter Teil jeder E-Mail). */
@@ -205,8 +205,46 @@ function klartext(string $html): string {
 function kopf_name(string $name, string $mail): string { return '=?UTF-8?B?' . base64_encode($name) . '?= <' . $mail . '>'; }
 
 /**
+ * Bilder von Website und Mediathek in die E-Mail einbetten (src -> cid:). Gibt [[cid, typ, daten, name], …] zurück.
+ * Große Fotos werden auf 1200 px Breite verkleinert. Zähl-Pixel und fremde Bilder bleiben extern.
+ */
+function bilder_einbetten(string &$html): array {
+  static $cache = [];
+  $quellen = [website_url() . '/assets/img/' => ($w = website_ordner()) ? dirname($w) . '/assets/img/' : null,
+              basis_url() . '/medien/' => APP . '/medien/'];
+  $o = []; $vergeben = [];
+  $html = preg_replace_callback('#<img([^>]*?) src="([^"]+)"#', function ($m) use ($quellen, &$o, &$vergeben, &$cache) {
+    $url = html_entity_decode($m[2], ENT_QUOTES, 'UTF-8');
+    foreach ($quellen as $pre => $dir) {
+      if (!$dir || !str_starts_with($url, $pre)) continue;
+      $name = basename(rawurldecode(substr($url, strlen($pre))));
+      $pfad = $dir . $name;
+      if (!preg_match('/\.(jpe?g|png|gif)$/i', $name) || !is_file($pfad)) return $m[0];
+      if (!isset($vergeben[$pfad])) {
+        if (!isset($cache[$pfad])) {
+          $daten = (string) file_get_contents($pfad); $typ = mime_content_type($pfad) ?: 'image/jpeg';
+          $info = @getimagesize($pfad);
+          if ($info && $info[0] > 1200 && $info[2] === IMAGETYPE_JPEG && function_exists('imagecreatefromstring')) {
+            $src = imagecreatefromstring($daten); $h = (int) round($info[1] * 1200 / $info[0]);
+            $dst = imagecreatetruecolor(1200, $h); imagecopyresampled($dst, $src, 0, 0, 0, 0, 1200, $h, $info[0], $info[1]);
+            ob_start(); imagejpeg($dst, null, 82); $daten = (string) ob_get_clean();
+          }
+          $cache[$pfad] = [$typ, $daten];
+        }
+        $cid = 'b' . count($o) . '.' . bin2hex(random_bytes(4)) . '@davinci-homes.de';
+        $vergeben[$pfad] = $cid;
+        $o[] = [$cid, $cache[$pfad][0], $cache[$pfad][1], $name];
+      }
+      return '<img' . $m[1] . ' src="cid:' . $vergeben[$pfad] . '"';
+    }
+    return $m[0];
+  }, $html);
+  return $o;
+}
+
+/**
  * E-Mail mit HTML- und Textteil senden, optional mit Anhängen.
- * $o: von, von_name, antwort, cc[], bcc[], anhaenge[[name, pfad, typ]], abmelden
+ * $o: von, von_name, antwort, cc[], bcc[], anhaenge[[name, pfad, typ]], abmelden, einbetten (Bilder als Teil der Mail)
  */
 function mail_roh(string $an, string $betreff, string $html, array $o = []): bool {
   $von = $o['von'] ?? cfg('absender', 'bauen@davinci-homes.de');
@@ -216,8 +254,19 @@ function mail_roh(string $an, string $betreff, string $html, array $o = []): boo
   if (!empty($o['bcc'])) $kopf .= 'Bcc: ' . implode(', ', $o['bcc']) . "\r\n";
   if (!empty($o['abmelden'])) $kopf .= 'List-Unsubscribe: <' . $o['abmelden'] . '>, <mailto:' . ($o['antwort'] ?? $von) . "?subject=Newsletter%20abbestellen>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n";
   $alt = 'alt' . bin2hex(random_bytes(8));
-  $teil = "--$alt\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode(klartext($html)) . "\r\n"
-        . "--$alt\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($html) . "\r\n--$alt--";
+  $text = klartext($html);
+  $bilder = !empty($o['einbetten']) ? bilder_einbetten($html) : [];
+  $htmlTeil = "Content-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($html) . "\r\n";
+  if ($bilder) {   // Bilder als Teil der E-Mail (multipart/related): erscheinen auch, wenn das Mailprogramm externe Inhalte blockiert
+    $rel = 'rel' . bin2hex(random_bytes(8));
+    $r = "--$rel\r\n" . $htmlTeil;
+    foreach ($bilder as [$cid, $typ, $daten, $name]) {
+      $r .= "--$rel\r\nContent-Type: $typ; name=\"$name\"\r\nContent-Transfer-Encoding: base64\r\nContent-ID: <$cid>\r\nContent-Disposition: inline; filename=\"$name\"\r\n\r\n" . chunk_split(base64_encode($daten)) . "\r\n";
+    }
+    $htmlTeil = "Content-Type: multipart/related; boundary=\"$rel\"; type=\"text/html\"\r\n\r\n" . $r . "--$rel--\r\n";
+  }
+  $teil = "--$alt\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($text) . "\r\n"
+        . "--$alt\r\n" . $htmlTeil . "--$alt--";
   $kopf .= "MIME-Version: 1.0\r\n";
   if (!empty($o['anhaenge'])) {
     $mix = 'mix' . bin2hex(random_bytes(8));
@@ -234,6 +283,7 @@ function mail_roh(string $an, string $betreff, string $html, array $o = []): boo
     $body = $teil;
   }
   // Testbetrieb: E-Mails in eine Datei schreiben statt zu senden
+  if ($eml = getenv('DV_MAIL_EML')) file_put_contents($eml, 'To: ' . $an . "\r\nSubject: " . $betreff . "\r\n" . $kopf . "\r\n" . $body);
   if ($datei = getenv('DV_MAIL_DATEI')) { file_put_contents($datei, json_encode(['an' => $an, 'betreff' => $betreff, 'kopf' => $kopf, 'laenge' => strlen($body)]) . "\n", FILE_APPEND); return !str_contains($an, 'fehler@'); }
   return @mail($an, '=?UTF-8?B?' . base64_encode($betreff) . '?=', $body, $kopf, '-f' . $von);
 }
