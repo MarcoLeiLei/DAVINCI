@@ -146,7 +146,7 @@ seitenkopf(t('DAVINCI Produkte', 'DAVINCI models') . ' · ' . t($pr['tag'][0], $
     <figure class="haus__plan reveal" data-delay="1">
       <img src="/assets/img/grundriss/<?= $key ?>-eg.webp" width="<?= $gd['plan'][0] ?>" height="<?= $gd['plan'][1] ?>" alt="<?= e(t('Grundriss Erdgeschoss', 'Ground floor plan') . ' ' . $pr['name']) ?>" loading="lazy">
       <figcaption><?= t('Erdgeschoss · Beispielgrundriss', 'Ground floor · example plan') ?></figcaption>
-      <button type="button" class="btn btn--dark" data-grundriss="<?= $key ?>" data-name="<?= e($pr['name']) ?>"><?= t('Alle Geschosse als PDF anfordern', 'Request all floors as PDF') ?></button>
+      <a class="btn btn--dark" href="/downloads/grundrisse/<?= $key ?>.pdf" download="DAVINCI <?= e(ucfirst($key)) ?> - Grundrisse.pdf" data-dl="grundriss"><?= t('Alle Geschosse als PDF herunterladen', 'Download all floors as PDF') ?></a>
     </figure>
   </div>
 </section>

@@ -217,8 +217,8 @@ def seite_tre(doc, nr):
     p.draw_rect(d, color=None, fill=DUNKEL)
     x = d.x0 + 30
     text(p, x, 286, 'Alle Grundrisse online.', 'ml', 27, (1, 1, 1))
-    absatz(p, x, 322, umbrechen('Zehn Häuser, jedes Geschoss im DAVINCI Look. Wählen Sie Ihr Haus auf der Website, '
-                                 'wir senden Ihnen den Grundriss als PDF per E-Mail.', 'ml', 12, d.width - 60), 'ml', 12, (0.8, 0.8, 0.82))
+    absatz(p, x, 322, umbrechen('Zehn Häuser, jedes Geschoss im DAVINCI Look. Wählen Sie Ihr Haus auf der Website '
+                                 'und laden Sie den Grundriss direkt als PDF herunter.', 'ml', 12, d.width - 60), 'ml', 12, (0.8, 0.8, 0.82))
     namen = ['Tre', 'Quattro', 'Piano', 'Alpina', 'Terrazza', 'Pendio', 'Corte', 'Ala', 'Vista', 'Ombra']
     y0 = 412
     for k, n in enumerate(namen):
@@ -227,8 +227,8 @@ def seite_tre(doc, nr):
         text(p, cx, cy, f'{k + 1:02d}', 'ml', 10.5, AKZENT)
         text(p, cx + 28, cy, n, 'ml', 13.5, (1, 1, 1))
     text(p, x, 640, 'davinci-homes.de/haeuser', 'mr', 15, (1, 1, 1))
-    text(p, x, 662, 'Grundriss je Haus anfordern', 'ml', 12, AKZENT)
-    ax = x + breite('Grundriss je Haus anfordern', 'ml', 12) + 10
+    text(p, x, 662, 'Grundriss je Haus herunterladen', 'ml', 12, AKZENT)
+    ax = x + breite('Grundriss je Haus herunterladen', 'ml', 12) + 10
     p.draw_line(fitz.Point(ax, 658), fitz.Point(ax + 16, 658), color=AKZENT, width=0.9)
     p.draw_polyline([fitz.Point(ax + 11, 654), fitz.Point(ax + 16, 658), fitz.Point(ax + 11, 662)], color=AKZENT, width=0.9)
     p.insert_link({'kind': fitz.LINK_URI, 'from': fitz.Rect(x, 620, d.x1 - 30, 670), 'uri': 'https://davinci-homes.de/haeuser/'})
