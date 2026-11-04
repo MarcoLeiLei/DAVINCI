@@ -5,6 +5,15 @@
    Deutsche Seiten liegen im Hauptordner, englische unter /en/.
    ========================================================= */
 require_once __DIR__ . '/../gate.php';
+/* Bilder als WebP ausliefern (gleiches Motiv, ca. 60 % kleiner), wenn eine .webp neben der .jpg liegt.
+   Nur relative Bildpfade im Seiteninhalt; Vorschaubilder für Google/Social (absolute Adressen) bleiben JPG. */
+ob_start(function (string $html): string {
+  // Zeilenumbrüche in Überschriften: Leerzeichen davor, damit Suchmaschinen die Wörter getrennt lesen
+  $html = preg_replace_callback('#<h1\b[^>]*>.*?</h1>#s', fn($m) => preg_replace('#(?<! )<br\s*/?>#', ' <br>', $m[0]), $html);
+  return preg_replace_callback('#(["\'(])/assets/img/([a-z0-9_-]+)\.jpg#i', function ($m) {
+    return is_file(__DIR__ . '/../assets/img/' . $m[2] . '.webp') ? $m[1] . '/assets/img/' . $m[2] . '.webp' : $m[0];
+  }, $html);
+});
 if (!defined('LANG')) define('LANG', 'de');
 const SITE = 'https://davinci-homes.de';
 
@@ -63,7 +72,7 @@ function seite_start(array $p): void {
   $GLOBALS['SEITE'] = $slug;
 
   $org = ['@context' => 'https://schema.org', '@type' => 'HomeAndConstructionBusiness', 'name' => 'DAVINCI', 'url' => SITE,
-    'slogan' => 'Designed to stay.', 'logo' => SITE . '/assets/img/signet.svg', 'image' => SITE . '/assets/img/dv-01-flachdach-weiss-abend.jpg',
+    'slogan' => 'Designed to stay.', 'logo' => SITE . '/assets/img/logo-512.png', 'image' => SITE . '/assets/img/dv-01-flachdach-weiss-abend.jpg',
     'description' => t('Häuser aus Holz und Glas aus einem durchdachten System: zehn DAVINCI Produkte und individuelle Entwürfe.', 'Homes in wood and glass from a considered system: ten DAVINCI models and bespoke designs.'),
     'email' => 'bauen@davinci-homes.de', 'telephone' => '+4915168107908',
     'address' => ['@type' => 'PostalAddress', 'streetAddress' => 'Kaiser-Friedrich-Ring 43', 'postalCode' => '40545', 'addressLocality' => 'Düsseldorf', 'addressCountry' => 'DE'],
@@ -183,7 +192,7 @@ function seitenkopf(string $eyebrow, string $titel, string $lead = '', string $b
 /** Abschluss-Band mit Claim und zwei Wegen weiter */
 function claim_band(string $text = ''): void { ?>
 <section class="claim claim--short" aria-label="Designed to stay">
-  <div class="claim__img"><img src="/assets/img/dv-17-schwarz-giebel-hang-carport.jpg" alt="" loading="lazy" data-parallax="0.15"></div>
+  <div class="claim__img"><img src="/assets/img/dv-17-schwarz-giebel-hang-carport.jpg" alt="<?= t('Haus von DAVINCI am Hang mit dunklem Tragwerk, Glasgiebel und Carport', 'House by DAVINCI on a slope with dark timber structure, glazed gable and carport') ?>" loading="lazy" data-parallax="0.15"></div>
   <div class="claim__inner">
     <svg class="claim__signet reveal"><use href="#signet"/></svg>
     <h2 class="display reveal" data-delay="1">Designed to stay.</h2>
@@ -338,7 +347,7 @@ function buch_visual(): void { ?>
       <div class="book">
         <div class="book__pages"></div>
         <div class="book__cover">
-          <div class="book__img"><img src="/assets/img/dv-01-flachdach-weiss-abend.jpg" alt="" loading="lazy"></div>
+          <div class="book__img"><img src="/assets/img/dv-01-flachdach-weiss-abend.jpg" alt="<?= t('Design-Book: Haus von DAVINCI mit Flachdach in der Abenddämmerung', 'Design Book: house by DAVINCI with flat roof at dusk') ?>" loading="lazy"></div>
           <div class="book__top"><svg class="book__signet"><use href="#signet"/></svg><span>DAVINCI</span></div>
           <div class="book__title"><small>Design-Book · Vol. 01</small>Wohnen in<br>Holz und Glas.</div>
         </div>

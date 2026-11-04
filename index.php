@@ -22,8 +22,8 @@ seite_start([
   </div>
   <div class="hero__content">
     <div class="wrap">
-      <p class="hero__kicker load-in"><?= t('DAVINCI · Häuser aus Holz und Glas', 'DAVINCI · Homes in wood and glass') ?></p>
-      <h1 class="display hero__title load-in d1" data-hero-title><em>Designed</em><em>to stay.</em></h1>
+      <h1 class="hero__kicker load-in"><?= t('DAVINCI · Häuser aus Holz und Glas', 'DAVINCI · Homes in wood and glass') ?></h1>
+      <p class="display hero__title load-in d1" data-hero-title><em>Designed</em><em>to stay.</em></p>
       <div class="hero__bottom load-in d2">
         <p class="hero__sub"><?= t('Aus einem durchdachten System entworfen, präzise gefertigt und gebaut, um zu bleiben.', 'Designed from a considered system, precisely made and built to stay.') ?></p>
         <div class="hero__ctas">

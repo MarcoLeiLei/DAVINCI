@@ -63,9 +63,9 @@ seitenkopf(t('Das System', 'The system'), t('Gute Architektur<br>ist kein Extra.
     </div>
     <div class="features" data-features>
       <div class="features__media" aria-hidden="true">
-        <img src="/assets/img/galerie.jpg" alt="" class="is-active" data-feature-img="0">
-        <img src="/assets/img/tragwerk.jpg" alt="" data-feature-img="1" loading="lazy">
-        <img src="/assets/img/dv-03-giebel-winter-tag.jpg" alt="" data-feature-img="2" loading="lazy">
+        <img src="/assets/img/galerie.jpg" alt="<?= t('Offener Luftraum über dem Essbereich mit Galerie', 'Open void above the dining area with gallery') ?>" class="is-active" data-feature-img="0">
+        <img src="/assets/img/tragwerk.jpg" alt="<?= t('Hoher Wohnraum mit sichtbarem Tragwerk und bodentiefen Fenstern', 'Tall living space with exposed structure and floor-to-ceiling windows') ?>" data-feature-img="1" loading="lazy">
+        <img src="/assets/img/dv-03-giebel-winter-tag.jpg" alt="<?= t('Haus von DAVINCI mit Glasgiebel im Schnee', 'House by DAVINCI with glazed gable in the snow') ?>" data-feature-img="2" loading="lazy">
         <span class="tag" data-feature-tag><?= t('Luftraum', 'Open void') ?></span>
       </div>
       <div class="features__steps">
