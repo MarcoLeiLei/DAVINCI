@@ -1356,7 +1356,7 @@ html.lb-offen { overflow: hidden; }
 .haus__fakten li { padding: 16px 16px 0 0; display: grid; gap: 6px; }
 .haus__fakten span { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--grey-4); }
 .haus__fakten b { font-weight: 400; font-size: 17px; line-height: 1.35; }
-.haus__plan { background: #fff; padding: clamp(16px, 2.4vw, 32px); display: grid; gap: 14px; justify-items: start; }
+.haus__plan { background: var(--grey-1); padding: clamp(24px, 3vw, 44px); display: grid; gap: 14px; justify-items: start; align-self: center; }
 .haus__plan img { width: 100%; height: auto; display: block; }
 .haus__plan figcaption { font-size: 13px; color: var(--grey-4); }
 .haus__geschosse { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(24px, 4vw, 56px); }

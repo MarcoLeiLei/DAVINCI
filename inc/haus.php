@@ -121,7 +121,7 @@ seite_start([
   'img'   => $pr['img'],
   'schema' => [[
     '@context' => 'https://schema.org', '@type' => 'Product', 'name' => $pr['name'], 'url' => $url,
-    'image' => [SITE . '/assets/img/' . $pr['img'], SITE . '/assets/img/grundriss/' . $key . '-eg.webp'],
+    'image' => SITE . '/assets/img/' . $pr['img'],
     'description' => $tx['desc'][$L], 'category' => t('Haus aus Holz und Glas', 'Wood and glass home'),
     'brand' => ['@type' => 'Brand', 'name' => 'DAVINCI'],
   ]],
@@ -143,11 +143,13 @@ seitenkopf(t('DAVINCI Produkte', 'DAVINCI models') . ' · ' . t($pr['tag'][0], $
       </ul>
       <p class="reveal" data-delay="3" style="margin-top:22px"><b><?= t('Für wen?', 'Who is it for?') ?></b> <?= e($tx['fuer'][$L]) ?></p>
     </div>
-    <figure class="haus__plan reveal" data-delay="1">
-      <img src="/assets/img/grundriss/<?= $key ?>-eg.webp" width="<?= $gd['plan'][0] ?>" height="<?= $gd['plan'][1] ?>" alt="<?= e(t('Grundriss Erdgeschoss', 'Ground floor plan') . ' ' . $pr['name']) ?>" loading="lazy">
-      <figcaption><?= t('Erdgeschoss · Beispielgrundriss', 'Ground floor · example plan') ?></figcaption>
-      <button type="button" class="btn btn--dark" data-grundriss="<?= $key ?>" data-name="<?= e($pr['name']) ?>"><?= t('Alle Geschosse als PDF anfordern', 'Request all floors as PDF') ?></button>
-    </figure>
+    <aside class="haus__plan reveal" data-delay="1">
+      <span class="eyebrow"><?= t('Grundriss', 'Floor plan') ?></span>
+      <h3 class="h3"><?= e($pr['name']) ?></h3>
+      <p><?= e(t('Alle Geschosse mit Raumaufteilung als PDF: ', 'All floors with room layout as a PDF: ') . implode(' · ', array_map($geschossName, array_column($gd['geschosse'], 0))) . '.') ?></p>
+      <button type="button" class="btn btn--dark" data-grundriss="<?= $key ?>" data-name="<?= e($pr['name']) ?>"><?= t('Grundriss anfordern', 'Request floor plan') ?></button>
+      <p class="muted" style="font-size:13px"><?= t('Wir senden Ihnen den Grundriss per E-Mail.', 'We will email you the floor plan.') ?></p>
+    </aside>
   </div>
 </section>
 

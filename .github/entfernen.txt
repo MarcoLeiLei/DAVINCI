@@ -2,3 +2,13 @@
 # Eine Datei pro Zeile, relativ zum Website-Ordner. Nur assets/ und downloads/ sind erlaubt.
 assets/img/dv-21-giebel-3achser-abend.jpg
 downloads/DAVINCI_Design-Book_Vol01.pdf
+assets/img/grundriss/tre-eg.webp
+assets/img/grundriss/quattro-eg.webp
+assets/img/grundriss/piano-eg.webp
+assets/img/grundriss/alpina-eg.webp
+assets/img/grundriss/terrazza-eg.webp
+assets/img/grundriss/pendio-eg.webp
+assets/img/grundriss/corte-eg.webp
+assets/img/grundriss/ala-eg.webp
+assets/img/grundriss/vista-eg.webp
+assets/img/grundriss/ombra-eg.webp
