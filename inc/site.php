@@ -70,6 +70,7 @@ function seite_start(array $p): void {
   $img = SITE . '/assets/img/' . ($p['img'] ?? 'dv-01-flachdach-weiss-abend.jpg');
   $andere = !empty($p['nur_de']) ? '/en/' : (en() ? '/' . $sl : '/en/' . $sl);
   $GLOBALS['SEITE'] = $slug;
+  $GLOBALS['NAV'] = $p['nav'] ?? $slug;
 
   $org = ['@context' => 'https://schema.org', '@type' => 'HomeAndConstructionBusiness', 'name' => 'DAVINCI', 'url' => SITE,
     'slogan' => 'Designed to stay.', 'logo' => SITE . '/assets/img/logo-512.png', 'image' => SITE . '/assets/img/dv-01-flachdach-weiss-abend.jpg',
@@ -80,7 +81,8 @@ function seite_start(array $p): void {
   $schemas = [$org];
   if ($slug !== '') $schemas[] = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
     ['@type' => 'ListItem', 'position' => 1, 'name' => 'DAVINCI', 'item' => SITE . u('')],
-    ['@type' => 'ListItem', 'position' => 2, 'name' => $p['crumb'] ?? (seiten()[$slug] ?? $title), 'item' => $canon]]];
+    ...(!empty($p['eltern']) ? [['@type' => 'ListItem', 'position' => 2, 'name' => $p['eltern'][1], 'item' => SITE . u($p['eltern'][0])]] : []),
+    ['@type' => 'ListItem', 'position' => empty($p['eltern']) ? 2 : 3, 'name' => $p['crumb'] ?? (seiten()[$slug] ?? $title), 'item' => $canon]]];
   foreach (($p['schema'] ?? []) as $s) $schemas[] = $s;
   ?><!DOCTYPE html>
 <html lang="<?= en() ? 'en' : 'de' ?>">
@@ -115,7 +117,7 @@ function seite_start(array $p): void {
 <script type="application/ld+json"><?= json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
 <?php endforeach; ?>
 </head>
-<body class="seite-<?= e($slug === '' ? 'start' : $slug) ?>">
+<body class="seite-<?= e($slug === '' ? 'start' : str_replace('/', '-', $slug)) ?>">
 <?php if ($slug === ''): ?>
 <div class="intro-overlay" aria-hidden="true">
   <div class="intro__bg"></div>
@@ -139,7 +141,7 @@ function seite_start(array $p): void {
     <nav aria-label="<?= t('Hauptnavigation', 'Main navigation') ?>">
       <ul class="nav__links">
 <?php foreach (seiten() as $s => $name): ?>
-        <li><a href="<?= u($s) ?>"<?= $s === $slug ? ' class="is-active" aria-current="page"' : '' ?>><?= e($name) ?></a></li>
+        <li><a href="<?= u($s) ?>"<?= $s === ($GLOBALS['NAV'] ?? $slug) ? ' class="is-active"' . ($s === $slug ? ' aria-current="page"' : '') : '' ?>><?= e($name) ?></a></li>
 <?php endforeach; ?>
       </ul>
     </nav>

@@ -66,4 +66,84 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/design-book/"/></url>
   <url><loc>https://davinci-homes.de/impressum/</loc></url>
   <url><loc>https://davinci-homes.de/datenschutz/</loc></url>
+  <url><loc>https://davinci-homes.de/haeuser/tre/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/tre/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/tre/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/tre/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/tre/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/tre/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/tre/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/tre/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/quattro/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/quattro/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/quattro/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/quattro/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/quattro/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/quattro/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/quattro/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/quattro/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/piano/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/piano/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/piano/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/piano/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/piano/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/piano/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/piano/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/piano/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/alpina/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/alpina/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/alpina/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/alpina/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/alpina/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/alpina/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/alpina/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/alpina/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/terrazza/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/terrazza/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/terrazza/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/terrazza/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/terrazza/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/terrazza/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/terrazza/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/terrazza/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/pendio/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/pendio/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/pendio/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/pendio/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/pendio/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/pendio/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/pendio/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/pendio/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/corte/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/corte/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/corte/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/corte/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/corte/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/corte/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/corte/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/corte/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/ala/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/ala/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/ala/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/ala/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/ala/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/ala/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/ala/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/ala/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/vista/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/vista/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/vista/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/vista/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/vista/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/vista/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/vista/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/vista/"/></url>
+  <url><loc>https://davinci-homes.de/haeuser/ombra/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/ombra/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/ombra/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/ombra/"/></url>
+  <url><loc>https://davinci-homes.de/en/haeuser/ombra/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://davinci-homes.de/haeuser/ombra/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://davinci-homes.de/en/haeuser/ombra/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://davinci-homes.de/haeuser/ombra/"/></url>
 </urlset>

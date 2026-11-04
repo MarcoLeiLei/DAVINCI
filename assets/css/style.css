@@ -1349,3 +1349,25 @@ html.lb-offen { overflow: hidden; }
   .lb__cap { left: 74px; right: 74px; bottom: 26px; flex-direction: column; gap: 4px; align-items: center; font-size: 13px; }
   .lb__close { top: 14px; right: 14px; }
 }
+
+/* ---------- Einzelseite je Haus ---------- */
+.haus { align-items: start; }
+.haus__fakten { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 28px; border-top: 1px solid var(--line, rgba(0,0,0,.12)); }
+.haus__fakten li { padding: 16px 16px 0 0; display: grid; gap: 6px; }
+.haus__fakten span { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--grey-4); }
+.haus__fakten b { font-weight: 400; font-size: 17px; line-height: 1.35; }
+.haus__plan { background: #fff; padding: clamp(16px, 2.4vw, 32px); display: grid; gap: 14px; justify-items: start; }
+.haus__plan img { width: 100%; height: auto; display: block; }
+.haus__plan figcaption { font-size: 13px; color: var(--grey-4); }
+.haus__geschosse { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(24px, 4vw, 56px); }
+.haus__geschosse h3 { font-weight: 400; font-size: 19px; margin-bottom: 14px; }
+.haus__weitere { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.haus__weitere .product { color: inherit; text-decoration: none; }
+.haus__weitere .product__img { aspect-ratio: 16 / 10; }
+@media (max-width: 900px) {
+  .haus__weitere { grid-template-columns: 1fr; }
+  .haus__fakten { grid-template-columns: 1fr 1fr; }
+}
+.product h3 a { color: inherit; text-decoration: none; }
+.product h3 a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+a.product__img { display: block; }

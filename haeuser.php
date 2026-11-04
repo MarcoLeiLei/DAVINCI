@@ -37,14 +37,14 @@ seitenkopf(t('Häuser', 'Homes'), t('Zwei Wege zu<br>Ihrem DAVINCI.', 'Two paths
     <div class="products products--2" data-filter-grid>
 <?php $i = 0; foreach (PRODUKTE as $k => $pr): ?>
       <article class="product reveal"<?= $i % 2 ? ' data-delay="1"' : '' ?> id="<?= $k ?>" data-kat="<?= $katVon($pr) ?>">
-        <div class="product__img"><img data-speed src="/assets/img/<?= $pr['img'] ?>" style="object-position:<?= $pr['pos'] ?>" alt="<?= e($pr['name']) ?>" loading="lazy"></div>
+        <a class="product__img" href="<?= u('haeuser') . $k ?>/" tabindex="-1" aria-hidden="true"><img data-speed src="/assets/img/<?= $pr['img'] ?>" style="object-position:<?= $pr['pos'] ?>" alt="<?= e($pr['name']) ?>" loading="lazy"></a>
         <div class="product__body">
-          <h3><?= e($pr['name']) ?></h3>
+          <h3><a href="<?= u('haeuser') . $k ?>/"><?= e($pr['name']) ?></a></h3>
           <ul class="product__facts"><?php if ($pr['m2']): ?><li><b><?= $pr['m2'] ?> m²</b> <?= t('Wohnfläche', 'living space') ?></li><?php endif; ?><li><b><?= $pr['ebenen'] ?></b> <?= $pr['ebenen'] > 1 ? t('Ebenen', 'levels') : t('Ebene', 'level') ?></li><li><?= t($pr['tag'][0], $pr['tag'][1]) ?></li></ul>
           <p><?= t($pr['txt'][0], $pr['txt'][1]) ?></p>
           <div class="product__foot product__foot--link">
             <button type="button" class="gr-btn" data-grundriss="<?= $k ?>" data-name="<?= e($pr['name']) ?>"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0l-3.2-3.2M8 10l3.2-3.2M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><?= t('Grundriss herunterladen', 'Download floor plan') ?></button>
-            <a href="<?= u('kontakt') ?>?haus=<?= $k ?>" class="link-arrow"><?= t('Anfragen', 'Enquire') ?> <svg><use href="#arrow"/></svg></a>
+            <a href="<?= u('haeuser') . $k ?>/" class="link-arrow"><?= t('Zum Haus', 'View home') ?> <svg><use href="#arrow"/></svg></a>
           </div>
         </div>
       </article>
