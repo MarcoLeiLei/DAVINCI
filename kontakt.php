@@ -3,7 +3,7 @@ require __DIR__ . '/inc/site.php';
 seite_start([
   'slug'  => 'kontakt',
   'title' => t('Kontakt und Termin | DAVINCI Düsseldorf', 'Contact and appointments | DAVINCI Düsseldorf'),
-  'desc'  => t('Sprechen Sie mit uns über Ihr DAVINCI Haus. Kaiser-Friedrich-Ring 43, 40545 Düsseldorf, bauen@davinci-homes.de, +49 151 681 079 08. Oder buchen Sie direkt einen Termin.', 'Talk to us about your DAVINCI house. Kaiser-Friedrich-Ring 43, 40545 Düsseldorf, bauen@davinci-homes.de, +49 151 681 079 08. Or book a meeting directly.'),
+  'desc'  => t('Sprechen Sie mit uns über Ihr Haus von DAVINCI: Kaiser-Friedrich-Ring 43, Düsseldorf, +49 151 681 079 08. Oder buchen Sie direkt online einen Termin.', 'Talk to us about your house by DAVINCI. Kaiser-Friedrich-Ring 43, 40545 Düsseldorf, bauen@davinci-homes.de, +49 151 681 079 08. Or book a meeting directly.'),
 ]);
 seitenkopf(t('Kontakt', 'Contact'), t('Lassen Sie uns sprechen.', "Let's talk."),
   t('Erzählen Sie uns von Ihrem Grundstück und Ihren Vorstellungen. Wir melden uns persönlich bei Ihnen. Oder Sie buchen direkt einen Termin in unserem Kalender.', 'Tell us about your plot and your ideas. We will get back to you personally. Or book a meeting directly in our calendar.'));

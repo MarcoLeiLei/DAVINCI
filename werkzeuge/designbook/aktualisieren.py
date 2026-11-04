@@ -192,7 +192,7 @@ def seite_kollektion(doc, nr):
              'Die Wohnebene als gläserner Pavillon mit Bad und Sauna, Terrassen und Pool. Darunter eine eigene Einliegerwohnung.', 'dv-12-hang-pool-nacht.jpg')):
         r = karte(p, x0, x0 + 438, name, info, txt, rnd)
         plan_zeigen(p, fitz.Rect(r.x0 + 18, 342, r.x1 - 18, 640), haus, 0)
-    text(p, 45, 742, 'Beispielgrundrisse. Jedes DAVINCI Haus wird für Grundstück und Bauherren individuell geplant.', 'ml', 9.8, HELLGRAU)
+    text(p, 45, 742, 'Beispielgrundrisse. Jedes Haus von DAVINCI wird für Grundstück und Bauherren individuell geplant.', 'ml', 9.8, HELLGRAU)
 
 
 def seite_tre(doc, nr):
@@ -359,9 +359,21 @@ def telefon(doc):
                     l['uri'] = 'tel:+4915168107908'; doc[i].update_link(l)
 
 
+def marke(doc):
+    """„DAVINCI Haus“ nur dort, wo es um bestehende Häuser oder die Geschichte geht; sonst „Haus von DAVINCI“."""
+    for i, alt, neu in ((5, 'DAVINCI Haus soll nach Jahrzehnten genauso selbstverständlich', 'Haus von DAVINCI soll nach Jahrzehnten genauso selbstverständlich'),
+                        (10, 'Das klassische DAVINCI Haus mit vier Achsen. Mehr Raum für', 'Das klassische Haus von DAVINCI mit vier Achsen. Mehr Raum für'),
+                        (17, 'Jedes DAVINCI Haus entsteht aus einem', 'Jedes Haus von DAVINCI entsteht aus einem'),
+                        (21, 'und wo es sich schützt. Ein DAVINCI Haus', 'und wo es sich schützt. Ein Haus von DAVINCI'),
+                        (31, 'Manche Lebensentwürfe brauchen besondere Antworten. Auch dafür gibt es ein DAVINCI Haus.',
+                         'Manche Lebensentwürfe brauchen besondere Antworten. Auch dafür gibt es ein Haus von DAVINCI.')):
+        text_tauschen(doc[i], [(alt, neu)])
+
+
 def korrekturen(doc):
     haltung_bilder(doc)
     telefon(doc)
+    marke(doc)
     chronik(doc)
     ohne_preis(doc)
     # Seite 10 · Kollektion

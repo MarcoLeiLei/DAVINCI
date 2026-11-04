@@ -3,7 +3,7 @@ require __DIR__ . '/inc/site.php';
 seite_start([
   'slug'  => 'manufaktur',
   'title' => t('Manufaktur: Präzision im Werk, Montage in 5 bis 7 Tagen | DAVINCI', 'Manufacture: precision in the works, assembly in 5 to 7 days | DAVINCI'),
-  'desc'  => t('Die Bauteile Ihres DAVINCI Hauses entstehen bei einem ausgewählten Manufakturpartner in Deutschland. Der Weg zu Ihrem Haus in fünf Schritten.', 'The components of your DAVINCI house are made by a selected manufacturing partner in Germany. The path to your home in five steps.'),
+  'desc'  => t('Die Bauteile Ihres Hauses von DAVINCI entstehen bei einem ausgewählten Manufakturpartner in Deutschland. Der Weg zu Ihrem Haus in fünf Schritten.', 'The components of your house by DAVINCI are made by a selected manufacturing partner in Germany. The path to your home in five steps.'),
   'img'   => 'skizze-dach.jpg',
 ]);
 seitenkopf(t('Manufaktur', 'Manufacture'), t('Präzision im Werk.', 'Precision in the works.'),
@@ -19,7 +19,7 @@ seitenkopf(t('Manufaktur', 'Manufacture'), t('Präzision im Werk.', 'Precision i
         <p class="reveal" data-delay="2"><a href="#termin" class="link-arrow" data-booking><?= t('Termin für ein Erstgespräch', 'Book an initial consultation') ?> <svg><use href="#arrow"/></svg></a></p>
       </div>
       <div class="prefab-hero__sketch reveal" data-delay="1">
-        <img src="/assets/img/skizze-dach.jpg" alt="<?= t('Konzeptzeichnung: Gebäudehülle und Tragwerk eines DAVINCI Hauses', 'Concept drawing: shell and structure of a DAVINCI house') ?>" loading="lazy">
+        <img src="/assets/img/skizze-dach.jpg" alt="<?= t('Konzeptzeichnung: Gebäudehülle und Tragwerk eines Hauses von DAVINCI', 'Concept drawing: shell and structure of a house by DAVINCI') ?>" loading="lazy">
       </div>
     </div>
     <div class="compare">

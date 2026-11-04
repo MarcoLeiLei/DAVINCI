@@ -108,7 +108,7 @@ function v_anfrage($d) {
     . m_zeilen(($d['termin'] ?? []) + ['Haustyp' => $d['haustyp'] ?? '', 'Grundstück' => $d['grund'] ?? '', 'Telefon' => $d['telefon'] ?? '', 'Nachricht' => $d['nachricht'] ?? ''])
     . ($istTermin ? '' : m_p('Sie möchten direkt einen Termin vereinbaren? Sagen Sie uns, wann es Ihnen passt.') . m_knopf(DV_TERMIN, 'Termin vereinbaren'));
   $k = m_kasten('Schon einmal stöbern?', m_p('In unserem Design-Book finden Sie Grundrisse, Ideen zu Grundstück und Ausrichtung sowie Inspiration für die gesamte DAVINCI Welt.') . m_knopf(DV_PDF, 'Design-Book herunterladen &nbsp;→', false));
-  return ['Ihre Anfrage bei DAVINCI', m_layout('Vielen Dank, wir melden uns persönlich bei Ihnen.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'DAVINCI Haus aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss(), '0 40px 40px'))];
+  return ['Ihre Anfrage bei DAVINCI', m_layout('Vielen Dank, wir melden uns persönlich bei Ihnen.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss(), '0 40px 40px'))];
 }
 
 /* 2 · Design-Book – Auslieferung (PDF oder Print) */
@@ -128,7 +128,7 @@ function v_designbook($d, $links = []) {
   } else {
     $k = m_kasten('Der nächste Schritt', m_p('Markieren Sie beim Lesen, was Ihnen gefällt, und bringen Sie Ihre Notizen zum Erstgespräch mit. Wir freuen uns darauf, Sie kennenzulernen.') . m_knopf(DV_TERMIN, 'Termin vereinbaren', false));
   }
-  return ['Ihr DAVINCI Design-Book', m_layout('Ihr Design-Book steht zum Download bereit.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'DAVINCI Haus aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss(), '0 40px 40px'))];
+  return ['Ihr DAVINCI Design-Book', m_layout('Ihr Design-Book steht zum Download bereit.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss(), '0 40px 40px'))];
 }
 
 /* 3 · Double-Opt-in bestätigt – Willkommen in der Inspirationsstrecke */
@@ -138,7 +138,7 @@ function v_willkommen($d, $links) {
     . m_p('vielen Dank für Ihre Bestätigung. In den nächsten Wochen schicken wir Ihnen vier kurze E-Mails, jeweils zu einem Thema, das beim Planen eines Hauses den Unterschied macht:')
     . m_liste(['<strong style="font-weight:600;color:#1d1d1f;">Grundstück und Sonne:</strong> wie wir einen Ort lesen', '<strong style="font-weight:600;color:#1d1d1f;">Grundrisse:</strong> welches Haus zu Ihrem Leben passt', '<strong style="font-weight:600;color:#1d1d1f;">Wohlfühlorte:</strong> Sauna, Galerie, Garage und Carport', '<strong style="font-weight:600;color:#1d1d1f;">Ihr Erstgespräch:</strong> wie es weitergeht'])
     . m_p('Sie können sich jederzeit mit einem Klick abmelden.') . m_gruss();
-  return ['Willkommen bei DAVINCI', m_layout('Vier E-Mails, vier Themen für Ihr Haus.', m_bild('dv-09-bungalow-flach-garten.jpg', 'DAVINCI Haus aus Holz und Glas') . m_block($t, '40px 40px 24px'), $links['abmelden'])];
+  return ['Willkommen bei DAVINCI', m_layout('Vier E-Mails, vier Themen für Ihr Haus.', m_bild('dv-09-bungalow-flach-garten.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t, '40px 40px 24px'), $links['abmelden'])];
 }
 
 /* 4 · Inspirationsstrecke (nur nach Double-Opt-in) */
@@ -149,7 +149,7 @@ function v_inspiration1($d, $links) {
     . m_liste(['<strong style="font-weight:600;color:#1d1d1f;">Osten:</strong> Schlafen und Frühstück im Morgenlicht', '<strong style="font-weight:600;color:#1d1d1f;">Süden:</strong> Wohnen und Terrasse hinter großen Glasflächen', '<strong style="font-weight:600;color:#1d1d1f;">Westen:</strong> Abendterrasse und Sauna', '<strong style="font-weight:600;color:#1d1d1f;">Norden:</strong> Eingang, Technik und Bäder als ruhige Schicht zur Straße'])
     . m_p('Unser Tipp: Stellen Sie sich zu verschiedenen Tageszeiten auf Ihr Grundstück und machen Sie Fotos in alle Richtungen. Für das Erstgespräch ist das Gold wert.')
     . m_knopf(DV_PDF, 'Kapitel „Grundstück“ im Design-Book') . m_gruss();
-  return ['Wo geht bei Ihnen die Sonne auf?', m_layout('Wie wir ein Grundstück lesen.', m_bild('dv-10-hang-pultdach-terrasse.jpg', 'DAVINCI Haus am Hang') . m_block($t, '40px 40px 24px'), $links['abmelden'])];
+  return ['Wo geht bei Ihnen die Sonne auf?', m_layout('Wie wir ein Grundstück lesen.', m_bild('dv-10-hang-pultdach-terrasse.jpg', 'Haus von DAVINCI am Hang') . m_block($t, '40px 40px 24px'), $links['abmelden'])];
 }
 function v_inspiration2($d, $links) {
   $t = m_titel('Inspiration 2 von 4 · Grundrisse', 'Welches Haus passt zu Ihrem Leben?')
@@ -215,7 +215,7 @@ function v_intern($typ, $d, $zeilen, $hinweis = '') {
 
 /* Grundriss · Versand nach Anfrage auf der Häuser-Seite */
 function v_grundriss($d, $pdfUrl) {
-  $haus = h($d['haustyp'] ?: 'Ihr DAVINCI Haus');
+  $haus = h($d['haustyp'] ?: 'Ihr Haus von DAVINCI');
   $t = m_titel('Grundriss · ' . $haus, 'Ihr Grundriss ist da.')
     . m_p('Guten Tag ' . h($d['name']) . ',')
     . ($pdfUrl
@@ -223,7 +223,7 @@ function v_grundriss($d, $pdfUrl) {
         : m_p('vielen Dank für Ihr Interesse am ' . $haus . '. Den Grundriss bereiten wir gerade für Sie auf und schicken ihn Ihnen in Kürze persönlich zu.'))
     . m_p('Jeder Grundriss ist ein Ausgangspunkt. Innerhalb des DAVINCI Systems passen wir Größe, Räume und Ausstattung an Ihr Grundstück und Ihr Leben an.');
   $k = m_kasten('Der nächste Schritt', m_p('Sprechen Sie mit uns über Ihr Grundstück und Ihre Wünsche. Persönlich, per Video oder bei Ihnen vor Ort.') . m_knopf(DV_TERMIN, 'Termin vereinbaren &nbsp;→', false));
-  return ['Ihr Grundriss: ' . ($d['haustyp'] ?: 'DAVINCI'), m_layout('Ihr Grundriss für ' . ($d['haustyp'] ?: 'Ihr DAVINCI Haus') . '.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'DAVINCI Haus aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss(), '0 40px 40px'))];
+  return ['Ihr Grundriss: ' . ($d['haustyp'] ?: 'DAVINCI'), m_layout('Ihr Grundriss für ' . ($d['haustyp'] ?: 'Ihr Haus von DAVINCI') . '.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss(), '0 40px 40px'))];
 }
 
 /* 8 · Vorlagen zum manuellen Versand (z. B. aus Outlook oder HubSpot) */
@@ -234,7 +234,7 @@ function v_danke_termin($d) {
     . m_p('So geht es weiter:')
     . m_liste(['Wir fassen Ihre Wünsche und die Vorgaben Ihres Grundstücks zusammen.', 'Wir entwickeln aus dem DAVINCI System eine erste Skizze.', 'Wir melden uns mit einem Terminvorschlag für die Präsentation.'])
     . m_p('Wenn Ihnen in der Zwischenzeit noch etwas einfällt, antworten Sie einfach auf diese E-Mail.') . m_gruss();
-  return ['Vielen Dank für das Gespräch', m_layout('Wie es jetzt weitergeht.', m_bild('skizze.jpg', 'Skizze eines DAVINCI Hauses') . m_block($t, '40px 40px 24px'))];
+  return ['Vielen Dank für das Gespräch', m_layout('Wie es jetzt weitergeht.', m_bild('skizze.jpg', 'Skizze eines Hauses von DAVINCI') . m_block($t, '40px 40px 24px'))];
 }
 function v_termin_verpasst($d) {
   $t = m_titel('Ihr Termin', 'Schade, dass es nicht geklappt hat.')
@@ -242,7 +242,7 @@ function v_termin_verpasst($d) {
     . m_p('heute haben wir uns leider verpasst. Das passiert, kein Problem. Suchen Sie sich einfach einen neuen Termin aus, der besser passt.')
     . m_knopf(DV_TERMIN, 'Neuen Termin wählen')
     . m_p('Oder rufen Sie uns an: ' . h(DV_TELEFON)) . m_gruss();
-  return ['Neuer Termin bei DAVINCI?', m_layout('Suchen Sie sich einen neuen Termin aus.', m_bild('dv-19-schwarz-giebel-garten-nacht.jpg', 'DAVINCI Haus am Abend') . m_block($t, '40px 40px 24px'))];
+  return ['Neuer Termin bei DAVINCI?', m_layout('Suchen Sie sich einen neuen Termin aus.', m_bild('dv-19-schwarz-giebel-garten-nacht.jpg', 'Haus von DAVINCI am Abend') . m_block($t, '40px 40px 24px'))];
 }
 function v_buch_versendet($d) {
   $t = m_titel('Design-Book', 'Ihr Buch ist unterwegs.')
@@ -250,7 +250,7 @@ function v_buch_versendet($d) {
     . m_p('Ihr gedrucktes DAVINCI Design-Book ist heute auf den Weg zu Ihnen gegangen und kommt in den nächsten Tagen an.')
     . m_p('Nehmen Sie sich Zeit, markieren Sie, was Ihnen gefällt, und bringen Sie das Buch gern zum Erstgespräch mit.')
     . m_knopf(DV_TERMIN, 'Termin vereinbaren') . m_gruss();
-  return ['Ihr Design-Book ist unterwegs', m_layout('Ihr gedrucktes Design-Book ist auf dem Weg.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'DAVINCI Haus aus Holz und Glas') . m_block($t, '40px 40px 24px'))];
+  return ['Ihr Design-Book ist unterwegs', m_layout('Ihr gedrucktes Design-Book ist auf dem Weg.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t, '40px 40px 24px'))];
 }
 function v_entwurf_bereit($d) {
   $t = m_titel('Ihr Entwurf', 'Ihr Haus nimmt Form an.')
@@ -258,7 +258,7 @@ function v_entwurf_bereit($d) {
     . m_p('unser Design-Team hat den ersten Entwurf für Ihr Haus fertiggestellt. Wir möchten ihn Ihnen gern persönlich vorstellen, mit Grundrissen, Ansichten und einer ersten Kostenschätzung.')
     . m_knopf(DV_TERMIN, 'Präsentationstermin wählen')
     . m_p('Wir freuen uns sehr auf diesen Moment.') . m_gruss();
-  return ['Ihr Entwurf ist fertig', m_layout('Wir möchten Ihnen Ihren Entwurf vorstellen.', m_bild('dv-07-hang-pultdach-garage.jpg', 'DAVINCI Haus aus Holz und Glas') . m_block($t, '40px 40px 24px'))];
+  return ['Ihr Entwurf ist fertig', m_layout('Wir möchten Ihnen Ihren Entwurf vorstellen.', m_bild('dv-07-hang-pultdach-garage.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t, '40px 40px 24px'))];
 }
 
 /* Newsletter – Bitte um Bestätigung (Double-Opt-in) */

@@ -8,7 +8,7 @@ seite_start([
 ]);
 seitenkopf(t('Häuser', 'Homes'), t('Zwei Wege zu<br>Ihrem DAVINCI.', 'Two paths to<br>your DAVINCI.'),
   t('Ein fertig gedachtes Haus aus dem DAVINCI System oder ein Entwurf nur für Sie. Beide entstehen aus demselben System und haben dieselbe Qualität.', 'A ready-designed house from the DAVINCI system or a design made only for you. Both come from the same system and share the same quality.'),
-  'dv-15-doppelpult-bungalow-abend.jpg', t('DAVINCI Haus mit zwei versetzten Pultdächern und Terrassen in der Abenddämmerung', 'DAVINCI house with two offset mono-pitch roofs and terraces at dusk'));
+  'dv-15-doppelpult-bungalow-abend.jpg', t('Haus von DAVINCI mit zwei versetzten Pultdächern und Terrassen in der Abenddämmerung', 'House by DAVINCI with two offset mono-pitch roofs and terraces at dusk'));
 
 ?>
 
@@ -57,7 +57,7 @@ seitenkopf(t('Häuser', 'Homes'), t('Zwei Wege zu<br>Ihrem DAVINCI.', 'Two paths
 <!-- ============ WEG 2: INDIVIDUELL ============ -->
 <section class="section grey" id="individuell">
   <div class="wrap split">
-    <figure class="split__img reveal"><img src="/assets/img/dv-10-hang-pultdach-terrasse.jpg" style="object-position:35% 50%" alt="<?= t('Individuell entworfenes DAVINCI Haus am Hang mit großer Terrasse', 'Bespoke DAVINCI house on a slope with large terrace') ?>" loading="lazy"></figure>
+    <figure class="split__img reveal"><img src="/assets/img/dv-10-hang-pultdach-terrasse.jpg" style="object-position:35% 50%" alt="<?= t('Individuell entworfenes Haus von DAVINCI am Hang mit großer Terrasse', 'Bespoke house by DAVINCI on a slope with large terrace') ?>" loading="lazy"></figure>
     <div class="section-head" style="margin-bottom:0">
       <span class="eyebrow reveal"><?= t('Weg 2 · DAVINCI Individuell', 'Path 2 · DAVINCI Bespoke') ?></span>
       <h2 class="h1 reveal" data-delay="1"><?= t('Ihr eigener DAVINCI.', 'Your own DAVINCI.') ?></h2>

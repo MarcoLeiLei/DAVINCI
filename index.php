@@ -11,13 +11,13 @@ seite_start([
 <section class="hero" id="hero">
   <div class="hero__media" data-hero-img>
     <div class="hero__slide hero__slide--video is-active"><video muted playsinline preload="none" poster="/assets/img/dv-drohne-poster.jpg" aria-label="<?= t('Drohnenflug über einen DAVINCI Bungalow mit Flachdach, Pultdach-Aufsatz und Carport im Herbst', 'Drone flight over a DAVINCI bungalow with flat roof, raised mono-pitch roof and carport in autumn') ?>" data-src="/assets/video/dv-drohne-1920.mp4" data-src-klein="/assets/video/dv-drohne-1280.mp4"></video></div>
-    <div class="hero__slide"><img src="/assets/img/dv-01-flachdach-weiss-abend.jpg" style="object-position:50% 55%" alt="<?= t('Weißes DAVINCI Haus mit Flachdach und raumhoher Verglasung in der Abenddämmerung', 'White DAVINCI house with flat roof and floor-to-ceiling glazing at dusk') ?>" loading="lazy"></div>
-    <div class="hero__slide"><img src="/assets/img/dv-12-hang-pool-nacht.jpg" style="object-position:45% 45%" alt="<?= t('DAVINCI Haus am Hang mit Pultdach, Terrasse und Pool bei Nacht', 'DAVINCI house on a slope with mono-pitch roof, terrace and pool at night') ?>" loading="lazy"></div>
-    <div class="hero__slide"><img src="/assets/img/dv-03-giebel-winter-tag.jpg" style="object-position:50% 35%" alt="<?= t('DAVINCI Haus mit Glasgiebel im Schnee vor Bergkulisse', 'DAVINCI house with glazed gable in the snow against a mountain backdrop') ?>" loading="lazy"></div>
+    <div class="hero__slide"><img src="/assets/img/dv-01-flachdach-weiss-abend.jpg" style="object-position:50% 55%" alt="<?= t('Weißes Haus von DAVINCI mit Flachdach und raumhoher Verglasung in der Abenddämmerung', 'White house by DAVINCI with flat roof and floor-to-ceiling glazing at dusk') ?>" loading="lazy"></div>
+    <div class="hero__slide"><img src="/assets/img/dv-12-hang-pool-nacht.jpg" style="object-position:45% 45%" alt="<?= t('Haus von DAVINCI am Hang mit Pultdach, Terrasse und Pool bei Nacht', 'House by DAVINCI on a slope with mono-pitch roof, terrace and pool at night') ?>" loading="lazy"></div>
+    <div class="hero__slide"><img src="/assets/img/dv-03-giebel-winter-tag.jpg" style="object-position:50% 35%" alt="<?= t('Haus von DAVINCI mit Glasgiebel im Schnee vor Bergkulisse', 'House by DAVINCI with glazed gable in the snow against a mountain backdrop') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-04-pultdach-bungalow-abend.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Bungalow mit versetzten Pultdächern im Sonnenuntergang', 'DAVINCI bungalow with offset mono-pitch roofs at sunset') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/echt-ansicht-strasse.jpg" style="object-position:55% 60%" alt="<?= t('Echtes DAVINCI Haus: Bungalow mit Flachdach, Pultdach-Aufsatz und Carport im Herbst', 'A real DAVINCI house: bungalow with flat roof, raised mono-pitch roof and carport in autumn') ?>" loading="lazy"></div>
-    <div class="hero__slide"><img src="/assets/img/dv-06-flachdach-schwarz-tag.jpg" style="object-position:50% 45%" alt="<?= t('DAVINCI Haus mit schwarzem Holzskelett, Flachdach und Glasfassade', 'DAVINCI house with black timber frame, flat roof and glass facade') ?>" loading="lazy"></div>
-    <div class="hero__slide"><img src="/assets/img/dv-18-schwarz-giebel-hang-garage.jpg" style="object-position:50% 40%" alt="<?= t('DAVINCI Haus mit dunklem Tragwerk, Satteldach und Garage bei Nacht', 'DAVINCI house with dark timber structure, pitched roof and garage at night') ?>" loading="lazy"></div>
+    <div class="hero__slide"><img src="/assets/img/dv-06-flachdach-schwarz-tag.jpg" style="object-position:50% 45%" alt="<?= t('Haus von DAVINCI mit schwarzem Holzskelett, Flachdach und Glasfassade', 'House by DAVINCI with black timber frame, flat roof and glass facade') ?>" loading="lazy"></div>
+    <div class="hero__slide"><img src="/assets/img/dv-18-schwarz-giebel-hang-garage.jpg" style="object-position:50% 40%" alt="<?= t('Haus von DAVINCI mit dunklem Tragwerk, Satteldach und Garage bei Nacht', 'House by DAVINCI with dark timber structure, pitched roof and garage at night') ?>" loading="lazy"></div>
     <div class="hero__slide"><img src="/assets/img/dv-09-bungalow-flach-garten.jpg" style="object-position:50% 50%" alt="<?= t('Weißer DAVINCI Bungalow mit Flachdach und Garten', 'White DAVINCI bungalow with flat roof and garden') ?>" loading="lazy"></div>
   </div>
   <div class="hero__content">
@@ -73,7 +73,7 @@ seite_start([
         </div>
       </a>
       <a href="<?= u('haeuser') ?>#individuell" class="way reveal" data-delay="1">
-        <div class="way__img"><img src="/assets/img/dv-07-hang-pultdach-garage.jpg" alt="<?= t('Individuell entworfenes DAVINCI Haus am Hang mit Pultdach und Garage', 'Bespoke DAVINCI house on a slope with mono-pitch roof and garage') ?>" loading="lazy"></div>
+        <div class="way__img"><img src="/assets/img/dv-07-hang-pultdach-garage.jpg" alt="<?= t('Individuell entworfenes Haus von DAVINCI am Hang mit Pultdach und Garage', 'Bespoke house by DAVINCI on a slope with mono-pitch roof and garage') ?>" loading="lazy"></div>
         <div class="way__body">
           <span class="way__label"><?= t('DAVINCI Individuell', 'DAVINCI Bespoke') ?></span>
           <h3><?= t('Ihr eigener DAVINCI.', 'Your own DAVINCI.') ?></h3>
@@ -123,7 +123,7 @@ echt_haus('traufe', ['garten', 'carport'], t('Gebaut und bewohnt', 'Built and li
     <div class="section-head" style="margin-bottom:0">
       <span class="eyebrow reveal"><?= t('Geschichte', 'Story') ?></span>
       <h2 class="h1 reveal" data-delay="1"><?= t('Bewahren.<br>Und besser machen.', 'Preserve.<br>And make it better.') ?></h2>
-      <p class="lead reveal" data-delay="2"><?= t('Über Jahrzehnte standen DAVINCI Häuser für eine eigene Idee vom Wohnen. 2023 endete die Geschichte des alten Unternehmens, die Häuser sind geblieben. Heute bauen wir DAVINCI neu auf.', 'For decades, DAVINCI houses stood for a distinct idea of living. In 2023 the story of the original company ended, but the houses remained. Today we are rebuilding DAVINCI.') ?></p>
+      <p class="lead reveal" data-delay="2"><?= t('Über Jahrzehnte standen DAVINCI Häuser für eine eigene Idee vom Wohnen. 2023 endete die Geschichte des alten Unternehmens, die Häuser sind geblieben. Heute bauen wir DAVINCI neu auf.', 'For decades, houses by DAVINCI stood for a distinct idea of living. In 2023 the story of the original company ended, but the houses remained. Today we are rebuilding DAVINCI.') ?></p>
       <p class="reveal" data-delay="3"><a href="<?= u('geschichte') ?>" class="link-arrow"><?= t('Die ganze Geschichte', 'The whole story') ?> <svg><use href="#arrow"/></svg></a></p>
     </div>
   </div>
