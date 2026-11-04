@@ -1371,4 +1371,3 @@ html.lb-offen { overflow: hidden; }
 .product h3 a { color: inherit; text-decoration: none; }
 .product h3 a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 a.product__img { display: block; }
-a.gr-btn { text-decoration: none; }

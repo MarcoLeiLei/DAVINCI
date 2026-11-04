@@ -497,7 +497,7 @@ const GOOGLE_ADS_LABELS = {
     if (!el || el.closest('.cookie') || el.matches('[data-cookie], [data-load-hubspot]') || !GOOGLE_ADS_LABELS.cta) return;
     if (!(adsGeladen && consent && consent.marketing)) return;
     const href = el.tagName === 'A' ? el.getAttribute('href') : null;
-    const wechselt = href && !href.startsWith('#') && !href.startsWith('tel:') && !href.startsWith('mailto:') && el.target !== '_blank' && !el.hasAttribute('download') && !e.metaKey && !e.ctrlKey && !e.shiftKey;
+    const wechselt = href && !href.startsWith('#') && !href.startsWith('tel:') && !href.startsWith('mailto:') && el.target !== '_blank' && !e.metaKey && !e.ctrlKey && !e.shiftKey;
     if (wechselt) { e.preventDefault(); window.gtag_report_conversion(el.href); }
     else gtag('event', 'conversion', { send_to: GOOGLE_ADS_ID + '/' + GOOGLE_ADS_LABELS.cta });
   }, true);
