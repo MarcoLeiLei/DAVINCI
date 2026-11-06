@@ -43,8 +43,25 @@ function website_abgleich(bool $sofort = false): int {
   $neu = 0;
   aendern('kontakte', function (&$kontakte) use ($webAnfragen, $nl, &$neu) {
     aendern('anfragen', function (&$archiv) use (&$kontakte, $webAnfragen, &$neu) {
+      // Grundriss-Anfragen stehen auf der Website zweimal (Anfragen-Ablage und alte Lead-Liste): Doppelte entfernen
+      $doppelt = function (array $w, array $liste): bool {
+        if (($w['typ'] ?? '') !== 'Grundriss') return false;
+        $k = strtolower((string) ($w['felder']['email'] ?? '')) . '|' . ($w['felder']['haus'] ?? '');
+        $t = strtotime((string) ($w['zeit'] ?? '')) ?: 0;
+        foreach ($liste as $x) {
+          if (($x['id'] ?? '') === ($w['id'] ?? '') || strpos((string) ($x['id'] ?? ''), 'gr-') === 0 || ($x['typ'] ?? '') !== 'Grundriss') continue;
+          if (strtolower((string) ($x['felder']['email'] ?? '')) . '|' . ($x['felder']['haus'] ?? '') === $k
+              && abs((strtotime((string) ($x['zeit'] ?? '')) ?: 0) - $t) <= 600) return true;
+        }
+        return false;
+      };
+      $unberuehrt = fn($e) => ($e['status'] ?? 'neu') === 'neu' && empty($e['notiz']) && empty($e['lead_id']) && empty($e['bearbeiter']);
+      foreach ($archiv as $id => $e)
+        if (strpos((string) $id, 'gr-') === 0 && $unberuehrt($e) && $doppelt($e, array_merge($archiv, $webAnfragen))) unset($archiv[$id]);
+
       foreach ($webAnfragen as $w) {
         if (!isset($w['id']) || isset($archiv[$w['id']])) continue;
+        if (strpos((string) $w['id'], 'gr-') === 0 && $doppelt($w, array_merge($archiv, $webAnfragen))) continue;
         $f = $w['felder'] ?? [];
         [$vn, $nn] = isset($f['vorname']) && $f['vorname'] !== '' ? [$f['vorname'], $f['nachname'] ?? ''] : name_teilen((string) ($f['name'] ?? ''));
         $kid = null;
