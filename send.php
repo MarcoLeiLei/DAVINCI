@@ -43,6 +43,7 @@ $quelle = array_filter(['Quelle' => feld('utm_source'), 'Medium' => feld('utm_me
                         'Suchbegriff' => feld('utm_term'), 'Einstieg' => feld('landing'), 'Verweis' => feld('referrer')]);
 $sprache = feld('sprache') === 'en' ? 'Englisch' : '';
 if ($sprache) $quelle = ['Sprache' => $sprache] + $quelle;
+$aid = st_token(); $GLOBALS['dv_anfrage'] = $aid;   // verbindet Anfrage und versendete E-Mails (intern: Kommunikationsverlauf)
 $hsBasis = ['email' => $email, 'vorname' => feld('vorname'), 'nachname' => feld('nachname')];
 // Optional: Newsletter (Double-Opt-in, eigene Bestätigungs-E-Mail)
 $nlGewuenscht = !empty($_POST['newsletter']);
@@ -67,7 +68,7 @@ if ($typ === 'Termin') {
       $q[] = ['id' => st_token(), 'faellig' => $start - 86400, 'vorlage' => 'erinnerung', 'daten' => $d];
     });
   }
-  anfrage_ablegen('Termin', ['name' => $name, 'email' => $email, 'termin' => $start ? date('c', $start) : ''], $quelle);
+  anfrage_ablegen('Termin', ['name' => $name, 'email' => $email, 'termin' => $start ? date('c', $start) : ''], $quelle, $aid);
   hs_kontakt_uebertragen($hsBasis, hs_notiz('Termin gebucht über die Website', ['Termin' => $start ? datum_de($start) : 'siehe Kalender', 'Gebucht am' => $jetzt] + $quelle),
     ['phase' => 'Termin gebucht', 'name' => $name . ' · Termin', 'props' => ['davinci_quelle' => 'Terminbuchung']]);
   echo json_encode(['ok' => $okI, 'kunde' => $okK]); exit;
@@ -80,7 +81,6 @@ if ($typ === 'Grundriss') {
   $d['haustyp'] = feld('haustyp');
   $d['telefon'] = feld('telefon');
   $pdf = ($key && is_file(__DIR__ . "/downloads/grundrisse/$key.pdf")) ? DV_SEITE . "/downloads/grundrisse/$key.pdf" : null;
-  $aid = st_token();
   try { $spur = spur_links($aid, $key); } catch (Throwable $e) { $spur = null; error_log('DAVINCI Spur: ' . $e->getMessage()); }
   [$bK, $hK] = v_grundriss($d, $pdf, $spur);
   $okK = m_senden($email, $bK, $hK, DV_NAME, DV_EMPFAENGER);
@@ -133,7 +133,7 @@ $zeilen = ['Typ' => $typ . ($istBook ? " · $format" : ''), 'Name' => $name, 'E-
 anfrage_ablegen($istBook ? 'Design-Book' : ($istTermin ? 'Terminanfrage' : 'Beratungsanfrage'),
   ['name' => $name, 'vorname' => feld('vorname'), 'nachname' => feld('nachname'), 'email' => $email, 'telefon' => $d['telefon'], 'adresse' => $adresse,
    'haustyp' => $d['haustyp'], 'grundstueck' => $d['grund'], 'nachricht' => $d['nachricht'], 'format' => $istBook ? $format : '',
-   'termin' => $termin ? implode(' · ', $termin) : '', 'inspiration' => $inspiration ? 'angefragt' : '', 'newsletter' => $nlGewuenscht ? 'angemeldet' : ''], $quelle);
+   'termin' => $termin ? implode(' · ', $termin) : '', 'inspiration' => $inspiration ? 'angefragt' : '', 'newsletter' => $nlGewuenscht ? 'angemeldet' : ''], $quelle, $aid);
 [$bI, $hI] = v_intern($istBook ? 'Design-Book' : ($istTermin ? 'Terminanfrage' : 'Beratungsanfrage'), $d, $zeilen, $istPrint ? 'Bitte gedrucktes Design-Book versenden.' : '');
 $okI = m_senden(DV_EMPFAENGER, $bI, $hI, 'DAVINCI Website', $email);
 

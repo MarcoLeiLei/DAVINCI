@@ -98,6 +98,48 @@ function website_abgleich(bool $sofort = false): int {
       unset($k);
     }
   });
+  website_mails_uebernehmen();
   schreiben('abgleich', ['zeit' => time(), 'neu' => $neu, 'ordner' => website_ordner()]);
   return $neu;
+}
+
+/* ---------- E-Mails der Website an Kunden (Kopien aus data/mails) ---------- */
+const WEB_MAILS = DATEN . '/mails_web';
+
+function website_mails_uebernehmen(): void {
+  $o = website_ordner(); if (!$o || !is_dir("$o/mails")) return;
+  $neu = [];
+  foreach (glob("$o/mails/*.php") ?: [] as $f) {
+    $id = basename($f, '.php');
+    if (!preg_match('/^[0-9a-f-]+$/', $id) || is_file(WEB_MAILS . "/$id.php")) continue;
+    $t = (string) file_get_contents($f);
+    $m = json_decode(strpos($t, SPERRZEILE) === 0 ? substr($t, strlen(SPERRZEILE)) : $t, true);
+    if (!is_array($m) || empty($m['an'])) continue;
+    if (!is_dir(WEB_MAILS)) @mkdir(WEB_MAILS, 0750, true);
+    @file_put_contents(WEB_MAILS . "/$id.php", SPERRZEILE . json_encode($m, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    $neu[$id] = ['id' => $id, 'zeit' => $m['zeit'], 'an' => strtolower($m['an']), 'betreff' => $m['betreff'], 'anfrage' => $m['anfrage'] ?? null];
+  }
+  if ($neu) aendern('mail_index', function (&$ix) use ($neu) { $ix = $neu + $ix; });
+}
+function web_mail(string $id): ?array {
+  if (!preg_match('/^[0-9a-f-]+$/', $id)) return null;
+  $f = WEB_MAILS . "/$id.php"; if (!is_file($f)) return null;
+  $t = (string) file_get_contents($f);
+  return json_decode(strpos($t, SPERRZEILE) === 0 ? substr($t, strlen(SPERRZEILE)) : $t, true) ?: null;
+}
+/** Alle E-Mails der Website an diese Adresse (neueste zuerst). */
+function web_mails_fuer(string $email): array {
+  $email = strtolower(trim($email)); if ($email === '') return [];
+  $l = array_filter(lesen('mail_index'), fn($m) => ($m['an'] ?? '') === $email);
+  uasort($l, fn($a, $b) => strcmp($b['zeit'], $a['zeit']));
+  return $l;
+}
+/** Beim Löschen eines Kontakts (DSGVO) auch die Kopien entfernen. */
+function web_mails_loeschen(string $email): void {
+  $email = strtolower(trim($email)); if ($email === '') return;
+  aendern('mail_index', function (&$ix) use ($email) {
+    foreach ($ix as $id => $m) if (($m['an'] ?? '') === $email) { @unlink(WEB_MAILS . "/$id.php"); unset($ix[$id]); }
+  });
+  $o = website_ordner();
+  if ($o) foreach (glob("$o/mails/*.php") ?: [] as $f) { $t = (string) @file_get_contents($f); if (stripos($t, '"an":"' . $email . '"') !== false) @unlink($f); }
 }

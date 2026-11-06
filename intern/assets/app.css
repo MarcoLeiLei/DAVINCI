@@ -165,6 +165,11 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .verlauf li::after { content: ""; position: absolute; left: 7px; top: 18px; bottom: 0; width: 1px; background: var(--line); }
 .verlauf li:last-child::after { display: none; }
 .verlauf small { display: block; color: var(--grey-3); font-size: 12px; }
+.verlauf li.verlauf--mail::before { background: var(--accent); }
+.verlauf li.verlauf--klick::before { background: var(--ok); }
+.verlauf li.verlauf--anfrage::before { background: var(--warn); }
+.verlauf--komm a { text-decoration: none; }
+.verlauf--komm a:hover { text-decoration: underline; }
 
 /* Kanban */
 .kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(176px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 12px; align-items: start; }

@@ -13,6 +13,38 @@ function mail_pills(array $a): string {
   if (!empty($m['geoeffnet']))     return '<span class="pill pill--angefragt" title="' . e(datum($m['geoeffnet'], true)) . ' Uhr">geöffnet</span>';
   return '<span class="muted klein">ungeöffnet</span>';
 }
+/** Alles, was mit dieser Person passiert ist: Anfragen, E-Mails der Website, persönliche E-Mails, Newsletter, Verlauf. Neueste zuerst. */
+function kommunikation(array $a, ?array $k): array {
+  $mail = strtolower(trim((string) ($k['email'] ?? ($a['felder']['email'] ?? ''))));
+  $o = [];
+  foreach (anfragen() as $x) if ($mail !== '' && strtolower((string) ($x['felder']['email'] ?? '')) === $mail)
+    $o[] = ['zeit' => $x['zeit'], 'art' => 'anfrage', 'titel' => 'Anfrage über die Website: ' . $x['typ'] . (!empty($x['felder']['haus']) ? ' · ' . $x['felder']['haus'] : ''),
+            'link' => $x['id'] === $a['id'] ? null : 'anfragen.php?id=' . $x['id'], 'info' => $x['id'] === $a['id'] ? 'diese Anfrage' : ''];
+  foreach (web_mails_fuer($mail) as $m)
+    $o[] = ['zeit' => $m['zeit'], 'art' => 'mail', 'titel' => 'E-Mail an Kunden: ' . $m['betreff'], 'info' => 'automatisch von der Website', 'link' => 'anfragen.php?id=' . $a['id'] . '&mail=' . $m['id'] . '#mail'];
+  foreach (lesen('mails') as $m) if ($mail !== '' && in_array($mail, array_merge($m['an'] ?? [], $m['cc'] ?? []), true))
+    $o[] = ['zeit' => $m['zeit'], 'art' => 'mail', 'titel' => 'E-Mail an Kunden: ' . $m['betreff'], 'info' => 'persönlich von ' . benutzer_name($m['von']), 'link' => 'email.php?id=' . $m['id']];
+  if ($k) foreach (lesen('kampagnen') as $kid => $kamp) {
+    $e = $kamp['empfaenger'][$k['id']] ?? null;
+    if (!$e || ($e['status'] ?? '') !== 'ok') continue;
+    $st = nl_statistik((string) $kid)[$k['id']] ?? [];
+    $o[] = ['zeit' => $e['zeit'] ?: ($kamp['gesendet'] ?? ''), 'art' => 'mail', 'titel' => 'Newsletter: ' . ($kamp['betreff'] ?: 'Ohne Betreff'),
+            'info' => !empty($st['k']) ? 'geklickt' : (!empty($st['o']) ? 'geöffnet' : ''), 'link' => 'kampagne.php?id=' . $kid];
+  }
+  foreach ($a['mail']['ziele'] ?? [] as $z => $t) $o[] = ['zeit' => $t, 'art' => 'klick', 'titel' => $z === 'pdf' ? 'Grundriss aus der E-Mail heruntergeladen' : 'Terminbuchung aus der E-Mail aufgerufen', 'info' => '', 'link' => null];
+  if (!empty($a['mail']['geoeffnet'])) $o[] = ['zeit' => $a['mail']['geoeffnet'], 'art' => 'klick', 'titel' => 'Grundriss-E-Mail geöffnet', 'info' => '', 'link' => null];
+  if ($k) foreach ($k['verlauf'] ?? [] as $v) {
+    if (str_starts_with($v['text'], 'E-Mail gesendet:') || str_starts_with($v['text'], 'Website: ')) continue;   // steht schon oben
+    $o[] = ['zeit' => $v['zeit'], 'art' => 'notiz', 'titel' => $v['text'], 'info' => $v['wer'], 'link' => null];
+  }
+  usort($o, fn($x, $y) => strcmp((string) $y['zeit'], (string) $x['zeit']));
+  return $o;
+}
+/** Die eigentliche Antwort auf die Anfrage (nicht die Newsletter-Bestätigung). */
+function haupt_mail(array $mails): ?string {
+  foreach (array_reverse($mails, true) as $mid => $m) if (!preg_match('/newsletter|bestätig/i', (string) $m['betreff'])) return (string) $mid;
+  return $mails ? (string) array_key_last($mails) : null;
+}
 $id = g('id');
 $aktion = g('aktion');
 
@@ -75,6 +107,29 @@ if ($id) {
           <?php if (mail_gemessen($a)): $m = $a['mail'] ?? []; ?><dt>Grundriss-E-Mail</dt><dd><?= !empty($m['geoeffnet']) ? 'geöffnet am ' . datum($m['geoeffnet'], true) . ' Uhr' . (($m['oeffnungen'] ?? 0) > 1 ? ' (' . (int) $m['oeffnungen'] . '×)' : '') : 'noch nicht geöffnet' ?><?php if (!empty($m['ziele']['pdf'])): ?><br>Grundriss geladen am <?= datum($m['ziele']['pdf'], true) ?> Uhr<?php endif; ?><?php if (!empty($m['ziele']['termin'])): ?><br>Terminbuchung aufgerufen am <?= datum($m['ziele']['termin'], true) ?> Uhr<?php endif; ?></dd><?php endif; ?>
           <?php if (!empty($a['quelle'])): ?><dt>Herkunft</dt><dd><?= e(implode(' · ', array_map(fn($k, $v) => "$k: $v", array_keys($a['quelle']), $a['quelle']))) ?></dd><?php endif; ?>
         </dl>
+      </section>
+      <?php
+        $kundenMails = array_filter(web_mails_fuer((string) ($a['felder']['email'] ?? '')), fn($m) => ($m['anfrage'] ?? null) === $a['id']);
+        $zeigen = g('mail') && web_mail(g('mail')) ? web_mail(g('mail')) : (($m0 = haupt_mail($kundenMails)) ? web_mail($m0) : null);
+        if ($zeigen && strtolower($zeigen['an']) !== strtolower((string) ($a['felder']['email'] ?? '')) && (!$k || strtolower($zeigen['an']) !== strtolower($k['email']))) $zeigen = null;
+      ?>
+      <section class="card" id="mail">
+        <div class="card__head"><h2>E-Mail an den Kunden</h2><?php if ($zeigen): ?><span class="muted klein"><?= datum($zeigen['zeit'], true) ?> Uhr</span><?php endif; ?></div>
+        <?php if ($zeigen): ?>
+          <dl class="dl" style="margin-bottom:14px"><dt>Betreff</dt><dd><?= e($zeigen['betreff']) ?></dd><dt>An</dt><dd><?= e($zeigen['an']) ?></dd></dl>
+          <?php if (count($kundenMails) > 1): ?><p class="klein" style="margin-bottom:12px">Zu dieser Anfrage: <?php foreach (array_reverse($kundenMails, true) as $mid => $m): ?><a href="anfragen.php?id=<?= e($id) ?>&mail=<?= e($mid) ?>#mail" style="margin-right:12px;<?= $mid === $zeigen['id'] ? 'font-weight:600' : '' ?>"><?= e($m['betreff']) ?></a><?php endforeach; ?></p><?php endif; ?>
+          <iframe title="E-Mail an den Kunden" sandbox srcdoc="<?= e($zeigen['html']) ?>" style="width:100%;height:720px;border:1px solid var(--line);border-radius:10px;background:#f0f0ee"></iframe>
+        <?php else: ?>
+          <p class="muted klein">Für diese Anfrage liegt keine Kopie der E-Mail vor. Kopien werden seit dem 06.11.2026 gespeichert.</p>
+        <?php endif; ?>
+      </section>
+      <section class="card">
+        <h2 style="margin-bottom:16px">Kommunikationsverlauf</h2>
+        <?php $verlauf = kommunikation($a, $k); if (!$verlauf): ?><p class="muted klein">Noch nichts.</p><?php else: ?>
+        <ul class="verlauf verlauf--komm"><?php foreach ($verlauf as $v): ?>
+          <li class="verlauf--<?= e($v['art']) ?>"><?php if ($v['link']): ?><a href="<?= e($v['link']) ?>"><?= e($v['titel']) ?></a><?php else: ?><?= e($v['titel']) ?><?php endif; ?>
+            <small><?= $v['zeit'] ? datum($v['zeit'], true) . ' Uhr' : '' ?><?= $v['info'] ? ' · ' . e($v['info']) : '' ?></small></li>
+        <?php endforeach; ?></ul><?php endif; ?>
       </section>
       <section class="card">
         <h2 style="margin-bottom:16px">Bearbeitung</h2>

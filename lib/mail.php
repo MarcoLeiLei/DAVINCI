@@ -84,7 +84,31 @@ function m_senden($an, $betreff, $html, $absName = DV_NAME, $replyTo = null) {
   $kopf .= "MIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary=\"$grenze\"\r\n";
   $body  = "--$grenze\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($plain) . "\r\n";
   $body .= "--$grenze\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($html) . "\r\n--$grenze--";
-  return @mail($an, '=?UTF-8?B?' . base64_encode($betreff) . '?=', $body, $kopf, '-f' . DV_ABSENDER);
+  $ok = @mail($an, '=?UTF-8?B?' . base64_encode($betreff) . '?=', $body, $kopf, '-f' . DV_ABSENDER);
+  if ($ok) m_kopie_ablegen($an, $betreff, $html);
+  return $ok;
+}
+
+/* Kopie jeder E-Mail an Kunden für den Kommunikationsverlauf in intern.davinci-homes.de (data/mails, 90 Tage).
+   Messbild und Messlinks werden entfernt, damit das Ansehen intern nichts zählt. */
+function m_kopie_ablegen($an, $betreff, $html) {
+  if (!defined('DV_DATA') || strcasecmp(trim($an), DV_EMPFAENGER) === 0) return;
+  try {
+    $dir = DV_DATA . '/mails';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    foreach (glob("$dir/*.php") ?: [] as $f) if (filemtime($f) < time() - 90 * 86400) @unlink($f);
+    $id = date('YmdHis') . '-' . bin2hex(random_bytes(4));
+    @file_put_contents("$dir/$id.php", DV_SPERRE . json_encode(['id' => $id, 'zeit' => date('c'), 'an' => strtolower(trim($an)), 'betreff' => $betreff,
+      'anfrage' => $GLOBALS['dv_anfrage'] ?? null, 'html' => m_ohne_spur($html)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+  } catch (Throwable $e) { error_log('DAVINCI Mailkopie: ' . $e->getMessage()); }
+}
+function m_ohne_spur($html) {
+  $html = preg_replace('#<img[^>]+/mail\.php\?[^>]*>#', '', $html);
+  return preg_replace_callback('#' . preg_quote(DV_SEITE, '#') . '/mail\.php\?[^"\'\s<]+#', function ($m) {
+    parse_str((string) parse_url(html_entity_decode($m[0]), PHP_URL_QUERY), $q);
+    $z = $q['z'] ?? ''; $hs = preg_replace('/[^a-z0-9-]/', '', (string) ($q['h'] ?? ''));
+    return h($z === 'pdf' && $hs ? DV_SEITE . "/downloads/grundrisse/$hs.pdf" : ($z === 'termin' ? DV_TERMIN : DV_SEITE . '/'));
+  }, $html);
 }
 
 function datum_de($ts) {

@@ -62,6 +62,7 @@ if (ist_post()) {
   } elseif ($aktion === 'loeschen') {
     if (($k['newsletter']['status'] ?? '') === 'abgemeldet') sperren($k['email']);
     aendern('kontakte', function (&$alle) use ($id) { unset($alle[$id]); });
+    web_mails_loeschen((string) $k['email']);
     aendern('anfragen', function (&$a) use ($id) { foreach ($a as &$x) if ($x['kontakt_id'] === $id) $x['kontakt_id'] = null; });
     aendern('leads', function (&$l) use ($id) { foreach ($l as &$x) if ($x['kontakt_id'] === $id) $x['kontakt_id'] = null; });
     protokoll('Kontakt gelöscht: ' . kontakt_name($k));
