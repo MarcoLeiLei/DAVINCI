@@ -39,10 +39,11 @@ function website_abgleich(bool $sofort = false): int {
                       'felder' => array_filter(['name' => $l['name'] ?? '', 'email' => $l['email'] ?? '', 'haus' => $l['haus'] ?? '', 'pdf' => !empty($l['pdf']) ? 'verschickt' : 'fehlt']), 'quelle' => []];
   }
   $nl = website_lesen('newsletter');
+  $mailStat = website_lesen('mail_statistik');
 
   $neu = 0;
-  aendern('kontakte', function (&$kontakte) use ($webAnfragen, $nl, &$neu) {
-    aendern('anfragen', function (&$archiv) use (&$kontakte, $webAnfragen, &$neu) {
+  aendern('kontakte', function (&$kontakte) use ($webAnfragen, $nl, $mailStat, &$neu) {
+    aendern('anfragen', function (&$archiv) use (&$kontakte, $webAnfragen, $mailStat, &$neu) {
       // Grundriss-Anfragen stehen auf der Website zweimal (Anfragen-Ablage und alte Lead-Liste): Doppelte entfernen
       $doppelt = function (array $w, array $liste): bool {
         if (($w['typ'] ?? '') !== 'Grundriss') return false;
@@ -74,6 +75,8 @@ function website_abgleich(bool $sofort = false): int {
         $archiv[$w['id']] = $w + ['status' => 'neu', 'kontakt_id' => $kid, 'lead_id' => null, 'notiz' => '', 'bearbeiter' => null, 'importiert' => date('c')];
         $neu++;
       }
+      // Öffnungen und Klicks der Grundriss-E-Mail übernehmen
+      foreach ($mailStat as $mid => $m) if (isset($archiv[$mid]) && is_array($m)) $archiv[$mid]['mail'] = $m;
     });
     // Newsletter-Anmeldungen der Website
     foreach ($nl as $tok => $a) {

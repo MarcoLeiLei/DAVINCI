@@ -3,6 +3,16 @@
 require __DIR__ . '/lib/start.php';
 $ich = seite_schuetzen();
 website_abgleich();
+/** Grundriss-Anfragen ab Einführung der Messung (ältere haben keine Messung). */
+function mail_gemessen(array $a): bool { return ($a['typ'] ?? '') === 'Grundriss' && (isset($a['mail']) || (strpos((string) $a['id'], 'gr-') !== 0 && ($a['zeit'] ?? '') >= '2026-11-06T22:45')); }
+function mail_pills(array $a): string {
+  if (!mail_gemessen($a)) return '';
+  $m = $a['mail'] ?? [];
+  if (!empty($m['ziele']['pdf']))  return '<span class="pill pill--bestaetigt" title="Grundriss geladen am ' . e(datum($m['ziele']['pdf'], true)) . ' Uhr">PDF geladen</span>';
+  if (!empty($m['geklickt']))      return '<span class="pill pill--bestaetigt">geklickt</span>';
+  if (!empty($m['geoeffnet']))     return '<span class="pill pill--angefragt" title="' . e(datum($m['geoeffnet'], true)) . ' Uhr">geöffnet</span>';
+  return '<span class="muted klein">ungeöffnet</span>';
+}
 $id = g('id');
 $aktion = g('aktion');
 
@@ -62,6 +72,7 @@ if ($id) {
         <div class="card__head"><h2>Angaben</h2><?= status_pill($a['status'], ANFRAGE_STATUS) ?></div>
         <dl class="dl">
           <?php foreach (anfrage_felder($a) as $l => $v): ?><dt><?= e($l) ?></dt><dd><?php if ($l === 'E-Mail'): ?><a href="mailto:<?= e($v) ?>"><?= e($v) ?></a><?php elseif ($l === 'Telefon'): ?><a href="tel:<?= e(preg_replace('/[^\d+]/', '', $v)) ?>"><?= e($v) ?></a><?php else: ?><?= e($v) ?><?php endif; ?></dd><?php endforeach; ?>
+          <?php if (mail_gemessen($a)): $m = $a['mail'] ?? []; ?><dt>Grundriss-E-Mail</dt><dd><?= !empty($m['geoeffnet']) ? 'geöffnet am ' . datum($m['geoeffnet'], true) . ' Uhr' . (($m['oeffnungen'] ?? 0) > 1 ? ' (' . (int) $m['oeffnungen'] . '×)' : '') : 'noch nicht geöffnet' ?><?php if (!empty($m['ziele']['pdf'])): ?><br>Grundriss geladen am <?= datum($m['ziele']['pdf'], true) ?> Uhr<?php endif; ?><?php if (!empty($m['ziele']['termin'])): ?><br>Terminbuchung aufgerufen am <?= datum($m['ziele']['termin'], true) ?> Uhr<?php endif; ?></dd><?php endif; ?>
           <?php if (!empty($a['quelle'])): ?><dt>Herkunft</dt><dd><?= e(implode(' · ', array_map(fn($k, $v) => "$k: $v", array_keys($a['quelle']), $a['quelle']))) ?></dd><?php endif; ?>
         </dl>
       </section>
@@ -125,7 +136,7 @@ seitenkopf('Website', 'Anfragen', '<span class="muted klein">' . count($liste) .
 <section class="card">
   <?php if (!$liste): ?><?= leer($typ || $status || $q ? 'Keine Anfragen für diesen Filter.' : 'Noch keine Anfragen. Sobald jemand ein Formular auf davinci-homes.de abschickt, erscheint es hier.') ?><?php else: ?>
   <div class="tabelle-wrap"><table class="tabelle">
-    <thead><tr><th>Eingang</th><th>Name</th><th>Art</th><th>Haus / Thema</th><th>Newsletter</th><th>Status</th></tr></thead>
+    <thead><tr><th>Eingang</th><th>Name</th><th>Art</th><th>Haus / Thema</th><th>E-Mail</th><th>Newsletter</th><th>Status</th></tr></thead>
     <tbody>
     <?php foreach ($liste as $id => $a): $f = $a['felder']; ?>
       <tr data-href="anfragen.php?id=<?= e($id) ?>" class="<?= ($a['status'] ?? 'neu') === 'neu' ? 'ist-neu' : '' ?>">
@@ -133,6 +144,7 @@ seitenkopf('Website', 'Anfragen', '<span class="muted klein">' . count($liste) .
         <td><a href="anfragen.php?id=<?= e($id) ?>"><?= e(anfrage_name($a)) ?></a><br><span class="muted klein"><?= e($f['email'] ?? '') ?></span></td>
         <td><span class="typ"><?= e($a['typ']) ?></span></td>
         <td><?= e($f['haus'] ?? ($f['haustyp'] ?? (isset($f['nachricht']) ? mb_strimwidth($f['nachricht'], 0, 60, '…') : ''))) ?></td>
+        <td class="nowrap"><?= mail_pills($a) ?></td>
         <td><?= !empty($f['newsletter']) ? '<span class="pill pill--angefragt">angemeldet</span>' : '' ?></td>
         <td><?= status_pill($a['status'] ?? 'neu', ANFRAGE_STATUS) ?></td>
       </tr>

@@ -214,16 +214,17 @@ function v_intern($typ, $d, $zeilen, $hinweis = '') {
 }
 
 /* Grundriss · Versand nach Anfrage auf der Häuser-Seite */
-function v_grundriss($d, $pdfUrl) {
+function v_grundriss($d, $pdfUrl, $spur = null) {
   $haus = h($d['haustyp'] ?: 'Ihr Haus von DAVINCI');
   $t = m_titel('Grundriss · ' . $haus, 'Ihr Grundriss ist da.')
     . m_p('Guten Tag ' . h($d['name']) . ',')
     . ($pdfUrl
-        ? m_p('vielen Dank für Ihr Interesse am ' . $haus . '. Hier ist der Grundriss als PDF, mit Maßen und Raumaufteilung.') . m_knopf($pdfUrl, 'Grundriss herunterladen')
+        ? m_p('vielen Dank für Ihr Interesse am ' . $haus . '. Hier ist der Grundriss als PDF, mit Maßen und Raumaufteilung.') . m_knopf($spur['pdf'] ?? $pdfUrl, 'Grundriss herunterladen')
         : m_p('vielen Dank für Ihr Interesse am ' . $haus . '. Den Grundriss bereiten wir gerade für Sie auf und schicken ihn Ihnen in Kürze persönlich zu.'))
     . m_p('Jeder Grundriss ist ein Ausgangspunkt. Innerhalb des DAVINCI Systems passen wir Größe, Räume und Ausstattung an Ihr Grundstück und Ihr Leben an.');
-  $k = m_kasten('Der nächste Schritt', m_p('Sprechen Sie mit uns über Ihr Grundstück und Ihre Wünsche. Persönlich, per Video oder bei Ihnen vor Ort.') . m_knopf(DV_TERMIN, 'Termin vereinbaren &nbsp;→', false));
-  return ['Ihr Grundriss: ' . ($d['haustyp'] ?: 'DAVINCI'), m_layout('Ihr Grundriss für ' . ($d['haustyp'] ?: 'Ihr Haus von DAVINCI') . '.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss(), '0 40px 40px'))];
+  $k = m_kasten('Der nächste Schritt', m_p('Sprechen Sie mit uns über Ihr Grundstück und Ihre Wünsche. Persönlich, per Video oder bei Ihnen vor Ort.') . m_knopf($spur['termin'] ?? DV_TERMIN, 'Termin vereinbaren &nbsp;→', false));
+  $pixel = $spur ? spur_bild($spur['bild']) : '';
+  return ['Ihr Grundriss: ' . ($d['haustyp'] ?: 'DAVINCI'), m_layout('Ihr Grundriss für ' . ($d['haustyp'] ?: 'Ihr Haus von DAVINCI') . '.', m_bild('dv-01-flachdach-weiss-abend.jpg', 'Haus von DAVINCI aus Holz und Glas') . m_block($t) . m_block($k . '<div style="height:16px"></div>' . m_gruss() . $pixel, '0 40px 40px'))];
 }
 
 /* 8 · Vorlagen zum manuellen Versand (z. B. aus Outlook oder HubSpot) */

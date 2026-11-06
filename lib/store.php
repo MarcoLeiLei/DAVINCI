@@ -45,12 +45,14 @@ function st_aendern(string $n, callable $fn) {
 
 /* Jede Anfrage für den internen Bereich (intern.davinci-homes.de) ablegen. Der interne Bereich übernimmt sie
    in sein eigenes Archiv; hier werden sie nach 90 Tagen automatisch gelöscht. */
-function anfrage_ablegen(string $typ, array $felder, array $quelle = []): void {
-  st_aendern('anfragen', function (&$a) use ($typ, $felder, $quelle) {
+function anfrage_ablegen(string $typ, array $felder, array $quelle = [], ?string $id = null): string {
+  $id = $id ?: st_token();
+  st_aendern('anfragen', function (&$a) use ($typ, $felder, $quelle, $id) {
     $grenze = time() - 90 * 86400;
     $a = array_values(array_filter($a, fn($e) => strtotime($e['zeit'] ?? 'now') >= $grenze));
-    $a[] = ['id' => st_token(), 'zeit' => date('c'), 'typ' => $typ, 'felder' => array_filter($felder, fn($v) => $v !== '' && $v !== null && $v !== []), 'quelle' => $quelle];
+    $a[] = ['id' => $id, 'zeit' => date('c'), 'typ' => $typ, 'felder' => array_filter($felder, fn($v) => $v !== '' && $v !== null && $v !== []), 'quelle' => $quelle];
   });
+  return $id;
 }
 
 /* Newsletter-Anmeldung aus einem Formular (Double-Opt-in). Gibt den Bestätigungslink zurück oder null. */

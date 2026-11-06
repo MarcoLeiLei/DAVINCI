@@ -17,6 +17,7 @@ register_shutdown_function(function () {
 require __DIR__ . '/zugang.php';
 require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/store.php';
+require __DIR__ . '/lib/spur.php';
 require __DIR__ . '/lib/hubspot.php';
 require __DIR__ . '/lib/schutz.php';
 require_once __DIR__ . '/lib/live.php';
@@ -77,14 +78,17 @@ if ($typ === 'Grundriss') {
   if (empty($_POST['datenschutz'])) fehler('Einwilligung fehlt');
   $key = preg_replace('/[^a-z0-9-]/', '', strtolower(feld('haus')));
   $d['haustyp'] = feld('haustyp');
+  $d['telefon'] = feld('telefon');
   $pdf = ($key && is_file(__DIR__ . "/downloads/grundrisse/$key.pdf")) ? DV_SEITE . "/downloads/grundrisse/$key.pdf" : null;
-  [$bK, $hK] = v_grundriss($d, $pdf);
+  $aid = st_token();
+  try { $spur = spur_links($aid, $key); } catch (Throwable $e) { $spur = null; error_log('DAVINCI Spur: ' . $e->getMessage()); }
+  [$bK, $hK] = v_grundriss($d, $pdf, $spur);
   $okK = m_senden($email, $bK, $hK, DV_NAME, DV_EMPFAENGER);
-  $zeilen = ['Typ' => 'Grundriss angefordert', 'Haus' => $d['haustyp'], 'Name' => $name, 'E-Mail' => $email,
+  $zeilen = ['Typ' => 'Grundriss angefordert', 'Haus' => $d['haustyp'], 'Name' => $name, 'E-Mail' => $email, 'Telefon' => $d['telefon'],
              'Grundriss-PDF' => $pdf ? 'automatisch verschickt' : 'fehlt noch: downloads/grundrisse/' . ($key ?: '?') . '.pdf',
              'Einwilligung' => 'Datenschutz akzeptiert am ' . $jetzt] + $nlZeile + $quelle;
-  anfrage_ablegen('Grundriss', ['name' => $name, 'vorname' => feld('vorname'), 'nachname' => feld('nachname'), 'email' => $email, 'haus' => $d['haustyp'],
-    'pdf' => $pdf ? 'verschickt' : 'fehlt', 'newsletter' => $nlGewuenscht ? 'angemeldet' : ''], $quelle);
+  anfrage_ablegen('Grundriss', ['name' => $name, 'vorname' => feld('vorname'), 'nachname' => feld('nachname'), 'email' => $email, 'telefon' => $d['telefon'], 'haus' => $d['haustyp'],
+    'pdf' => $pdf ? 'verschickt' : 'fehlt', 'newsletter' => $nlGewuenscht ? 'angemeldet' : ''], $quelle, $aid);
   [$bI, $hI] = v_intern('Grundriss', $d, $zeilen, $pdf ? '' : 'PDF liegt noch nicht auf dem Server. Bitte Grundriss persönlich nachsenden.');
   $okI = m_senden(DV_EMPFAENGER, $bI, $hI, 'DAVINCI Website', $email);
   try { $l = st_lesen('leads'); $l[] = ['zeit' => date('c'), 'name' => $d['name'], 'email' => $d['email'], 'haus' => $d['haustyp'], 'pdf' => (bool) $pdf, 'sprache' => $sprache]; st_schreiben('leads', $l); }
