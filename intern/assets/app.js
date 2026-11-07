@@ -21,6 +21,15 @@
     tr.addEventListener('click', e => { if (!e.target.closest('a, button, input, select, label')) location.href = tr.dataset.href; });
   });
 
+  // Mehrere Zeilen markieren (Anfragen löschen)
+  const leiste = $('.auswahl-leiste');
+  if (leiste) {
+    const boxen = () => $$('input[name="ids[]"]');
+    const neu = () => { const n = boxen().filter(b => b.checked).length; leiste.hidden = !n; $('[data-anzahl]').textContent = n + ' markiert'; };
+    boxen().forEach(b => b.addEventListener('change', neu));
+    const alle = $('[data-alle]'); if (alle) alle.addEventListener('change', () => { boxen().forEach(b => b.checked = alle.checked); neu(); });
+  }
+
   // Sicherheitsabfrage
   $$('[data-bestaetigen]').forEach(el => el.addEventListener(el.tagName === 'FORM' ? 'submit' : 'click', e => {
     if (!confirm(el.dataset.bestaetigen)) { e.preventDefault(); e.stopImmediatePropagation(); }

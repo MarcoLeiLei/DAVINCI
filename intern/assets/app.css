@@ -294,3 +294,7 @@ input[type=file] { max-width: 100%; font: inherit; font-size: 14px; }
 .ausschluss__zeile:first-child { border-top: 0; }
 .ausschluss__zeile[hidden] { display: none; }
 .ausschluss__zeile:has(input:checked) > span { text-decoration: line-through; opacity: .55; }
+
+.spalte-wahl { width: 34px; padding-right: 0 !important; }
+.spalte-wahl input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.auswahl-leiste { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; margin-bottom: 14px; border-radius: 10px; background: var(--grey-1, #f0f0ee); font-size: 14px; }

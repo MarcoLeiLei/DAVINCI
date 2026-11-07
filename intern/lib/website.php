@@ -60,8 +60,9 @@ function website_abgleich(bool $sofort = false): int {
       foreach ($archiv as $id => $e)
         if (strpos((string) $id, 'gr-') === 0 && $unberuehrt($e) && $doppelt($e, array_merge($archiv, $webAnfragen))) unset($archiv[$id]);
 
+      $weg = lesen('anfragen_geloescht');   // in intern gelöschte Anfragen nicht wieder übernehmen
       foreach ($webAnfragen as $w) {
-        if (!isset($w['id']) || isset($archiv[$w['id']])) continue;
+        if (!isset($w['id']) || isset($archiv[$w['id']]) || isset($weg[$w['id']]) || $doppelt($w, $weg)) continue;
         if (strpos((string) $w['id'], 'gr-') === 0 && $doppelt($w, array_merge($archiv, $webAnfragen))) continue;
         $f = $w['felder'] ?? [];
         [$vn, $nn] = isset($f['vorname']) && $f['vorname'] !== '' ? [$f['vorname'], $f['nachname'] ?? ''] : name_teilen((string) ($f['name'] ?? ''));
@@ -142,4 +143,56 @@ function web_mails_loeschen(string $email): void {
   });
   $o = website_ordner();
   if ($o) foreach (glob("$o/mails/*.php") ?: [] as $f) { $t = (string) @file_get_contents($f); if (stripos($t, '"an":"' . $email . '"') !== false) @unlink($f); }
+}
+
+/* ---------- Anfragen endgültig löschen ---------- */
+/** Datei der Website ändern (mit Sperre). Gelingt das nicht (Rechte), bleibt es bei der Löschliste in intern. */
+function website_aendern(string $n, callable $f): void {
+  $o = website_ordner(); if (!$o || !is_file("$o/$n.php") || !is_writable("$o/$n.php")) return;
+  $h = @fopen("$o/$n.php", 'c+'); if (!$h) return;
+  if (flock($h, LOCK_EX)) {
+    $t = (string) stream_get_contents($h);
+    $d = json_decode(strpos($t, SPERRZEILE) === 0 ? substr($t, strlen(SPERRZEILE)) : $t, true) ?: [];
+    $f($d);
+    ftruncate($h, 0); rewind($h);
+    fwrite($h, SPERRZEILE . json_encode($d, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    fflush($h); flock($h, LOCK_UN);
+  }
+  fclose($h);
+}
+/** Löscht Anfragen in intern und auf der Website (Ablage, alte Grundriss-Liste, E-Mail-Kopien, Messung)
+    und merkt sie sich, damit der Abgleich sie nicht zurückholt. Gibt die Zahl gelöschter Anfragen zurück. */
+function anfragen_loeschen(array $ids): int {
+  $alle = anfragen();
+  $weg = [];
+  foreach ($ids as $id) if (isset($alle[$id])) {
+    $a = $alle[$id];
+    $weg[$id] = ['id' => $id, 'zeit' => $a['zeit'], 'typ' => $a['typ'], 'felder' => array_intersect_key($a['felder'] ?? [], ['email' => 1, 'haus' => 1]), 'geloescht' => date('c')];
+  }
+  if (!$weg) return 0;
+  aendern('anfragen_geloescht', function (&$g) use ($weg) { $g = $weg + $g; });
+  aendern('anfragen', function (&$a) use ($weg) { foreach ($weg as $id => $_) unset($a[$id]); });
+
+  // Website: Ablage und alte Grundriss-Liste
+  website_aendern('anfragen', function (&$l) use ($weg) { $l = array_values(array_filter($l, fn($x) => !isset($weg[$x['id'] ?? '']))); });
+  website_aendern('leads', function (&$l) use ($weg) {
+    $l = array_values(array_filter($l, function ($x) use ($weg) {
+      if (isset($weg['gr-' . substr(sha1(($x['zeit'] ?? '') . ($x['email'] ?? '')), 0, 16)])) return false;
+      foreach ($weg as $w) if (($w['typ'] ?? '') === 'Grundriss' && strtolower((string) ($w['felder']['email'] ?? '')) === strtolower((string) ($x['email'] ?? ''))
+        && abs((strtotime((string) $w['zeit']) ?: 0) - (strtotime((string) ($x['zeit'] ?? '')) ?: 0)) <= 600) return false;
+      return true;
+    }));
+  });
+  website_aendern('mail_statistik', function (&$m) use ($weg) { foreach ($weg as $id => $_) unset($m[$id]); });
+
+  // Kopien der E-Mails zu diesen Anfragen
+  aendern('mail_index', function (&$ix) use ($weg) {
+    foreach ($ix as $mid => $m) if (isset($weg[$m['anfrage'] ?? ''])) { @unlink(WEB_MAILS . "/$mid.php"); unset($ix[$mid]); }
+  });
+  $o = website_ordner();
+  if ($o) foreach (glob("$o/mails/*.php") ?: [] as $f) {
+    $t = (string) @file_get_contents($f);
+    if (preg_match('/"anfrage":"([0-9a-f]+)"/', $t, $m) && isset($weg[$m[1]])) @unlink($f);
+  }
+  return count($weg);
 }

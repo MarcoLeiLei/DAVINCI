@@ -81,12 +81,21 @@ if (ist_post() && $id) {
     meldung('Projekt angelegt.');
     weiter('leads.php?id=' . $lid);
   } elseif ($aktion === 'loeschen') {
-    aendern('anfragen', function (&$alle) use ($id) { unset($alle[$id]); });
+    anfragen_loeschen([$id]);
     protokoll('Anfrage gelöscht: ' . anfrage_name($a) . ' (' . $a['typ'] . ')');
     meldung('Anfrage gelöscht.');
     weiter('anfragen.php');
   }
   weiter('anfragen.php?id=' . $id);
+}
+
+/* ---------- Mehrere löschen ---------- */
+if (ist_post() && !$id && $aktion === 'mehrere_loeschen') {
+  $ids = array_values(array_filter((array) ($_POST['ids'] ?? []), 'is_string'));
+  $n = anfragen_loeschen($ids);
+  if ($n) protokoll("$n Anfragen gelöscht");
+  meldung($n === 1 ? '1 Anfrage gelöscht.' : "$n Anfragen gelöscht.");
+  weiter('anfragen.php?' . http_build_query(array_filter(['typ' => g('typ'), 'status' => g('status'), 'q' => g('q')])));
 }
 
 /* ---------- Einzelansicht ---------- */
@@ -190,11 +199,15 @@ seitenkopf('Website', 'Anfragen', '<span class="muted klein">' . count($liste) .
 </form>
 <section class="card">
   <?php if (!$liste): ?><?= leer($typ || $status || $q ? 'Keine Anfragen für diesen Filter.' : 'Noch keine Anfragen. Sobald jemand ein Formular auf davinci-homes.de abschickt, erscheint es hier.') ?><?php else: ?>
+  <form method="post" id="auswahl" action="anfragen.php?<?= e(http_build_query(array_filter(['aktion' => 'mehrere_loeschen', 'typ' => $typ, 'status' => $status, 'q' => $q]))) ?>" data-bestaetigen="Die markierten Anfragen endgültig löschen? Die Kontakte bleiben erhalten."><?= csrf_feld() ?>
+  <div class="auswahl-leiste" hidden><span data-anzahl>0 markiert</span><button class="btn btn--klein btn--gefahr" type="submit">Markierte löschen</button></div>
+  </form>
   <div class="tabelle-wrap"><table class="tabelle">
-    <thead><tr><th>Eingang</th><th>Name</th><th>Art</th><th>Haus / Thema</th><th>E-Mail</th><th>Newsletter</th><th>Status</th></tr></thead>
+    <thead><tr><th class="spalte-wahl"><input type="checkbox" data-alle aria-label="Alle markieren"></th><th>Eingang</th><th>Name</th><th>Art</th><th>Haus / Thema</th><th>E-Mail</th><th>Newsletter</th><th>Status</th></tr></thead>
     <tbody>
     <?php foreach ($liste as $id => $a): $f = $a['felder']; ?>
       <tr data-href="anfragen.php?id=<?= e($id) ?>" class="<?= ($a['status'] ?? 'neu') === 'neu' ? 'ist-neu' : '' ?>">
+        <td class="spalte-wahl"><input type="checkbox" name="ids[]" value="<?= e($id) ?>" form="auswahl" aria-label="Markieren"></td>
         <td class="nowrap"><?= datum($a['zeit'], true) ?></td>
         <td><a href="anfragen.php?id=<?= e($id) ?>"><?= e(anfrage_name($a)) ?></a><br><span class="muted klein"><?= e($f['email'] ?? '') ?></span></td>
         <td><span class="typ"><?= e($a['typ']) ?></span></td>
